@@ -1,0 +1,919 @@
+---
+// FindingsSection.astro - Key findings with Chart.js interactive visualizations
+---
+<section id="results" class="content-section">
+  <div class="section-container">
+    <h2 class="section-title">Key Findings</h2>
+    <p class="section-description">Our research reveals three critical insights about teaching VLMs spatial reasoning through structured scaffolding.</p>
+
+    <div class="findings-sections">
+      <!-- Frozen VLMs Section -->
+      <div class="finding-category">
+        <h3 class="category-title">3.1 Scaffolding Spatial Reasoning in Frozen VLMs</h3>
+        
+        <div class="takeaways-box">
+          <div class="takeaway-header">
+            <span class="bulb-icon">💡</span>
+            <h4>Key Takeaways: Scaffolding Spatial Reasoning in Frozen VLMs</h4>
+          </div>
+          <ul class="takeaway-list">
+            <li><em>Explicit reasoning is crucial for improving performance.</em></li>
+            <li><em>Cognitive maps can help guide the reasoning process.</em></li>
+            <li><em>Passive structures (like maps as input) alone and visual continuity offer little benefit.</em></li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-header">
+            <h4 class="finding-title">Performance Analysis: Limited Gains from External Scaffolds</h4>
+            <span class="expand-icon">+</span>
+          </div>
+          <div class="finding-content">
+            <div class="chart-container">
+              <canvas id="frozenVLMsChart"></canvas>
+            </div>
+            <div class="analysis-grid">
+              <div class="metric-highlight">
+                <div class="metric-value">37.81%</div>
+                <div class="metric-label">Raw-QA Baseline</div>
+              </div>
+              <div class="metric-highlight">
+                <div class="metric-value">41.33%</div>
+                <div class="metric-label">Best w/ Reasoning</div>
+              </div>
+              <div class="metric-highlight">
+                <div class="metric-value">+3.52%</div>
+                <div class="metric-label">Maximum Gain</div>
+              </div>
+            </div>
+            <p><strong>Critical Finding:</strong> Structure alone fails. View interpolation shows no meaningful gains (+0.09%), while providing pre-computed maps actually degrades performance (-5.81%). Only explicit reasoning yields consistent improvements.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SFT Section -->
+      <div class="finding-category">
+        <h3 class="category-title">3.2 Teaching VLMs to Reason Spatially</h3>
+        
+        <div class="takeaways-box">
+          <div class="takeaway-header">
+            <span class="bulb-icon">💡</span>
+            <h4>Key Takeaways: Teaching VLMs to Reason Spatially</h4>
+          </div>
+          <ul class="takeaway-list">
+            <li><em>Joint cogmap and reasoning setting yields optimal performance through synergistic effects.</em></li>
+            <li><em>Reasoning shapes spatial representations for functional utility, not just structural perfection.</em></li>
+            <li><em>Neither map generation nor reasoning alone largely outperforms the SFT QA baseline.</em></li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-header">
+            <h4 class="finding-title">SFT Performance: The Power of Joint Training</h4>
+            <span class="expand-icon">+</span>
+          </div>
+          <div class="finding-content">
+            <div class="chart-container">
+              <canvas id="sftPerformanceChart"></canvas>
+            </div>
+            <div class="analysis-grid">
+              <div class="metric-highlight success">
+                <div class="metric-value">60.76%</div>
+                <div class="metric-label">Plain-CGMap-FFR-Out</div>
+              </div>
+              <div class="metric-highlight">
+                <div class="metric-value">54.38%</div>
+                <div class="metric-label">Map Generation Only</div>
+              </div>
+              <div class="metric-highlight">
+                <div class="metric-value">53.52%</div>
+                <div class="metric-label">Reasoning Only</div>
+              </div>
+            </div>
+            <p><strong>Breakthrough:</strong> Combining map generation with reasoning achieves +8.48% improvement over baseline. The synergy forces models to build functionally effective spatial representations, not just structural perfection.</p>
+          </div>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-header">
+            <h4 class="finding-title">Training Dynamics: Structure vs. Function Trade-off</h4>
+            <span class="expand-icon">+</span>
+          </div>
+          <div class="finding-content">
+            <div class="chart-container">
+              <canvas id="trainingDynamicsChart"></canvas>
+            </div>
+            <p><strong>Key Insight:</strong> Models trained only on map generation learn structure rapidly (91.73% similarity, 89.05% isomorphism) but plateau in QA performance. Joint training learns structure more slowly but achieves superior functional utility.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RL Section -->
+      <div class="finding-category">
+        <h3 class="category-title">3.3 Reinforcement Learning for Spatial Reasoning</h3>
+        
+        <div class="takeaways-box">
+          <div class="takeaway-header">
+            <span class="bulb-icon">💡</span>
+            <h4>Key Takeaways: Reinforcement Learning for Spatial Reasoning</h4>
+          </div>
+          <ul class="takeaway-list">
+            <li><em>Combining cognitive maps with reasoning consistently improves all learning outcomes.</em></li>
+            <li><em>Starting from scratch, RL provides only marginal gains for spatial reasoning; its true power is unlocked when building upon a strong SFT foundation.</em></li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-header">
+            <h4 class="finding-title">RL Performance: Building on Strong Foundations</h4>
+            <span class="expand-icon">+</span>
+          </div>
+          <div class="finding-content">
+            <div class="chart-container">
+              <canvas id="rlComparisonChart"></canvas>
+            </div>
+            <div class="rl-metrics">
+              <div class="metric-card breakthrough">
+                <div class="metric-value">70.67%</div>
+                <div class="metric-label">RL from SFT</div>
+                <div class="metric-change">+9.91% vs SFT</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">53.71%</div>
+                <div class="metric-label">RL from Scratch</div>
+                <div class="metric-change">Limited gains</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">85.79%</div>
+                <div class="metric-label">Map Quality</div>
+                <div class="metric-change">Plain-CGMap Superior</div>
+              </div>
+            </div>
+            <p><strong>Critical Discovery:</strong> RL's power is unlocked when building upon strong SFT foundations. While both Plain and Augmented variants reach identical 70.67% QA accuracy, Plain-CGMap maintains superior geometric quality (71.52% vs 58.86% isomorphism).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .findings-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .finding-category {
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #e0e0e0;
+    transition: all 0.3s ease;
+  }
+
+  .finding-category:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  }
+
+  .finding-category:nth-child(1) {
+    border-left-color: #1976d2;
+  }
+
+  .finding-category:nth-child(2) {
+    border-left-color: #4caf50;
+  }
+
+  .finding-category:nth-child(3) {
+    border-left-color: #ff9800;
+  }
+
+  .category-title {
+    color: var(--brand-deep);
+    font-size: 1.6rem;
+    margin-bottom: 2rem;
+    border-bottom: 3px solid var(--brand-deep);
+    padding-bottom: 0.75rem;
+    font-weight: 700;
+  }
+
+  .takeaways-box {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid #2196f3;
+  }
+
+  .takeaway-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .takeaway-header h4 {
+    color: #1565c0;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .bulb-icon {
+    font-size: 1.2rem;
+  }
+
+  .takeaway-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    list-style-type: disc;
+  }
+
+  .takeaway-list li {
+    color: #1565c0;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .finding-card {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+  }
+
+  .finding-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .finding-header {
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+    border-bottom: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+  }
+
+  .finding-header:hover {
+    background: linear-gradient(135deg, #dee2e6 0%, #e9ecef 100%);
+  }
+
+  .finding-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--brand-deep);
+  }
+
+  .expand-icon {
+    font-size: 1.4rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    color: var(--brand-deep);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(var(--brand-deep-rgb), 0.1);
+  }
+
+  .finding-content {
+    padding: 2rem;
+    display: none;
+    line-height: 1.7;
+    background-color: #fff;
+  }
+
+  .finding-content.active {
+    display: block;
+    animation: slideDown 0.5s ease-out;
+  }
+
+  .chart-container {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+    height: 400px;
+  }
+
+  .chart-container canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .metric-highlight {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #ffb74d;
+    transition: all 0.3s ease;
+  }
+
+  .metric-highlight:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(255, 183, 77, 0.3);
+  }
+
+  .metric-highlight.success {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%);
+    border-color: #4caf50;
+  }
+
+  .metric-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #e65100;
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-highlight.success .metric-value {
+    color: #2e7d32;
+  }
+
+  .metric-label {
+    font-size: 0.9rem;
+    color: #bf360c;
+    font-weight: 500;
+  }
+
+  .metric-highlight.success .metric-label {
+    color: #1b5e20;
+  }
+
+  .rl-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .metric-card {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #ffb74d;
+    transition: all 0.3s ease;
+  }
+
+  .metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(255, 183, 77, 0.3);
+  }
+
+  .metric-card.breakthrough {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%);
+    border-color: #4caf50;
+  }
+
+  .metric-card .metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #e65100;
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-card.breakthrough .metric-value {
+    color: #2e7d32;
+  }
+
+  .metric-card .metric-label {
+    font-size: 1rem;
+    color: #bf360c;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-card.breakthrough .metric-label {
+    color: #1b5e20;
+  }
+
+  .metric-change {
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .finding-category {
+      padding: 1.5rem;
+    }
+    
+    .analysis-grid, .rl-metrics {
+      grid-template-columns: 1fr;
+    }
+    
+    .metric-value {
+      font-size: 1.8rem;
+    }
+
+    .takeaways-box {
+      padding: 1rem;
+    }
+
+    .chart-container {
+      height: 300px;
+      padding: 1rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Dynamically import Chart.js
+    const { Chart, registerables } = await import('chart.js');
+    Chart.register(...registerables);
+
+    // Store chart instances
+    let charts = {};
+
+    // Expandable cards functionality
+    const findingCards = document.querySelectorAll('.finding-card');
+    
+    findingCards.forEach((card) => {
+      const header = card.querySelector('.finding-header');
+      const content = card.querySelector('.finding-content');
+      const expandIcon = card.querySelector('.expand-icon');
+      
+      if (header && content && expandIcon) {
+        header.addEventListener('click', () => {
+          const isActive = content.classList.contains('active');
+          
+          if (isActive) {
+            content.classList.remove('active');
+            expandIcon.textContent = '+';
+            (expandIcon as HTMLElement).style.transform = 'rotate(0deg)';
+          } else {
+            content.classList.add('active');
+            expandIcon.textContent = '−';
+            (expandIcon as HTMLElement).style.transform = 'rotate(180deg)';
+            
+            // Initialize charts when expanded
+            setTimeout(() => {
+              if (card.querySelector('#frozenVLMsChart') && !charts.frozenVLMs) {
+                charts.frozenVLMs = createFrozenVLMsChart(Chart);
+              } else if (card.querySelector('#sftPerformanceChart') && !charts.sftPerformance) {
+                charts.sftPerformance = createSFTPerformanceChart(Chart);
+              } else if (card.querySelector('#trainingDynamicsChart') && !charts.trainingDynamics) {
+                charts.trainingDynamics = createTrainingDynamicsChart(Chart);
+              } else if (card.querySelector('#rlComparisonChart') && !charts.rlComparison) {
+                charts.rlComparison = createRLComparisonChart(Chart);
+              }
+            }, 300);
+          }
+        });
+      }
+    });
+
+    function createFrozenVLMsChart(Chart: any) {
+      const ctx = document.getElementById('frozenVLMsChart') as HTMLCanvasElement;
+      if (!ctx) return null;
+
+      return new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Raw-QA', 'VI-1', 'VI-2', 'Aug-CGMap-In', 'FF-Rsn', 'Aug-CGMap-FFR-Out', 'Plain-CGMap-FFR-Out'],
+          datasets: [{
+            label: 'QA Accuracy (%)',
+            data: [37.81, 37.90, 37.81, 32.00, 40.48, 40.57, 41.33],
+            backgroundColor: [
+              'rgba(255, 107, 107, 0.8)', 'rgba(254, 202, 87, 0.8)', 'rgba(255, 159, 243, 0.8)', 
+              'rgba(255, 99, 72, 0.8)', 'rgba(29, 209, 161, 0.8)', 'rgba(84, 160, 255, 0.8)', 'rgba(95, 39, 205, 0.8)'
+            ],
+            borderColor: [
+              '#ff6b6b', '#feca57', '#ff9ff3', '#ff6348', 
+              '#1dd1a1', '#54a0ff', '#5f27cd'
+            ],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Frozen VLMs: Limited Gains from External Scaffolds',
+              font: { size: 16, weight: 'bold', family: 'Georgia' },
+              color: 'var(--brand-deep)',
+              padding: 20
+            },
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              titleColor: '#333',
+              bodyColor: '#666',
+              borderColor: '#ddd',
+              borderWidth: 1,
+              cornerRadius: 8,
+              displayColors: true,
+              titleFont: { family: 'Georgia', size: 14 },
+              bodyFont: { family: 'Georgia', size: 13 },
+              callbacks: {
+                label: function(context: any) {
+                  return `QA Accuracy: ${context.parsed.y.toFixed(2)}%`;
+                },
+                afterLabel: function(context: any) {
+                  const baseline = 37.81;
+                  const change = context.parsed.y - baseline;
+                  if (Math.abs(change) > 0.1) {
+                    return change > 0 ? `+${change.toFixed(2)}% vs baseline` : `${change.toFixed(2)}% vs baseline`;
+                  }
+                  return '';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 45,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                font: { family: 'Georgia' },
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: { family: 'Georgia' },
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
+          },
+          animation: {
+            delay: (context) => context.dataIndex * 150,
+            duration: 1500,
+            easing: 'easeOutQuart'
+          }
+        }
+      });
+    }
+
+    function createSFTPerformanceChart(Chart) {
+      const ctx = document.getElementById('sftPerformanceChart') as HTMLCanvasElement;
+      if (!ctx) return null;
+
+      return new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Raw-QA', 'FF-Rsn', 'Aug-CGMap-Out', 'Plain-CGMap-Out', 'Aug-CGMap-FFR-Out', 'Plain-CGMap-FFR-Out'],
+          datasets: [{
+            label: 'QA Accuracy (%)',
+            data: [52.28, 53.52, 54.19, 54.38, 55.24, 60.76],
+            backgroundColor: [
+              'rgba(255, 107, 107, 0.8)', 'rgba(254, 202, 87, 0.8)', 'rgba(255, 159, 243, 0.8)', 
+              'rgba(72, 219, 251, 0.8)', 'rgba(10, 189, 227, 0.8)', 'rgba(0, 210, 211, 0.8)'
+            ],
+            borderColor: [
+              '#ff6b6b', '#feca57', '#ff9ff3', '#48dbfb', '#0abde3', '#00d2d3'
+            ],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'SFT: The Power of Joint Training',
+              font: { size: 16, weight: 'bold', family: 'Georgia' },
+              color: 'var(--brand-deep)',
+              padding: 20
+            },
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              titleColor: '#333',
+              bodyColor: '#666',
+              borderColor: '#ddd',
+              borderWidth: 1,
+              cornerRadius: 8,
+              titleFont: { family: 'Georgia', size: 14 },
+              bodyFont: { family: 'Georgia', size: 13 },
+              callbacks: {
+                label: function(context) {
+                  return `QA Accuracy: ${context.parsed.y.toFixed(2)}%`;
+                },
+                afterLabel: function(context) {
+                  const baseline = 52.28;
+                  const improvement = context.parsed.y - baseline;
+                  return improvement > 0 ? `Improvement: +${improvement.toFixed(2)}%` : '';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 65,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                font: { family: 'Georgia' },
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: { family: 'Georgia' },
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
+          },
+          animation: {
+            delay: (context) => context.dataIndex * 200,
+            duration: 1800,
+            easing: 'easeOutBounce'
+          }
+        }
+      });
+    }
+
+    function createTrainingDynamicsChart(Chart) {
+      const ctx = document.getElementById('trainingDynamicsChart') as HTMLCanvasElement;
+      if (!ctx) return null;
+
+      const steps = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 57];
+      
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: steps,
+          datasets: [
+            {
+              label: 'QA Accuracy',
+              data: [31.52, 46.76, 51.71, 54.19, 53.71, 53.24, 52.76, 53.52, 53.14, 53.33, 53.62, 53.62],
+              borderColor: '#5f27cd',
+              backgroundColor: 'rgba(95, 39, 205, 0.1)',
+              borderWidth: 3,
+              pointBackgroundColor: '#5f27cd',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Map Quality (Overall Similarity)',
+              data: [43.71, 50.19, 52.95, 53.33, 53.62, 54.00, 52.95, 53.43, 54.38, 53.52, 53.52, 53.43],
+              borderColor: '#1dd1a1',
+              backgroundColor: 'rgba(29, 209, 161, 0.1)',
+              borderWidth: 3,
+              pointBackgroundColor: '#1dd1a1',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Training Dynamics: Structure vs. Function Trade-off',
+              font: { size: 16, weight: 'bold', family: 'Georgia' },
+              color: 'var(--brand-deep)',
+              padding: 20
+            },
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                font: { size: 12, family: 'Georgia' }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              titleColor: '#333',
+              bodyColor: '#666',
+              borderColor: '#ddd',
+              borderWidth: 1,
+              cornerRadius: 8,
+              mode: 'index',
+              intersect: false,
+              titleFont: { family: 'Georgia', size: 14 },
+              bodyFont: { family: 'Georgia', size: 13 },
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 60,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                font: { family: 'Georgia' },
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Training Steps',
+                font: { size: 14, family: 'Georgia' }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                font: { family: 'Georgia' }
+              }
+            }
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          animation: {
+            duration: 2500,
+            easing: 'easeInOutQuart'
+          }
+        }
+      });
+    }
+
+    function createRLComparisonChart(Chart) {
+      const ctx = document.getElementById('rlComparisonChart') as HTMLCanvasElement;
+      if (!ctx) return null;
+
+      return new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['RL from Scratch', 'RL from SFT'],
+          datasets: [
+            {
+              label: 'FF-Rsn',
+              data: [50.57],
+              backgroundColor: 'rgba(255, 107, 107, 0.8)',
+              borderColor: '#ff6b6b',
+              borderWidth: 2,
+              borderRadius: 6
+            },
+            {
+              label: 'Aug-CGMap-FFR-Out',
+              data: [52.19, 70.67],
+              backgroundColor: 'rgba(254, 202, 87, 0.8)',
+              borderColor: '#feca57',
+              borderWidth: 2,
+              borderRadius: 6
+            },
+            {
+              label: 'Plain-CGMap-FFR-Out',
+              data: [53.71, 70.67],
+              backgroundColor: 'rgba(29, 209, 161, 0.8)',
+              borderColor: '#1dd1a1',
+              borderWidth: 2,
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'RL: Building on Strong Foundations',
+              font: { size: 16, weight: 'bold', family: 'Georgia' },
+              color: 'var(--brand-deep)',
+              padding: 20
+            },
+            legend: {
+              position: 'top',
+              labels: {
+                font: { size: 12, family: 'Georgia' },
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              titleColor: '#333',
+              bodyColor: '#666',
+              borderColor: '#ddd',
+              borderWidth: 1,
+              cornerRadius: 8,
+              titleFont: { family: 'Georgia', size: 14 },
+              bodyFont: { family: 'Georgia', size: 13 },
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+                },
+                afterLabel: function(context) {
+                  if (context.dataIndex === 1) {
+                    const scratchValue = context.chart.data.datasets[context.datasetIndex].data[0];
+                    const improvement = context.parsed.y - scratchValue;
+                    return `Improvement: +${improvement.toFixed(2)}% vs from scratch`;
+                  }
+                  return '';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 75,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                font: { family: 'Georgia' },
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: { family: 'Georgia' }
+              }
+            }
+          },
+          animation: {
+            delay: (context) => {
+              return context.datasetIndex * 300 + context.dataIndex * 150;
+            },
+            duration: 2000,
+            easing: 'easeOutExpo'
+          }
+        }
+      });
+    }
+  });
+</script> 

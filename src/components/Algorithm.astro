@@ -1,0 +1,429 @@
+---
+// Algorithm.astro - Leaderboard for MindTopo.
+// Scores come from the main evaluation table in the paper (tables/01_main_table.tex).
+// Column order is fixed by TASKS; every row's `scores` array must follow it.
+
+type Level = 'reasoning' | 'planning';
+
+const TASKS: { name: string; property: string; level: Level }[] = [
+  { name: '2D Maze',       property: 'Continuity', level: 'reasoning' },
+  { name: '3D Maze',       property: 'Continuity', level: 'reasoning' },
+  { name: 'Pipe',          property: 'Continuity', level: 'planning'  },
+  { name: 'IKEA',          property: 'Separation', level: 'reasoning' },
+  { name: 'One Stroke',    property: 'Separation', level: 'planning'  },
+  { name: 'Bead',          property: 'Order',      level: 'reasoning' },
+  { name: 'Origami Point', property: 'Order',      level: 'reasoning' },
+  { name: 'Swap',          property: 'Order',      level: 'planning'  },
+  { name: 'Sheep',         property: 'Enclosure',  level: 'reasoning' },
+  { name: 'Hole',          property: 'Enclosure',  level: 'reasoning' },
+  { name: 'Chat Noir',     property: 'Enclosure',  level: 'planning'  },
+  { name: 'Knots',         property: 'Knots',      level: 'reasoning' },
+  { name: 'Untangle',      property: 'Knots',      level: 'planning'  },
+];
+
+// Contiguous property groups, for the spanning header row.
+const PROPERTY_GROUPS = TASKS.reduce<{ property: string; span: number }[]>((groups, task) => {
+  const last = groups[groups.length - 1];
+  if (last && last.property === task.property) last.span += 1;
+  else groups.push({ property: task.property, span: 1 });
+  return groups;
+}, []);
+
+type Group = 'proprietary' | 'open-weight' | 'reference';
+
+const MODELS: { name: string; group: Group; scores: number[] }[] = [
+  // Proprietary
+  { name: 'Gemini 3.1 Flash Lite',   group: 'proprietary', scores: [21.90, 60.30,  0.00, 42.47,  0.00, 66.97, 36.70,  12.80, 61.00, 55.00, 25.60, 62.40, 26.90] },
+  { name: 'Gemini 3.1 Pro',          group: 'proprietary', scores: [44.10, 75.60, 26.56, 39.80, 29.43, 75.90, 32.00,  71.70, 78.60, 63.00, 58.90, 71.00, 29.40] },
+  { name: 'GPT-5.4 mini',            group: 'proprietary', scores: [20.40, 30.10,  0.00, 36.24,  0.00, 59.86, 21.73,  15.60, 29.25, 57.98, 26.10, 26.00,  7.80] },
+  { name: 'GPT-5.5',                 group: 'proprietary', scores: [50.90, 58.60, 21.67, 42.67, 25.00, 72.37, 31.75, 100.00, 78.21, 69.26, 61.70, 58.20, 33.30] },
+  // Open-weight
+  { name: 'InternVL-3.5-241b-a28b',  group: 'open-weight', scores: [10.80, 34.50,  1.20, 17.80,  0.00, 57.30, 25.40,  12.80, 28.30, 50.00,  6.70, 37.80,  0.60] },
+  { name: 'Nemotron Nano 12B v2 VL', group: 'open-weight', scores: [18.30, 25.20,  0.50, 41.00,  0.60, 41.50, 24.50,  13.90, 18.00, 59.70,  1.70, 24.80, 15.00] },
+  { name: 'Gemma-4-31b-it',          group: 'open-weight', scores: [26.50, 55.80,  7.50, 18.80,  0.00, 66.37, 45.24,   0.00, 50.35, 49.90,  0.00,  5.00,  6.06] },
+  { name: 'Qwen3.5-VL-397B',         group: 'open-weight', scores: [18.72, 67.77,  0.00, 39.76,  0.00, 62.19, 23.21,  59.50, 42.99, 54.49, 29.70, 45.60, 10.30] },
+  { name: 'Cosmos-Reason2',          group: 'open-weight', scores: [30.10, 22.40,  0.00, 35.74,  2.20, 56.96,  9.82,  19.40, 29.05, 41.82, 12.20, 20.00, 21.70] },
+  { name: 'BAGEL-7B',                group: 'open-weight', scores: [ 7.30, 33.30,  0.00, 21.18,  0.00, 17.42, 13.69,   0.00, 34.73, 57.98,  0.00, 36.80,  7.20] },
+  { name: 'ThinkMorph-7B',           group: 'open-weight', scores: [ 8.20, 31.10,  0.00, 21.18,  0.00, 17.22, 11.81,   0.00, 20.00, 55.89,  0.00, 27.40,  0.00] },
+  // Reference rows
+  { name: 'Random Chance',           group: 'reference',   scores: [11.12, 22.83,  0.00, 19.94,  0.00,  8.43, 10.07,   8.89, 10.31,  8.41,  1.67, 15.01,  6.67] },
+  { name: 'Human',                   group: 'reference',   scores: [97.18, 98.62, 100.00, 94.37, 100.00, 95.77, 91.94, 100.00, 99.06, 97.65, 100.00, 91.55, 100.00] },
+];
+
+const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+const pick = (scores: number[], level: Level) =>
+  scores.filter((_, i) => TASKS[i].level === level);
+
+const rows = MODELS.map((model) => ({
+  ...model,
+  overall: mean(model.scores),
+  reasoning: mean(pick(model.scores, 'reasoning')),
+  planning: mean(pick(model.scores, 'planning')),
+}));
+
+// Best score per column across evaluated models only (Random / Human excluded).
+const evaluated = rows.filter((r) => r.group !== 'reference');
+const bestOverall = Math.max(...evaluated.map((r) => r.overall));
+const bestReasoning = Math.max(...evaluated.map((r) => r.reasoning));
+const bestPlanning = Math.max(...evaluated.map((r) => r.planning));
+const bestPerTask = TASKS.map((_, i) => Math.max(...evaluated.map((r) => r.scores[i])));
+
+const fmt = (n: number) => n.toFixed(2);
+---
+
+<section id="leaderboard" class="content-section alt-background">
+  <div class="section-container">
+    <h2 class="section-title">Leaderboard</h2>
+    <p class="section-description">
+      Accuracy (%) on the 13 <strong>MindTopo</strong> tasks, grouped by the five topological properties.
+      <strong>Overall</strong>, <strong>Reasoning</strong> and <strong>Planning</strong> are unweighted means over the
+      13, 8 and 5 tasks respectively. Every model recognizes topology far better than it acts on it.
+    </p>
+
+    <div class="leaderboard-container">
+      <div class="table-controls">
+        <p class="sort-info">Click a column header to sort · scroll the table sideways to see every task</p>
+        <div class="model-legend">
+          <span class="legend-item">
+            <span class="legend-color proprietary-legend"></span>
+            Proprietary models
+          </span>
+          <span class="legend-item">
+            <span class="legend-color open-weight-legend"></span>
+            Open-weight models
+          </span>
+          <span class="legend-item">
+            <span class="legend-color baseline-legend"></span>
+            Random chance / human
+          </span>
+          <span class="legend-item">
+            <span class="legend-color reasoning-legend"></span>
+            Reasoning task
+          </span>
+          <span class="legend-item">
+            <span class="legend-color planning-legend"></span>
+            Planning task
+          </span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="leaderboard-table" id="leaderboardTable">
+          <thead>
+            <tr class="group-row">
+              <th class="group-spacer corner-cell" rowspan="2">Model</th>
+              <th class="group-spacer" colspan="3">Summary</th>
+              {PROPERTY_GROUPS.map((group) => (
+                <th class="property-group" colspan={group.span}>{group.property}</th>
+              ))}
+            </tr>
+            <tr>
+              <th class="sortable summary-col" data-column="1">Overall<span class="sort-arrow">↕</span></th>
+              <th class="sortable summary-col reasoning-col" data-column="2">Reasoning<span class="sort-arrow">↕</span></th>
+              <th class="sortable summary-col planning-col" data-column="3">Planning<span class="sort-arrow">↕</span></th>
+              {TASKS.map((task, i) => (
+                <th class={`sortable ${task.level}-col`} data-column={i + 4}>
+                  {task.name}<span class="sort-arrow">↕</span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                class={`${row.group}-model`}
+                data-values={JSON.stringify([row.name, row.overall, row.reasoning, row.planning, ...row.scores])}
+              >
+                <th scope="row" class="model-name">{row.name}</th>
+                <td class={row.overall === bestOverall ? 'score-best' : ''}>{fmt(row.overall)}</td>
+                <td class={row.reasoning === bestReasoning ? 'score-best' : ''}>{fmt(row.reasoning)}</td>
+                <td class={row.planning === bestPlanning ? 'score-best' : ''}>{fmt(row.planning)}</td>
+                {row.scores.map((score, i) => (
+                  <td class={score === bestPerTask[i] ? 'score-best' : ''}>{fmt(score)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="table-footnote">
+        Highlighted cells mark the best evaluated model in that column. <em>Random Chance</em> and <em>Human</em> are
+        reference rows and are excluded from that comparison.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .leaderboard-container {
+    margin: 2rem 0;
+  }
+
+  .table-controls {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .sort-info {
+    color: #666;
+    font-style: italic;
+    margin: 0 0 1rem 0;
+  }
+
+  .model-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+
+  .baseline-legend { background-color: #f8f9fa; }
+  .open-weight-legend { background-color: #fffdED; }
+  .proprietary-legend { background-color: #fff2e6; }
+  .reasoning-legend { background-color: #eef3ff; }
+  .planning-legend { background-color: #e9f7ef; }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    background: white;
+  }
+
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .leaderboard-table th {
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-mid));
+    color: white;
+    padding: 0.7rem 0.65rem;
+    text-align: center;
+    font-weight: 600;
+    position: relative;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .leaderboard-table th.sortable {
+    cursor: pointer;
+    padding-right: 1.4rem;
+  }
+
+  .leaderboard-table th.sortable:hover {
+    background: linear-gradient(135deg, var(--brand-mid), var(--brand-mid-2));
+  }
+
+  .property-group {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--brand-deep-2) !important;
+  }
+
+  .group-spacer {
+    background: var(--brand-deep-2) !important;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .corner-cell {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    text-align: left;
+  }
+
+  .sort-arrow {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+    font-size: 0.75rem;
+  }
+
+  .sortable.sorted-asc .sort-arrow::after {
+    content: " ↑";
+    color: #ffd700;
+  }
+
+  .sortable.sorted-desc .sort-arrow::after {
+    content: " ↓";
+    color: #ffd700;
+  }
+
+  /* Column tinting: which cognitive level a task belongs to */
+  .summary-col { background: linear-gradient(135deg, #1d6070, #2c7d90) !important; }
+  .reasoning-col { box-shadow: inset 0 -4px 0 #9db6ee; }
+  .planning-col { box-shadow: inset 0 -4px 0 #86cfa6; }
+
+  .leaderboard-table td {
+    padding: 0.65rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .leaderboard-table th.model-name {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    text-align: left;
+    font-weight: 500;
+    color: var(--brand-deep);
+    background: inherit;
+    border-right: 1px solid #e9ecef;
+    border-bottom: 1px solid #f0f0f0;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Model group backgrounds */
+  .proprietary-model { background-color: #fff2e6; }
+  .proprietary-model:hover { background-color: #ffe6d1; }
+
+  .open-weight-model { background-color: #fffded; }
+  .open-weight-model:hover { background-color: #fdf8d8; }
+
+  .reference-model {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+  }
+  .reference-model:hover { background-color: #eef0f2; }
+  .reference-model th.model-name { color: #6c757d; }
+
+  .score-best {
+    font-weight: 700;
+    color: var(--brand-deep-2);
+    background-color: rgba(62, 143, 163, 0.18);
+  }
+
+  .table-footnote {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .leaderboard-table {
+      font-size: 0.8rem;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 0.5rem 0.4rem;
+    }
+
+    .model-legend {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .legend-item {
+      font-size: 0.85rem;
+    }
+  }
+</style>
+
+<script>
+  // Add sorting functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('leaderboardTable') as HTMLTableElement | null;
+    if (!table) return;
+
+    const headers = table.querySelectorAll('th.sortable');
+
+    headers.forEach((header) => {
+      // data-column is the index into each row's data-values array.
+      const columnIndex = Number((header as HTMLElement).dataset.column);
+      header.addEventListener('click', () => {
+        sortTable(columnIndex);
+      });
+    });
+
+    // -1 so the first sortTable() call lands on 'desc' rather than toggling off it.
+    let currentSort = { column: -1, direction: 'desc' as 'asc' | 'desc' };
+
+    function sortTable(columnIndex: number) {
+      if (!table) return;
+
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.querySelectorAll('tr')) as HTMLTableRowElement[];
+
+      // Determine sort direction
+      if (currentSort.column === columnIndex) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.direction = 'desc';
+        currentSort.column = columnIndex;
+      }
+
+      // Update header indicators
+      headers.forEach(h => {
+        h.classList.remove('sorted-asc', 'sorted-desc');
+        if (Number((h as HTMLElement).dataset.column) === columnIndex) {
+          h.classList.add(`sorted-${currentSort.direction}`);
+        }
+      });
+
+      // Sort rows
+      rows.sort((a, b) => {
+        const aDataset = a.dataset.values;
+        const bDataset = b.dataset.values;
+
+        if (!aDataset || !bDataset) return 0;
+
+        const aValues = JSON.parse(aDataset);
+        const bValues = JSON.parse(bDataset);
+
+        let aVal = aValues[columnIndex];
+        let bVal = bValues[columnIndex];
+
+        if (columnIndex === 0) { // Model name - string comparison
+          aVal = String(aVal).toLowerCase();
+          bVal = String(bVal).toLowerCase();
+          return currentSort.direction === 'asc' ?
+            aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        } else { // Numeric comparison
+          aVal = parseFloat(aVal);
+          bVal = parseFloat(bVal);
+          return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+      });
+
+      // Re-insert sorted rows
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Initial sort by overall score
+    sortTable(1);
+  });
+</script>

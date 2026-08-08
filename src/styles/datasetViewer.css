@@ -1,0 +1,896 @@
+/* Dataset Viewer Styles */
+
+/* Utility classes for better responsiveness */
+.flex {
+  display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-12 {
+  margin-bottom: 3rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.max-w-3xl {
+  max-width: 48rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Enhanced image grid for better layout */
+@media (max-width: 640px) {
+  .images-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .image-container img {
+    height: 180px !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .images-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Improved question text formatting */
+.question-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Better answer choices display */
+.answer-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.answer-choice {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 14px;
+}
+
+.answer-choice.correct {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+/* Enhanced loading animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-state p {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Focus styles for better accessibility */
+.control-select:focus,
+.nav-btn:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for better UX */
+.question-text::-webkit-scrollbar,
+pre.reasoning-content::-webkit-scrollbar,
+pre.cogmap-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.question-text::-webkit-scrollbar-track,
+pre.reasoning-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+pre.cogmap-content::-webkit-scrollbar-track {
+  background: #334155; /* Darker track for dark code block */
+  border-radius: 4px;
+}
+
+.question-text::-webkit-scrollbar-thumb,
+pre.reasoning-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+pre.cogmap-content::-webkit-scrollbar-thumb {
+  background: #64748b; /* Lighter thumb for dark code block */
+  border-radius: 4px;
+}
+
+.question-text::-webkit-scrollbar-thumb:hover,
+pre.reasoning-content::-webkit-scrollbar-thumb:hover,
+pre.cogmap-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Image zoom effect on hover */
+.image-container {
+  cursor: pointer;
+}
+
+.image-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Better typography hierarchy */
+.sample-header .sample-id {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.section-title {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+/* Enhanced error state */
+.error-state {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Animation for smooth data transitions */
+.sample-content {
+  animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Additional styles for the new layout */
+.sample-layout {
+  animation: fadeIn 0.3s ease;
+}
+
+.left-panel, .right-panel {
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Hover effects for sections */
+.answer-section:hover,
+.cogmap-section:hover,
+.reasoning-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* JSON formatting for cognitive map */
+.cogmap-content {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+}
+
+/* Better text selection */
+.reasoning-content,
+.cogmap-content,
+.question-text {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Dataset Viewer - 新设计样式 - 使用具体选择器避免冲突 */
+
+/* 主要容器 - 只针对dataset-section */
+#dataset-viewer.dataset-section {
+  padding: 4rem 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+}
+
+#dataset-viewer .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Section Header */
+#dataset-viewer .section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+#dataset-viewer .section-title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+#dataset-viewer .section-subtitle {
+  font-size: 1.25rem;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Stats Overview */
+#dataset-viewer .stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+#dataset-viewer .stat-item {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#dataset-viewer .stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+#dataset-viewer .stat-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #667eea;
+  line-height: 1;
+}
+
+#dataset-viewer .stat-label {
+  font-size: 1rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* Viewer Container */
+#dataset-viewer .viewer-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* Controls Panel */
+#dataset-viewer .controls-panel {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem 2rem;
+  display: grid;
+  /* minmax(0, …) keeps long <option> text from blowing up the track's min-content width */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+#dataset-viewer .control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#dataset-viewer .control-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#dataset-viewer .control-select {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#dataset-viewer .control-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+#dataset-viewer .navigation-controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+#dataset-viewer .nav-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid white;
+  background: transparent;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#dataset-viewer .nav-btn:hover:not(:disabled) {
+  background: white;
+  color: #667eea;
+}
+
+#dataset-viewer .nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Content Display */
+#dataset-viewer .content-display {
+  padding: 2rem;
+  min-height: 600px;
+}
+
+/* Sample Container */
+#dataset-viewer .sample-container {
+  height: 100%;
+}
+
+#dataset-viewer .sample-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+#dataset-viewer .sample-id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+#dataset-viewer .sample-meta {
+  font-size: 1rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* 双列布局容器 */
+#dataset-viewer .dual-column-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  height: calc(100% - 80px);
+}
+
+#dataset-viewer .left-column,
+#dataset-viewer .right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 内容卡片 */
+#dataset-viewer .content-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+#dataset-viewer .content-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+#dataset-viewer .card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+#dataset-viewer .card-icon {
+  width: 20px;
+  height: 20px;
+  fill: #667eea;
+}
+
+#dataset-viewer .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+#dataset-viewer .card-content {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* 图片容器 - 调整大小 */
+#dataset-viewer .images-card {
+  min-height: 200px;
+}
+
+#dataset-viewer .images-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#dataset-viewer .image-item {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  overflow: hidden;
+  transition: all 0.2s;
+  aspect-ratio: 4/3;
+}
+
+#dataset-viewer .image-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  transform: scale(1.02);
+}
+
+#dataset-viewer .image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#dataset-viewer .image-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Question Card */
+#dataset-viewer .question-card {
+  flex: 1;
+}
+
+#dataset-viewer .question-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+}
+
+/* Options Container */
+#dataset-viewer .options-container {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+#dataset-viewer .options-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#dataset-viewer .options-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+#dataset-viewer .option-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+#dataset-viewer .option-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+}
+
+#dataset-viewer .option-label {
+  background: #667eea;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+#dataset-viewer .option-text {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+/* CogMap Card - 改进显示 */
+#dataset-viewer .cogmap-card {
+  min-height: 250px;
+}
+
+#dataset-viewer .cogmap-content {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  background: #1f2937;
+  color: #d1d5db;
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+  line-height: 1.4;
+}
+
+/* Reasoning Chain Card */
+#dataset-viewer .reasoning-card {
+  flex: 1;
+}
+
+#dataset-viewer .reasoning-content {
+  background: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#dataset-viewer .reasoning-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#dataset-viewer .reasoning-step {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  gap: 0.75rem;
+}
+
+#dataset-viewer .reasoning-step:last-child {
+  border-bottom: none;
+}
+
+#dataset-viewer .step-number {
+  background: #667eea;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+#dataset-viewer .step-text {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #374151;
+}
+
+/* Answer Card */
+#dataset-viewer .answer-card {
+  min-height: 120px;
+}
+
+#dataset-viewer .answer-content {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+#dataset-viewer .answer-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#dataset-viewer .answer-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Loading State */
+#dataset-viewer .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+#dataset-viewer .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#dataset-viewer .loading-text {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* No Data State */
+#dataset-viewer .no-data-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+#dataset-viewer .no-data-icon {
+  width: 64px;
+  height: 64px;
+  fill: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+#dataset-viewer .no-data-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+#dataset-viewer .no-data-message {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Download Section */
+#dataset-viewer .download-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  text-align: center;
+}
+
+#dataset-viewer .download-section h3 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+#dataset-viewer .download-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#dataset-viewer .download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+#dataset-viewer .download-btn.primary {
+  background: white;
+  color: #667eea;
+}
+
+#dataset-viewer .download-btn.primary:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+#dataset-viewer .download-btn.secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+#dataset-viewer .download-btn.secondary:hover {
+  background: white;
+  color: #667eea;
+  text-decoration: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  #dataset-viewer .controls-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  #dataset-viewer .navigation-controls {
+    justify-content: center;
+  }
+  
+  #dataset-viewer .dual-column-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  #dataset-viewer .download-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #dataset-viewer .stats-overview {
+    grid-template-columns: 1fr;
+  }
+  
+  #dataset-viewer .options-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  #dataset-viewer .container {
+    padding: 0 1rem;
+  }
+  
+  #dataset-viewer .content-display {
+    padding: 1rem;
+  }
+  
+  #dataset-viewer .sample-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+} 

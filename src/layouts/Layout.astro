@@ -1,0 +1,84 @@
+---
+// src/layouts/Layout.astro
+// We might import a global CSS file later if needed
+import '../styles/global.css';
+import Header from '../components/Header.astro'; // Import the Header component we will create
+import Footer from '../components/Footer.astro';
+
+const {
+    title,
+    description = "MindTopo: a topological reasoning benchmark of 11,016 procedurally generated instances across 13 task types, testing whether multimodal large language models share human topological intuition — continuity, separation, order, enclosure, and knots — at two cognitive levels, reasoning over static scenes and planning in interactive environments. The strongest model reaches 54.1% against a 97.4% human ceiling.",
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og-card.jpg', Astro.site).href;
+---
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="keywords" content="MindTopo, topological reasoning, topological intuition, topology benchmark, spatial reasoning, multimodal large language models, MLLM, foundation models, benchmark, Piaget, continuity, separation, order, enclosure, knots, connectivity, planning, world model, embodied AI" />
+        <link rel="canonical" href={canonical} />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="MindTopo" />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <!-- Twitter / X card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@ManlingLi_" />
+        <meta name="twitter:creator" content="@ManlingLi_" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImage} />
+        <slot name="head" />
+        {/* We can link fonts or global styles here if necessary */}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    </head>
+    <body>
+        <Header /> {/* Add the Header component here */}
+        <main>
+            <slot /> {/* Page content from index.astro goes here */}
+        </main>
+        <Footer />
+    </body>
+</html>
+
+<style is:global>
+	:root {
+		--header-height: 60px;
+		--page-max-width: 1100px;
+		--text-light: #555;
+	}
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+	html {
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+		color: #252525;
+		scroll-behavior: smooth;
+	}
+	body {
+		min-height: 100vh;
+		overflow-x: hidden;
+	}
+	main {
+		padding-top: var(--header-height);
+	}
+</style>

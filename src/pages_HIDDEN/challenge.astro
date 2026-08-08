@@ -1,0 +1,1353 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Import component-specific styles
+import '../styles/section.css';
+
+const pageTitle = "MindCube Challenge @ CVPR 2026 CVinW";
+const pageDescription = "The MindCube Challenge at the CVinW Workshop, CVPR 2026: spatial question answering from limited multi-view observations, built on the MindCube spatial mental modeling benchmark.";
+---
+<Layout title={pageTitle} description={pageDescription}>
+  <section class="challenge-hero">
+    <div class="challenge-container">
+      <div class="challenge-badge">
+        <span class="badge-workshop">CVinW @ CVPR 2026</span>
+      </div>
+      <h1 class="challenge-title">
+        <img src="/icon.png" alt="MindCube Logo" class="challenge-logo">
+        MindCube Challenge
+      </h1>
+      <p class="challenge-tagline">
+        Spatial Question Answering from Limited Multi-View Observations
+      </p>
+      
+      <div class="challenge-cta-buttons">
+        <a href="#overview" class="cta-btn cta-primary">
+          <i class="fas fa-book"></i>
+          Challenge Instructions
+        </a>
+        <a href="https://github.com/mll-lab-nu/MindCube" target="_blank" class="cta-btn cta-secondary">
+          <i class="fab fa-github"></i>
+          Dataset & Code
+        </a>
+        <a href="https://drive.google.com/file/d/1w24JgRKbT2KzTyjBdJE6d_1NUpcOxl7d/view?usp=sharing" target="_blank" class="cta-btn cta-primary">
+          <i class="fas fa-flask"></i>
+          Test Set (Released)
+        </a>
+        <a href="https://eval.ai/web/challenges/challenge-page/2687/overview" target="_blank" class="cta-btn cta-primary">
+          <i class="fas fa-upload"></i>
+          Submission Portal
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="challenge-content">
+    <div class="challenge-container">
+
+      <!-- Announcement Banner -->
+      <div class="announcement-banner">
+        <div class="announcement-icon">📢</div>
+        <div class="announcement-text">
+          <h3>MindCube Test Set is now released!</h3>
+          <p>
+            The held-out test set is available for download here:
+            <a href="https://drive.google.com/file/d/1w24JgRKbT2KzTyjBdJE6d_1NUpcOxl7d/view?usp=sharing" target="_blank">MindCube Challenge Test Set</a>.
+          </p>
+          <p>
+            <strong>Heads-up:</strong> The Test Phase on EvalAI is currently experiencing an issue. We are actively
+            working with the EvalAI team to fix it. In the meantime, you can already download the test set and
+            run your results locally — we will notify everyone (via the
+            <a href="https://join.slack.com/t/mindcubechallenge2026/shared_invite/zt-3v50k4gqe-BUib8kOULZ052y4hcoEZqw" target="_blank">Challenge Slack</a>)
+            as soon as submissions are open.
+          </p>
+        </div>
+      </div>
+
+      <!-- Hosted By Section -->
+      <div class="content-block hosted-by">
+        <div class="hosted-icon">🏛️</div>
+        <div class="hosted-text">
+          <strong>Hosted by:</strong> The 5th Workshop on 
+          <a href="https://computer-vision-in-the-wild.github.io/cvpr-2026/" target="_blank">Computer Vision in the Wild (CVinW)</a>, CVPR 2026.
+        </div>
+      </div>
+
+      <p class="intro-text">
+        We are organizing the <strong>MindCube Challenge</strong>, a spatial question answering benchmark designed to evaluate spatial mental modeling from limited multi-view observations. Participants will be ranked by accuracy on a held-out test set.
+      </p>
+
+      <!-- Quick Links -->
+      <div class="quick-links">
+        <h3>Quick Links</h3>
+        <ul>
+          <li>
+            <i class="fab fa-github"></i>
+            <strong>Dataset & Code:</strong> 
+            <a href="https://github.com/mll-lab-nu/MindCube" target="_blank">github.com/mll-lab-nu/MindCube</a>
+          </li>
+          <li>
+            <i class="fab fa-slack"></i>
+            <strong>Slack (preferred):</strong>
+            <a href="https://join.slack.com/t/mindcubechallenge2026/shared_invite/zt-3v50k4gqe-BUib8kOULZ052y4hcoEZqw" target="_blank">Join the MindCube Challenge Slack</a>
+            — we highly encourage participants to communicate here.
+          </li>
+          <li>
+            <i class="fas fa-envelope"></i>
+            <strong>Challenge Contact:</strong>
+            <a href="mailto:qinengw@u.northwestern.edu">qinengw@u.northwestern.edu</a>
+          </li>
+          <li>
+            <i class="fas fa-upload"></i>
+            <strong>Submission Portal:</strong>
+            <a href="https://eval.ai/web/challenges/challenge-page/2687/overview" target="_blank">EvalAI — MindCube Challenge</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Challenge Overview -->
+      <div id="overview" class="content-block">
+        <h2><i class="fas fa-bullseye"></i> Challenge Overview</h2>
+        
+        <div class="goal-box">
+          <h4>Goal</h4>
+          <p>Given a multi-view observation and a question, predict the correct answer for each example.</p>
+        </div>
+        
+        <h4>What You Do</h4>
+        <ol class="numbered-list">
+          <li>Train / fine-tune on the MindCube training set.</li>
+          <li>Develop and validate on <code>MindCube_tinybench</code>.</li>
+          <li>Run inference on the held-out test set (now released) and submit predictions.</li>
+        </ol>
+      </div>
+
+      <!-- Data Splits -->
+      <div class="content-block">
+        <h2><i class="fas fa-database"></i> Data Splits</h2>
+        
+        <div class="data-splits-grid">
+          <div class="split-card split-train">
+            <div class="split-icon">📚</div>
+            <h4>Train</h4>
+            <p><code>MindCube_train.jsonl</code></p>
+            <span class="status-badge status-public">Public</span>
+          </div>
+          <div class="split-card split-val">
+            <div class="split-icon">🔬</div>
+            <h4>Validation</h4>
+            <p><code>MindCube_tinybench.jsonl</code></p>
+            <span class="status-badge status-public">Public</span>
+          </div>
+          <div class="split-card split-test">
+            <div class="split-icon">🏆</div>
+            <h4>Test (Held-out)</h4>
+            <p>Final evaluation set</p>
+            <span class="status-badge status-public">Released</span>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <p><strong>Dataset:</strong> Data can be found at 
+              <a href="https://huggingface.co/datasets/MLL-Lab/MindCube" target="_blank">huggingface.co/datasets/MLL-Lab/MindCube</a>
+            </p>
+            <p style="margin-top: 0.5rem;"><strong>Format & loading:</strong> Please refer to the official instructions in the 
+              <a href="https://github.com/mll-lab-nu/MindCube" target="_blank">MindCube repository</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evaluation -->
+      <div class="content-block">
+        <h2><i class="fas fa-chart-bar"></i> Evaluation</h2>
+        
+        <ul class="feature-list">
+          <li>
+            <strong>Metric:</strong> Accuracy (exact match) on the held-out test set.
+          </li>
+          <li>
+            <strong>Ranking:</strong> Teams are ranked by overall accuracy.
+          </li>
+          <li>
+            <em>(Optional)</em> We may additionally report accuracy by setting/sub-category for analysis.
+          </li>
+          <li>
+            <strong>Tie-break:</strong> Higher accuracy on a specific subset, then earlier submission time.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Challenge Leaderboard -->
+      <div class="content-block">
+        <h2><i class="fas fa-trophy"></i> Challenge Leaderboard</h2>
+        
+        <p>Performance of submitted methods on the held-out test set.</p>
+        
+        <div class="leaderboard-container">
+          <div class="table-controls">
+            <p class="sort-info">Click on column headers to sort the results</p>
+            <div class="model-legend">
+              <span class="legend-item">
+                <span class="legend-color baseline-legend"></span>
+                Baseline
+              </span>
+              <span class="legend-item">
+                <span class="legend-color participant-legend"></span>
+                Participants
+              </span>
+            </div>
+          </div>
+          
+          <div class="table-wrapper">
+            <table class="leaderboard-table" id="challengeLeaderboardTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-column="0">
+                    Rank
+                    <span class="sort-arrow">↕</span>
+                  </th>
+                  <th class="sortable" data-column="1">
+                    Team / Method
+                    <span class="sort-arrow">↕</span>
+                  </th>
+                  <th class="sortable highlighted-overall" data-column="2">
+                    Overall
+                    <span class="sort-arrow">↕</span>
+                  </th>
+                  <th class="sortable highlighted-rotation" data-column="3">
+                    Rotation
+                    <span class="sort-arrow">↕</span>
+                  </th>
+                  <th class="sortable highlighted-among" data-column="4">
+                    Among
+                    <span class="sort-arrow">↕</span>
+                  </th>
+                  <th class="sortable highlighted-around" data-column="5">
+                    Around
+                    <span class="sort-arrow">↕</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Placeholder Baseline -->
+                <tr class="baseline-model">
+                  <td>-</td>
+                  <td class="model-name">Random (chance)</td>
+                  <td>32.35</td>
+                  <td>36.36</td>
+                  <td>32.29</td>
+                  <td>30.66</td>
+                </tr>
+                <tr class="baseline-model">
+                  <td>-</td>
+                  <td class="model-name">Random (frequency)</td>
+                  <td>33.02</td>
+                  <td>38.30</td>
+                  <td>32.66</td>
+                  <td>35.79</td>
+                </tr>
+                <!-- Placeholder for Participants -->
+                <tr class="participant-placeholder">
+                  <td colspan="6" class="placeholder-cell">
+                    <div class="placeholder-content">
+                      <i class="fas fa-hourglass-half"></i>
+                      <span>Challenge submissions coming soon...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="leaderboard-note">
+          <i class="fas fa-info-circle"></i>
+          <span>Leaderboard will be updated after the test set is released and submissions are evaluated.</span>
+        </div>
+      </div>
+
+      <!-- Submission -->
+      <div class="content-block">
+        <h2><i class="fas fa-upload"></i> Submission</h2>
+        
+        <h4>Submission File Format (JSONL)</h4>
+        <p>Submit a single <code>.jsonl</code> file with one JSON object per line, containing:</p>
+        <ul class="simple-list">
+          <li><code>id</code> (string) — the question ID from the test set</li>
+          <li><code>answer</code> (string) — the predicted option letter (e.g., <code>"A"</code>, <code>"B"</code>, <code>"C"</code>, <code>"D"</code>)</li>
+        </ul>
+
+        <div class="code-example">
+          <div class="code-header">
+            <span>Example submission format</span>
+          </div>
+          <pre><code set:html={`{"id": "among_group693_q1_5_2", "answer": "C"}
+{"id": "around_group012_q3_1_0", "answer": "A"}`}></code></pre>
+        </div>
+
+        <h4>Requirements</h4>
+        <ul class="simple-list">
+          <li>Provide exactly one prediction for each <code>id</code> in the test set.</li>
+          <li><strong>Duplicate IDs:</strong> Keep last / invalid submission</li>
+          <li><strong>Missing IDs:</strong> Count as incorrect / invalid submission</li>
+        </ul>
+
+        <h4>How to Submit</h4>
+        <div class="submission-steps">
+          <div class="step">
+            <span class="step-number">1</span>
+            <p>Download the held-out test set from the
+              <a href="https://drive.google.com/file/d/1w24JgRKbT2KzTyjBdJE6d_1NUpcOxl7d/view?usp=sharing" target="_blank">Challenge Test Set link</a>.</p>
+          </div>
+          <div class="step">
+            <span class="step-number">2</span>
+            <p>Generate your <code>predictions.jsonl</code> following the required format.</p>
+          </div>
+          <div class="step">
+            <span class="step-number">3</span>
+            <p>Name the file as: <code>TeamName_MethodName.jsonl</code></p>
+          </div>
+          <div class="step">
+            <span class="step-number">4</span>
+            <p>Submit your predictions on
+              <a href="https://eval.ai/web/challenges/challenge-page/2687/overview" target="_blank">EvalAI</a>.
+              Questions? Contact <a href="mailto:qinengw@u.northwestern.edu">qinengw@u.northwestern.edu</a>.</p>
+          </div>
+        </div>
+
+        <div class="deadline-box">
+          <div class="deadline-item">
+            <i class="fas fa-repeat"></i>
+            <strong>Submission Limit:</strong> Up to 5 submissions per day, 100 submissions total per team across the challenge
+          </div>
+          <div class="deadline-item">
+            <i class="fas fa-flask"></i>
+            <strong>Dev Phase Deadline:</strong> May 22, 2026 (AoE)
+          </div>
+          <div class="deadline-item">
+            <i class="fas fa-clock"></i>
+            <strong>Test Phase Deadline:</strong> May 25, 2026 (AoE)
+          </div>
+          <div class="deadline-item">
+            <i class="fas fa-trophy"></i>
+            <strong>Results Announcement:</strong> May 31, 2026
+          </div>
+        </div>
+      </div>
+
+      <!-- Rules -->
+      <div class="content-block">
+        <h2><i class="fas fa-gavel"></i> Rules</h2>
+        
+        <ul class="rules-list">
+          <li>
+            <i class="fas fa-database"></i>
+            <strong>External data / models / APIs:</strong> Open-source models and external data are allowed. <span class="not-allowed">Commercial API-only (closed-source) models are disallowed.</span> Please disclose any external resources used in your method description.
+          </li>
+          <li>
+            <i class="fas fa-user-slash"></i>
+            <strong>Human-in-the-loop labeling on test:</strong> <span class="not-allowed">Disallowed</span>
+          </li>
+          <li>
+            <i class="fas fa-ban"></i>
+            Participants must not attempt to obtain test labels or manipulate evaluation.
+          </li>
+          <li>
+            <i class="fas fa-file-alt"></i>
+            <strong>Verification:</strong> Top teams may be asked to provide a brief method description and reproducibility details.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Baselines & Starter Kit -->
+      <div class="content-block">
+        <h2><i class="fas fa-code"></i> Baselines & Starter Kit</h2>
+        
+        <p>Baselines, data loaders, and evaluation scripts are available in the official MindCube repository:</p>
+        
+        <a href="https://github.com/mll-lab-nu/MindCube" target="_blank" class="repo-link">
+          <i class="fab fa-github"></i>
+          github.com/mll-lab-nu/MindCube
+        </a>
+      </div>
+
+      <!-- Contact -->
+      <div class="content-block contact-block">
+        <h2><i class="fas fa-envelope"></i> Contact</h2>
+        
+        <p>For questions, please reach out via:</p>
+        
+        <div class="contact-options">
+          <a href="mailto:qinengw@u.northwestern.edu" class="contact-btn">
+            <i class="fas fa-envelope"></i>
+            Email Us
+          </a>
+          <a href="https://github.com/mll-lab-nu/MindCube/issues" target="_blank" class="contact-btn contact-btn-secondary">
+            <i class="fab fa-github"></i>
+            GitHub Issues
+          </a>
+        </div>
+      </div>
+
+      <!-- Back to Home -->
+      <div class="back-home">
+        <a href="/">
+          <i class="fas fa-arrow-left"></i>
+          Back to MindCube Home
+        </a>
+      </div>
+
+    </div>
+  </section>
+</Layout>
+
+<style>
+  /* Challenge Hero Section */
+  .challenge-hero {
+    padding: 6rem 1rem 4rem;
+    text-align: center;
+    background: linear-gradient(135deg, #1a1f4e 0%, #2a2f6c 50%, #3d4494 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .challenge-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/background-blurred.svg') center/cover;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .challenge-container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .challenge-badge {
+    margin-bottom: 1.5rem;
+  }
+
+  .badge-workshop {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .challenge-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .challenge-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .challenge-tagline {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .challenge-cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .cta-primary {
+    background: white;
+    color: #2a2f6c;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  }
+
+  .cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(255, 255, 255, 0.3);
+  }
+
+  .cta-secondary {
+    background: transparent;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .cta-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+  }
+
+  .cta-disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+    cursor: not-allowed;
+  }
+
+  /* Challenge Content Section */
+  .challenge-content {
+    padding: 4rem 1rem;
+  }
+
+  .challenge-content .challenge-container {
+    max-width: 800px;
+  }
+
+  /* Hosted By Box */
+  .hosted-by {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .hosted-icon {
+    font-size: 2rem;
+  }
+
+  .hosted-text {
+    font-size: 1.05rem;
+    color: #78350f;
+  }
+
+  .hosted-text a {
+    color: #b45309;
+    font-weight: 600;
+  }
+
+  .intro-text {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 2rem;
+  }
+
+  /* Quick Links */
+  .quick-links {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .quick-links h3 {
+    font-size: 1.1rem;
+    color: #2a2f6c;
+    margin-bottom: 1rem;
+  }
+
+  .quick-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .quick-links li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: #4b5563;
+  }
+
+  .quick-links li i {
+    width: 20px;
+    color: #2a2f6c;
+  }
+
+  .quick-links a {
+    color: #2563eb;
+    text-decoration: none;
+  }
+
+  .quick-links a:hover {
+    text-decoration: underline;
+  }
+
+  .coming-soon-text {
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  /* Content Blocks */
+  .content-block {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .content-block:last-of-type {
+    border-bottom: none;
+  }
+
+  .content-block h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2a2f6c;
+    margin-bottom: 1.5rem;
+  }
+
+  .content-block h2 i {
+    color: #4b4f8f;
+  }
+
+  .content-block h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .content-block p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #4b5563;
+  }
+
+  /* Goal Box */
+  .goal-box {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    border: 2px solid #a78bfa;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .goal-box h4 {
+    margin-top: 0;
+    color: #5b21b6;
+  }
+
+  .goal-box p {
+    margin: 0;
+    color: #4c1d95;
+  }
+
+  /* Lists */
+  .numbered-list {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .numbered-list li {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+  }
+
+  .simple-list {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .simple-list li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+
+  .feature-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #4b5563;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #10b981;
+    font-weight: bold;
+  }
+
+  /* Code */
+  code {
+    background: #f1f5f9;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    font-size: 0.9em;
+    color: #be185d;
+  }
+
+  /* Safety net: any bare <pre> scrolls inside itself instead of widening the page */
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Long unbreakable strings (URLs, ids, inline code) must wrap instead of
+     overflowing off-screen; body clips overflow-x, so anything wider than the
+     viewport is silently cut off on phones. */
+  /* Links and inline code carry long unbreakable strings (URLs, ids): allow
+     breaks anywhere so they never push the page wider than the phone screen.
+     Plain text only breaks when a whole word cannot fit. */
+  .challenge-container a,
+  .challenge-container code:not(pre code) {
+    overflow-wrap: anywhere;
+  }
+  .challenge-container li,
+  .challenge-container p {
+    overflow-wrap: break-word;
+  }
+
+  .code-example {
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .code-header {
+    background: #334155;
+    padding: 0.75rem 1rem;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .code-example pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+  }
+
+  .code-example code {
+    background: none;
+    color: #e2e8f0;
+    padding: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* Data Splits Grid */
+  .data-splits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 640px) {
+    .data-splits-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .split-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .split-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .split-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .split-card h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #1f2937;
+  }
+
+  .split-card p {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-public {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-coming {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  /* Announcement Banner */
+  .announcement-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #6ee7b7;
+    border-left: 5px solid #10b981;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .announcement-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .announcement-text h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #065f46;
+  }
+
+  .announcement-text p {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    color: #064e3b;
+    line-height: 1.6;
+  }
+
+  .announcement-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .announcement-text a {
+    color: #047857;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  /* Info Box */
+  .info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .info-box i {
+    color: #2563eb;
+    font-size: 1.25rem;
+    margin-top: 0.1rem;
+  }
+
+  .info-box p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  /* Submission Steps */
+  .submission-steps {
+    margin: 1.5rem 0;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #2a2f6c;
+    color: white;
+    font-weight: 700;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .step p {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+  }
+
+  /* Deadline Box */
+  .deadline-box {
+    background: #fef2f2;
+    border: 2px solid #fecaca;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .deadline-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #991b1b;
+  }
+
+  .deadline-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .deadline-item i {
+    width: 20px;
+    color: #dc2626;
+  }
+
+  .tbd {
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  /* Rules List */
+  .rules-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+
+  .rules-list li {
+    display: flex;
+    /* text between inline tags forms anonymous flex items; without wrapping
+       they line up in one row and get clipped on phones */
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #4b5563;
+  }
+
+  .rules-list li i {
+    color: #6b7280;
+    margin-top: 0.1rem;
+    width: 20px;
+  }
+
+  .not-allowed {
+    color: #dc2626;
+    font-weight: 600;
+  }
+
+  /* Repo Link */
+  .repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #1f2937;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-top: 1rem;
+    transition: all 0.2s ease;
+  }
+
+  .repo-link:hover {
+    background: #111827;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Contact Block */
+  .contact-block {
+    text-align: center;
+  }
+
+  .contact-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .contact-btn:not(.contact-btn-secondary) {
+    background: linear-gradient(135deg, #2a2f6c, #4b4f8f);
+    color: white;
+  }
+
+  .contact-btn:not(.contact-btn-secondary):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(42, 47, 108, 0.3);
+  }
+
+  .contact-btn-secondary {
+    background: white;
+    color: #2a2f6c;
+    border: 2px solid #2a2f6c;
+  }
+
+  .contact-btn-secondary:hover {
+    background: #f5f7ff;
+  }
+
+  /* Back to Home */
+  .back-home {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+  }
+
+  .back-home a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .back-home a:hover {
+    color: #2a2f6c;
+  }
+
+  /* Leaderboard Styles */
+  .leaderboard-container {
+    margin: 2rem 0;
+  }
+
+  .table-controls {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .sort-info {
+    color: #666;
+    font-style: italic;
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+  }
+
+  .model-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+
+  .baseline-legend {
+    background-color: #f8f9fa;
+  }
+
+  .participant-legend {
+    background-color: #e8f4fd;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    background: white;
+  }
+
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .leaderboard-table th {
+    background: linear-gradient(135deg, #2a2f6c, #3a4b8e);
+    color: white;
+    padding: 1rem 0.8rem;
+    text-align: center;
+    font-weight: 600;
+    position: relative;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .leaderboard-table th:hover {
+    background: linear-gradient(135deg, #3a4b8e, #4a5b9e);
+  }
+
+  .leaderboard-table th:last-child {
+    border-right: none;
+  }
+
+  .sortable .sort-arrow {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+    font-size: 0.8rem;
+  }
+
+  /* Header highlighting */
+  .highlighted-overall {
+    background: linear-gradient(135deg, #e8e8e8, #f0f0f0) !important;
+    color: #333 !important;
+  }
+
+  .highlighted-rotation {
+    background: linear-gradient(135deg, #CFDDA6, #d9e7b6) !important;
+    color: #333 !important;
+  }
+
+  .highlighted-among {
+    background: linear-gradient(135deg, #DABFDA, #e5cfea) !important;
+    color: #333 !important;
+  }
+
+  .highlighted-around {
+    background: linear-gradient(135deg, #FDEEC7, #fef5d7) !important;
+    color: #333 !important;
+  }
+
+  .leaderboard-table td {
+    padding: 0.8rem;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+  }
+
+  .leaderboard-table .model-name {
+    text-align: left !important;
+    font-weight: 500;
+    color: #2a2f6c;
+  }
+
+  /* Model type backgrounds */
+  .baseline-model {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .baseline-model:hover {
+    background-color: #e9ecef;
+  }
+
+  .participant-model {
+    background-color: #e8f4fd;
+  }
+
+  .participant-model:hover {
+    background-color: #d4ebfc;
+  }
+
+  .participant-placeholder {
+    background-color: #fafafa;
+  }
+
+  .placeholder-cell {
+    padding: 3rem !important;
+  }
+
+  .placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .placeholder-content i {
+    font-size: 2rem;
+    animation: pulse-icon 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-icon {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .placeholder-content span {
+    font-size: 1rem;
+    font-style: italic;
+  }
+
+  .leaderboard-note {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    color: #0369a1;
+    font-size: 0.95rem;
+  }
+
+  .leaderboard-note i {
+    color: #0ea5e9;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .challenge-hero {
+      padding: 4rem 1rem 3rem;
+    }
+
+    .challenge-title {
+      font-size: 2rem;
+    }
+
+    .challenge-logo {
+      width: 48px;
+      height: 48px;
+    }
+
+    .challenge-tagline {
+      font-size: 1.1rem;
+    }
+
+    .cta-btn {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .content-block h2 {
+      font-size: 1.5rem;
+    }
+
+    .hosted-by {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .leaderboard-table {
+      font-size: 0.85rem;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 0.6rem 0.4rem;
+    }
+
+    .leaderboard-table .model-name {
+      font-size: 0.8rem;
+    }
+
+    .model-legend {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .legend-item {
+      font-size: 0.85rem;
+    }
+  }
+</style>
+

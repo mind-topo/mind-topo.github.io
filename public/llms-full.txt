@@ -1,0 +1,71 @@
+# MindTopo: Can Foundation Models Reason in Topological Space? Full reference for LLMs and RAG tools
+
+Paper: "MindTopo: Can Foundation Models Reason in Topological Space?"
+Authors: Yunfei Ge, Anbang Liu, Qineng Wang, Johnalbert Garnica, Jianwen Lyu, Zihan Wang, Reuben Tan, Jianfeng Gao, Ruohan Zhang, Yining Hong, Jiajun Wu, Manling Li.
+Affiliations: Northwestern University, Microsoft Research, Stanford University.
+Project page: https://mind-topo.github.io/
+Code: https://github.com/mll-lab-nu/MindTopo
+Dataset: https://huggingface.co/datasets/MLL-Lab/MindTOPO
+
+## What is MindTopo?
+
+MindTopo is a systematic benchmark that evaluates topological intuition in multimodal large language models (MLLMs). It probes five Piagetian topological primitives (continuity, separation, order, enclosure, and knots) at two cognitive levels: reasoning from a static rendered scene, and planning through an interactive environment. It contains 13 task types and 11,016 instances, each procedurally generated with controllable difficulty.
+
+## What is topological space, and why does it matter?
+
+Spatial understanding extends beyond Euclidean or metric properties such as distance, angle, and shape. Topological properties are those that remain invariant under continuous deformation: whether a path connects two rooms, whether a boundary fully encloses a region, whether a knot persists in a rope. Piaget identified topological space as a distinct dimension of spatial understanding, acquired before Euclidean and projective notions. Chen showed that the adult visual system extracts topological invariants before Euclidean features. Most existing spatial benchmarks assess Euclidean properties; MindTopo targets the topological layer.
+
+## What are the five topological properties?
+
+- Continuity: whether a path or surface forms an unbroken whole. Reasoning task: are two marked endpoints in a rendered maze connected? Negative cases use a single severing wall, so the answer hinges on the topological cut rather than metric layout. Planning task (Pipe): rotate pipe segments by 90 degrees to form a connected source-to-destination route.
+- Separation: the complement of proximity, and the basis of object individuation. Reasoning task (IKEA): given an assembled object and candidate sub-assemblies, select the subset that forms a topologically separable component. Planning task (One Stroke): draw a single corner-to-corner path through a colored grid that separates same-colored cells into shared regions.
+- Order: the sequential arrangement of elements along a path. Reasoning task (Bead): adapting Piaget's bead-replication paradigm, enumerate the sequence of colored beads on a curved or twisted string, or decide whether two strings preserve the same cyclic order. Planning task (Swap): a one-dimensional sliding-track puzzle reaching a target color permutation via a single empty slot.
+- Enclosure: the inside/outside relation induced by a closed boundary, formalized by the Jordan curve theorem. Reasoning tasks: Fence & Sheep (which animals lie strictly inside a top-down enclosure boundary?) and Hole Detection (count through-holes in a solid object). Planning task (Chat Noir): on a hexagonal grid, place one block per turn to encircle a moving cat before it escapes to the boundary.
+- Knots: whether ropes are truly knotted or loops truly interlocked. Strohecker characterizes knots as the "mother structure" that coordinates all other topological relations. Reasoning task (Knots): given rendered closed rope loops, decide whether a single loop is truly knotted or just visually tangled, and whether two loops are linked. Planning task (Untangle): move plugs across a discrete grid until no two ropes cross.
+
+Reasoning tasks also include "what-if" sub-questions that probe how the topological answer changes under a transformation, e.g. adding or removing a wall, removing a connector, folding a string, or flipping a crossing.
+
+## What are the two cognitive levels?
+
+- Reasoning: each task is a visual question answering instance (o, q, a). The model receives one or more rendered images and a question targeting a topological property, and must produce an answer verified against ground truth derived from the scene specification.
+- Planning: each task is a Markov decision process. States are scene configurations, actions are interventions that may create or disrupt topological structure, transitions are deterministic simulator steps, and reward is given for reaching a configuration whose topology satisfies the goal.
+
+This split separates whether a model can recognize a topological relation in a static scene from whether it can operate on that relation through a sequence of decisions.
+
+## How is the data built?
+
+A four-stage pipeline. Scene Generation procedurally synthesizes scenes for all 13 task types from native simulators or rendering scripts (Three.js or simulators). Topological Annotation attaches the ground-truth label each property requires. Difficulty Control varies scene parameters that change topological complexity (wall count, grid size, number of crossings) to produce easy, medium, and hard variants. Instances Generation turns each annotated scene into a reasoning instance with a templated question and answer, and into a matched planning instance whose initial state, goal, and reward come from the same annotation. Every instance is labeled by construction.
+
+## How large is the benchmark?
+
+11,016 instances across 13 task types and five topological properties, split 73% reasoning and 27% planning. Each of the eight reasoning tasks (2D Maze, 3D Maze, IKEA, Bead, Origami Point, Sheep, Hole, Knots) contributes roughly 1,000 instances; each of the five planning tasks (Pipe, One Stroke, Swap, Chat Noir, Untangle) contributes 600.
+
+## How do current models perform?
+
+11 MLLMs were evaluated. The strongest, GPT-5.5, reaches 54.13% overall, far below the human ceiling of 97.40%. Random chance is 9.49%. Reasoning accuracy outpaces planning accuracy by a wide margin across every model tier. Within each property, performance degrades with topological complexity rather than failing only on isolated hard cases, suggesting models lack systematic topological reasoning.
+
+## Can generative tools be used as visual world models?
+
+Two state-of-the-art generative tools were probed under a tool-use augmentation. Image generation can substitute for a missing perception channel, lifting GPT-5.4-mini by more than 50 points on perception-bound tasks. The strongest open-source video generator, by contrast, violates dynamics on 116 of 119 generated rollouts, so video augmentation does not help. Generative tools support a model's perception of topology but not its prediction of how topology evolves under action.
+
+## Key numbers at a glance
+
+- 5 topological properties; 2 cognitive levels; 13 task types; 11,016 instances (8,016 reasoning, 3,000 planning).
+- 11 MLLMs evaluated; 2 generative tools probed as world models.
+- Best model (GPT-5.5): 54.13% overall. Human: 97.40%. Random chance: 9.49%.
+- Video world model: 116 of 119 rollouts violate dynamics.
+
+## Contributions
+
+1. Formalizing topological intuition as a distinct and evaluable dimension of spatial understanding in foundation models, grounded in the cognitive science of topological space.
+2. MindTopo, a scalable benchmark of 13 task types across five topological properties and two cognitive levels, with parametric generation pipelines enabling controlled difficulty scaling.
+3. A systematic evaluation of 11 MLLMs plus a probe of two generative tools, revealing that frontier MLLMs recognize topology in a static scene but cannot operate on it under action, and that current video generators do not yet reason in topological space.
+
+## Citation
+
+@misc{ge2026mindtopo,
+  title={MindTopo: Can Foundation Models Reason in Topological Space?},
+  author={Yunfei Ge and Anbang Liu and Qineng Wang and Johnalbert Garnica and Jianwen Lyu and Zihan Wang and Reuben Tan and Jianfeng Gao and Ruohan Zhang and Yining Hong and Jiajun Wu and Manling Li},
+  year={2026},
+  url={https://mind-topo.github.io/},
+}

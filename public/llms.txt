@@ -1,0 +1,28 @@
+# MindTopo: Can Foundation Models Reason in Topological Space?
+
+> MindTopo is a benchmark that asks whether multimodal large language models (MLLMs) possess topological intuition: the recognition of spatial invariants such as connectivity, enclosure, and knottedness that persist under continuous deformation. Cognitive science treats this as a foundational layer of human spatial cognition, acquired before Euclidean and projective notions of distance and shape. MindTopo evaluates five Piagetian topological primitives at two cognitive levels, reasoning and planning, using 13 procedurally generated task types and 11,016 instances. Paper: "MindTopo: Can Foundation Models Reason in Topological Space?" by Yunfei Ge, Anbang Liu, Qineng Wang, Johnalbert Garnica, Jianwen Lyu, Zihan Wang, Reuben Tan, Jianfeng Gao, Ruohan Zhang, Yining Hong, Jiajun Wu, and Manling Li (Northwestern University, Microsoft Research, Stanford University).
+
+Key facts:
+- Topological properties are the spatial properties that survive continuous deformation. A rope can be bent, stretched, or coiled, but whether it is knotted does not change; a maze can be redrawn in many shapes, but whether two points are connected does not change.
+- MindTopo organizes topological space into five properties: continuity (is there a connected path?), separation (are nearby elements one whole or distinct objects?), order (how are elements sequenced along a path?), enclosure (does a boundary create an inside and an outside?), and knots (are ropes truly knotted or loops truly interlocked?).
+- Each property is probed at two cognitive levels: reasoning (visual QA over a rendered static scene) and planning (acting in an interactive gym environment to reach a topological goal).
+- Scale: 13 task types, 11,016 instances, split 73% reasoning (8,016 questions) and 27% planning (3,000 episodes). Every task is procedurally generated with controllable difficulty, so the pipelines can produce arbitrarily large datasets.
+- Results: 11 MLLMs evaluated. The strongest, GPT-5.5, reaches 54.13% overall against a human ceiling of 97.40%. Reasoning accuracy outpaces planning accuracy by a wide margin at every model tier.
+- Core finding: models consistently recognize a topological relation in a static scene but cannot maintain or operate on it across an action sequence.
+- Generative tools probed as visual world models: image generation can substitute for a missing perception channel, lifting GPT-5.4-mini by more than 50 points on perception-bound tasks. The strongest open-source video generator violates dynamics on 116 of 119 generated rollouts and does not help. Generative tools today can render the topology of a single scene, not simulate how that topology changes when an agent acts on it.
+
+## Links
+- [Project page](https://mind-topo.github.io/)
+- [Code on GitHub](https://github.com/mll-lab-nu/MindTopo)
+- [Dataset on Hugging Face](https://huggingface.co/datasets/MLL-Lab/MindTOPO)
+
+## Citation
+@misc{ge2026mindtopo,
+  title={MindTopo: Can Foundation Models Reason in Topological Space?},
+  author={Yunfei Ge and Anbang Liu and Qineng Wang and Johnalbert Garnica and Jianwen Lyu and Zihan Wang and Reuben Tan and Jianfeng Gao and Ruohan Zhang and Yining Hong and Jiajun Wu and Manling Li},
+  year={2026},
+  url={https://mind-topo.github.io/},
+}
+
+## More detail
+- [Full FAQ and extended summary](https://mind-topo.github.io/llms-full.txt)

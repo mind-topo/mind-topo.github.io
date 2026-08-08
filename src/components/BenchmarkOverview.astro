@@ -1,0 +1,227 @@
+---
+// BenchmarkOverview.astro - The five topological properties and the 13 tasks that probe them.
+
+const PROPERTIES = [
+  {
+    name: 'Continuity',
+    question: 'Is there an unbroken path?',
+    blurb:
+      'Whether a path or surface forms an unbroken whole — among the earliest spatial concepts a child acquires.',
+    reasoning: '2D Maze, 3D Maze',
+    planning: 'Pipe',
+  },
+  {
+    name: 'Separation',
+    question: 'One whole, or distinct parts?',
+    blurb:
+      'The complement of proximity, and the prerequisite for any reasoning beyond an undifferentiated whole.',
+    reasoning: 'IKEA',
+    planning: 'One Stroke',
+  },
+  {
+    name: 'Order',
+    question: 'Which comes before which?',
+    blurb:
+      'The sequential arrangement of elements along a path, tracked through a transformation of the scene.',
+    reasoning: 'Bead, Origami Point',
+    planning: 'Swap',
+  },
+  {
+    name: 'Enclosure',
+    question: 'What is inside, what is outside?',
+    blurb:
+      'The inside/outside relation induced by a closed boundary — the Jordan curve theorem, and the holes in a solid.',
+    reasoning: 'Sheep, Hole',
+    planning: 'Chat Noir',
+  },
+  {
+    name: 'Knots',
+    question: 'Truly knotted, or merely tangled?',
+    blurb:
+      'The "mother structure" that coordinates every other topological relation: crossings, linking, and knotting.',
+    reasoning: 'Knots',
+    planning: 'Untangle',
+  },
+];
+---
+
+<section id="benchmark" class="content-section">
+  <div class="section-container">
+    <h2 class="section-title">The Benchmark</h2>
+    <p class="section-description">
+      Topological properties are the spatial properties that survive continuous deformation. A rope can be bent,
+      stretched, or coiled, but whether it is knotted does not change. <strong>MindTopo</strong> organizes them into
+      five Piagetian primitives and probes each at two cognitive levels — <strong>reasoning</strong> over a static
+      rendered scene, and <strong>planning</strong> inside an interactive environment.
+    </p>
+
+    <div class="property-grid">
+      {PROPERTIES.map((property) => (
+        <article class="property-card">
+          <h3 class="property-name">{property.name}</h3>
+          <p class="property-question">{property.question}</p>
+          <p class="property-blurb">{property.blurb}</p>
+          <dl class="property-tasks">
+            <div class="task-row">
+              <dt class="task-level reasoning">Reasoning</dt>
+              <dd>{property.reasoning}</dd>
+            </div>
+            <div class="task-row">
+              <dt class="task-level planning">Planning</dt>
+              <dd>{property.planning}</dd>
+            </div>
+          </dl>
+        </article>
+      ))}
+    </div>
+
+    <figure class="benchmark-figure">
+      <img
+        src="/task-overview.png"
+        alt="The 13 MindTopo tasks arranged by topological property and cognitive level, each with a representative rendered scene, question, or gym environment."
+        width="2000"
+        height="1210"
+        loading="lazy"
+      />
+      <figcaption>
+        All 13 tasks, with a representative scene and question for each. Interactive environments are labelled
+        <strong>Gym Env</strong>.
+      </figcaption>
+    </figure>
+
+    <figure class="benchmark-figure narrow">
+      <img
+        src="/data-stats.png"
+        alt="MindTopo dataset statistics: 11,016 instances across 13 task types, split 73% reasoning and 27% planning."
+        width="1800"
+        height="672"
+        loading="lazy"
+      />
+      <figcaption>
+        11,016 instances, split 73% reasoning and 27% planning. Each of the eight reasoning tasks contributes roughly
+        1,000 instances; each of the five planning tasks contributes 600. Every task is procedurally generated with
+        controllable difficulty, so the pipelines can produce arbitrarily large datasets.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .property-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-top: 4px solid var(--brand-deep);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Continuity -> Knots, walking the logo triad then extending it. */
+  .property-card:nth-child(1) { border-top-color: var(--brand-teal); }
+  .property-card:nth-child(2) { border-top-color: var(--brand-coral); }
+  .property-card:nth-child(3) { border-top-color: var(--brand-amber); }
+  .property-card:nth-child(4) { border-top-color: #3fa06a; }
+  .property-card:nth-child(5) { border-top-color: #7a6bbd; }
+
+  .property-name {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--brand-deep);
+  }
+
+  .property-question {
+    margin: 0;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: #6b7280;
+  }
+
+  .property-blurb {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #555;
+    flex-grow: 1;
+  }
+
+  .property-tasks {
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .task-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .task-row dd {
+    margin: 0;
+    color: #444;
+  }
+
+  .task-level {
+    flex-shrink: 0;
+    min-width: 5.6em;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+  }
+
+  .task-level.reasoning {
+    background-color: #eef3ff;
+    color: #2f4f9e;
+  }
+
+  .task-level.planning {
+    background-color: #e9f7ef;
+    color: #226b45;
+  }
+
+  .benchmark-figure {
+    margin: 0 0 3rem;
+  }
+
+  .benchmark-figure:last-child {
+    margin-bottom: 0;
+  }
+
+  .benchmark-figure.narrow {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .benchmark-figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+  }
+
+  .benchmark-figure figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #6c757d;
+    text-align: center;
+  }
+</style>

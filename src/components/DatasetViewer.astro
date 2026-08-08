@@ -1,0 +1,118 @@
+---
+// Dataset Viewer Component - 清洁版本，只包含HTML结构
+---
+
+<section id="dataset-viewer" class="dataset-section">
+  <div class="container">
+    <!-- Section Header -->
+    <div class="section-header">
+      <h2 class="section-title">Dataset Viewer</h2>
+      <p class="section-subtitle">
+        Explore our <strong>MindCube-tinybench</strong> version dataset.
+      </p>
+    </div>
+
+    <!-- Dataset Stats -->
+    <div class="stats-overview">
+      <div class="stat-item">
+        <div class="stat-number">21K</div>
+        <div class="stat-label">Total Samples</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Settings</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">2-4</div>
+        <div class="stat-label">Views per Sample</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Annotated</div>
+      </div>
+    </div>
+
+    <!-- Main Viewer -->
+    <div class="viewer-container">
+      <!-- Controls Panel -->
+      <div class="controls-panel">
+        <div class="control-group">
+          <label>Setting Filter:</label>
+          <select id="setting-select" class="control-select">
+            <option value="">All Settings</option>
+            <option value="among">Among</option>
+            <option value="around">Around</option>
+            <option value="rotation">Rotation</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Sample:</label>
+          <select id="id-select" class="control-select">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+
+        <div class="navigation-controls">
+          <button id="prev-btn" class="nav-button" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Previous
+          </button>
+          <button id="next-btn" class="nav-button">
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content Display -->
+      <div id="data-display" class="content-display">
+        <!-- Loading State -->
+        <div class="loading-state">
+          <div class="spinner-container">
+            <div class="spinner"></div>
+            <p>Loading dataset...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dataset Download Section -->
+    <div class="download-section">
+      <h3>Access Dataset</h3>
+      <div class="download-buttons">
+        <a href="https://huggingface.co/datasets/MLL-Lab/MindCube/resolve/main/data.zip?download=true" class="download-btn primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Dataset
+        </a>
+        <a href="https://github.com/mll-lab-nu/MindCube" class="download-btn secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          Documentation
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Import dataset viewer functionality
+  import { initDatasetViewer } from '../scripts/datasetViewer.js';
+  
+  // Initialize when DOM is ready
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initDatasetViewer();
+    });
+  }
+</script> 
