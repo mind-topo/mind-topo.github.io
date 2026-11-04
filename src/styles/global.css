@@ -50,11 +50,14 @@
   --nav-w: 172px;
   --nav-gap: 28px;
   --col: min(1080px, 100vw - 40px);
+  /* How far the column sits right of center, so nav + column are centered together. */
+  --col-shift: 0px;
 }
 
 @media (min-width: 1200px) {
   :root {
-    --col: min(1060px, 100vw - 2 * (var(--nav-w) + var(--nav-gap) + 20px));
+    --col: min(1060px, 100vw - var(--nav-w) - var(--nav-gap) - 64px);
+    --col-shift: calc((var(--nav-w) + var(--nav-gap)) / 2);
   }
 }
 
@@ -184,7 +187,7 @@ main {
 
 .wrap {
   width: var(--col);
-  margin-inline: auto;
+  margin-left: calc(50% - var(--col) / 2 + var(--col-shift));
 }
 
 /* ------------------------------------------------------------ section head */

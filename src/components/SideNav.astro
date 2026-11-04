@@ -33,7 +33,7 @@ import { SECTIONS } from '../data/nav';
       position: fixed;
       z-index: 30;
       top: calc(var(--header-h) + 40px);
-      left: max(16px, calc((100vw - var(--col)) / 2 - var(--nav-w) - var(--nav-gap)));
+      left: max(16px, calc(50% - var(--col) / 2 + var(--col-shift) - var(--nav-w) - var(--nav-gap)));
       width: var(--nav-w);
     }
   }
