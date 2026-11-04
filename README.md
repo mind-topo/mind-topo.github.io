@@ -4,7 +4,8 @@ Source for [mind-topo.github.io](https://mind-topo.github.io/), the project page
 **MindTopo: Can Foundation Models Reason in Topological Space?**
 
 Built with [Astro](https://astro.build/) and deployed to GitHub Pages by
-[`.github/workflows`](.github/workflows) on every push to `main`.
+[`.github/workflows`](.github/workflows) on every push to `main`. No chart library:
+every chart is plain HTML/SVG with a few small TypeScript modules.
 
 ## Commands
 
@@ -15,39 +16,78 @@ Built with [Astro](https://astro.build/) and deployed to GitHub Pages by
 | `npm run build`   | Build the production site to `./dist/`        |
 | `npm run preview` | Preview the production build locally          |
 
-## Structure
+## Updating the numbers
+
+Every score on the page comes from `src/data/paper.json`, which is generated from
+the paper's LaTeX tables (the TMLR version, the newest results):
+
+```bash
+python3 scripts/sync-paper-data.py ../-NeurIPS-2026-TopoBench/tmlr
+```
+
+The script parses the main, Easy-level, difficulty, training, error-analysis,
+probing and video-verifier tables, cross-checks them (Easy + Hard must average to
+the main table; the Reason/Plan means must match), and refuses to write if they
+disagree. Headlines such as "13 of 13 models plan worse than they reason" are
+computed from the data, so they update with it. Only the per-task copy (questions,
+answers, error-example quotes) lives by hand in `src/data/site.ts`.
+
+## Page structure
+
+The page reads top to bottom as a list of conclusions; each section's headline is
+its finding, and the side navigation (desktop) or the header menu (below 1200px)
+tracks the current section.
+
+| Section | Component | Interaction |
+| :-- | :-- | :-- |
+| Overview | `Hero.astro` | count-up stats, deforming-loop motif |
+| Teaser video | `TeaserVideo.astro` | loads only on play |
+| Key findings | `Findings.astro` | six cards linking to their evidence |
+| Benchmark | `Benchmark.astro` | invariance demo, task explorer (quiz + animated gym states) |
+| The action gap | `Results.astro` | difficulty switch, dumbbell chart, sortable heatmap leaderboard |
+| Against humans | `Humans.astro` | model picker, morphing radar, largest gaps |
+| Training | `Training.astro` | method switch |
+| Failure modes | `Errors.astro` | model switch, linked legend / bars / example gallery |
+| Visual imagination | `Imagination.astro` | in-view video loops, planner switch, verifier small multiples |
+| Citation | `Citation.astro` | copy BibTeX |
+
+Section order and labels live in `src/data/nav.ts`. Charts share the toolkit in
+`src/scripts/viz.ts` (tooltip, radio groups, FLIP reordering, table views); every
+chart has a "Show data table" twin. Motion respects `prefers-reduced-motion`.
 
 ```text
-public/            static assets served at the site root
-  icon.png           MindTopo logo (header, favicon, hero)
-  teaser.png         paper teaser figure
-  task-overview.png  13-task overview figure
-  data-stats.png     dataset statistics figure
-  og-card.jpg        social preview card
-  llms.txt           short LLM-facing summary
-  llms-full.txt      extended LLM-facing reference
+public/
+  media/               teaser video + poster, rollout clips, task / error / figure images (WebP)
+  og-card.jpg          social preview card
+  llms.txt             short LLM-facing summary
+  llms-full.txt        extended LLM-facing reference
+scripts/
+  sync-paper-data.py   regenerates src/data/paper.json from the paper's tables
 src/
-  components/      Hero, Header, Algorithm (leaderboard), AuthorsCitation, Footer
-  layouts/         Layout.astro — <head>, metadata, header/footer shell
-  pages/           index.astro — the one published route
-  pages_HIDDEN/    routes kept out of the build (see its README)
-  scripts/         client-side TypeScript/JS
-  styles/          global + per-section CSS
+  data/                paper.json (generated), site.ts (typed access + copy), nav.ts, results.ts, humans.ts
+  components/          one component per section, plus Header, SideNav, Footer, Icon, SectionHeader
+  scripts/             client behaviour: site.ts (nav, reveal, media), viz.ts, one module per chart
+  styles/global.css    design tokens and shared UI pieces
 ```
+
+The chart palette (reasoning `#0a7fb0`, planning `#eb6834`, model `#6250d6`, and
+the seven error-category slots) was checked for color-vision-deficiency
+separation and contrast; change it in `src/styles/global.css` and
+`src/data/site.ts` together.
+
+## Links not yet public
+
+Paper, code and dataset links, author pages and lab links are parked: the
+destination is in `data-href` instead of `href` and the element carries
+`link-disabled`. To enable one, swap `data-href` for `href` and drop the class
+(and the "soon" badge next to it in `Header.astro` / `Hero.astro`).
 
 ## Currently hidden
 
-These are wired up but deliberately not rendered; re-enable by uncommenting the
-import and the tag in [`src/pages/index.astro`](src/pages/index.astro).
+These predate the 2026-11 redesign and are not rendered. They still work with
+their own stylesheets but will need restyling to match the new design.
 
 - `DatasetViewer` — waiting on the MindTopo data drop under `public/`.
-- `FindingsSection` — still contains MindCube results; needs MindTopo content.
-- `TrajectoryViewer` — carried over from an earlier template.
+- `FindingsSection` — MindCube results; superseded by `Findings.astro`.
+- `TrajectoryViewer` — carried over from an earlier template (styles in `src/styles/trajectoryViewer.css`).
 - `src/pages_HIDDEN/challenge.astro` — MindCube challenge page, kept as a layout reference.
-
-## Updating the leaderboard
-
-Scores live in the `TASKS` and `MODELS` arrays at the top of
-[`src/components/Algorithm.astro`](src/components/Algorithm.astro). Overall,
-Reasoning and Planning columns are derived from them, so only the per-task
-numbers need editing. Each row's `scores` array must follow `TASKS` order.

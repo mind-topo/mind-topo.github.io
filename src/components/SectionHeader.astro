@@ -1,0 +1,16 @@
+---
+// SectionHeader.astro - eyebrow (section number + name) and a headline that states the conclusion.
+import { sectionNumber, sectionLabel, type SectionId } from '../data/nav';
+
+interface Props {
+  id: SectionId;
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+<header class="section-head" data-reveal>
+  <p class="eyebrow"><span class="num">{sectionNumber(id)}</span>{sectionLabel(id)}</p>
+  <h2 class="section-title">{title}</h2>
+  {Astro.slots.has('default') && <p class="section-lead"><slot /></p>}
+</header>

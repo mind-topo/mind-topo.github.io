@@ -1,0 +1,501 @@
+---
+// Imagination.astro - can generated images or videos stand in for a world model?
+// Endpoint success vs process validity, the image-interleaving probe, and two
+// rollout clips cut from the launch video.
+import SectionHeader from './SectionHeader.astro';
+import { FACTS, GENERATION_AUDIT, PROBING, VIDEO_VERIFIER, TASKS, taskIndex, fmt } from '../data/site';
+
+const PLANNERS = ['GPT-5.6-Luna', 'GPT-5.4-mini', 'InternVL3.5-241B'];
+const IMAGE = '+ GPT-Image-2 (image)';
+const probeTasks = Array.from(new Set(PROBING.map((p) => p.task)));
+const cell = (planner: string, condition: string, task: string) =>
+  PROBING.find((p) => p.planner === planner && p.condition === condition && p.task === task)?.success ?? 0;
+const probeRows = probeTasks.map((task) => ({
+  task,
+  kind: TASKS[taskIndex(task)].kind,
+  before: cell(PLANNERS[0], 'Planner only', task),
+  after: cell(PLANNERS[0], IMAGE, task),
+}));
+
+const verifierTasks = Object.keys(VIDEO_VERIFIER);
+const video = GENERATION_AUDIT.video;
+const image = GENERATION_AUDIT.image;
+const best = Object.entries(VIDEO_VERIFIER)
+  .flatMap(([task, gens]) => Object.entries(gens).map(([gen, v]) => ({ task, gen, ...v })))
+  .sort((a, b) => b.finalStateSuccess - a.finalStateSuccess)[0];
+---
+<section id="imagination" class="section">
+  <div class="wrap">
+    <SectionHeader id="imagination" title="Imagined rollouts reach the goal, but never by legal moves">
+      Can image or video generation act as the world model that planning lacks? We let generators render the
+      next state, or a whole plan, and then check every frame.
+    </SectionHeader>
+
+    <div class="im-hero">
+      <figure class="im-clip" data-reveal>
+        <div class="media-frame">
+          <video data-inview muted loop playsinline preload="none" poster="/media/rollouts-grid-poster.webp" width="1100" height="678" aria-label="Three video models imagining the same planner's moves on Untangle, One Stroke and Pipe">
+            <source src="/media/rollouts-grid.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <figcaption class="caption">Three video models imagine a planner's moves on Untangle, One Stroke and Pipe. Endpoints look plausible; the steps in between do not follow the rules.</figcaption>
+      </figure>
+
+      <div class="im-stats card" data-reveal style="--reveal-delay:.08s">
+        <div class="im-figures">
+          <div>
+            <p class="im-big">{fmt(FACTS.video.bestEndpoint)}<span>%</span></p>
+            <p class="im-cap">best rate of a <strong>solved final frame</strong> ({best.gen}, {best.task})</p>
+          </div>
+          <div>
+            <p class="im-big zero">{fmt(FACTS.video.bestProcessValid)}<span>%</span></p>
+            <p class="im-cap">of {FACTS.video.rollouts.toLocaleString('en-US')} rollouts are <strong>process-valid</strong>: every frame legal, every transition legal</p>
+          </div>
+        </div>
+        <div class="audit">
+          <p class="side-title">Manual audit of {video.total} {video.generator} rollouts</p>
+          {Object.entries(video.errors).map(([k, n]) => (
+            <div class="audit-row">
+              <span class="audit-name">{k === 'Invariant' ? 'Topology broken' : k === 'Dynamics' ? 'Illegal dynamics' : 'Inconsistent frames'}</span>
+              <span class="audit-bar"><span style={`--v:${(100 * n) / video.total}%`}></span></span>
+              <span class="audit-n tabular">{n}<span>/{video.total}</span></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 im-row">
+      <figure class="card figure-card" id="probe-chart" data-reveal>
+        <div class="figure-head">
+          <div>
+            <p class="subhead">A generated next frame helps only where a local cue suffices</p>
+            <p class="subhead-note">Success rate with and without GPT-Image-2 rendering the predicted next state, 105 episodes per task.</p>
+          </div>
+        </div>
+        <div class="controls compact">
+          <span class="control-label" id="planner-label">Planner</span>
+          <div class="chip-row" role="radiogroup" aria-labelledby="planner-label" id="planner-control">
+            {PLANNERS.map((p, i) => (
+              <button class="chip" role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-value={p}>{p}</button>
+            ))}
+          </div>
+        </div>
+        <div class="probe" id="probe">
+          {probeRows.map((r) => (
+            <div class={`probe-row ${r.kind}`} data-task={r.task} tabindex="0" style={`--a:${r.before};--b:${r.after}`}>
+              <span class="pr-name"><span class={`kind-dot ${r.kind}`}></span>{r.task}</span>
+              <span class="pr-track">
+                <span class="pr-link"></span>
+                <span class="pr-dot before"></span>
+                <span class="pr-dot after"></span>
+              </span>
+              <span class="pr-delta tabular">{(r.after - r.before >= 0 ? '+' : '−') + fmt(Math.abs(r.after - r.before))}</span>
+            </div>
+          ))}
+          <div class="pr-axis" aria-hidden="true"><span></span><span class="pr-ticks"><span>0</span><span>25</span><span>50</span><span>75%</span></span><span></span></div>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span class="legend-item"><span class="swatch ring"></span>planner only</span>
+          <span class="legend-item"><span class="swatch dot" style="background:var(--model)"></span>+ generated next frame</span>
+          <span class="legend-item"><span class="kind-dot reasoning"></span>reasoning</span>
+          <span class="legend-item"><span class="kind-dot planning"></span>planning</span>
+        </div>
+        <details class="table-view">
+          <summary>Show data table</summary>
+          <div class="table-scroll"><table id="probe-table"></table></div>
+        </details>
+      </figure>
+
+      <div class="im-side">
+        <figure class="im-clip" data-reveal style="--reveal-delay:.08s">
+          <div class="media-frame">
+            <video data-inview muted loop playsinline preload="none" poster="/media/rollouts-board-poster.webp" width="1280" height="470" aria-label="The same Untangle board and instruction given to three video models, each breaking the board differently">
+              <source src="/media/rollouts-board.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <figcaption class="caption">Same board, same instruction, three video models. One moves the wrong rope, one lets a rope end slip a peg, one invents a fifth rope.</figcaption>
+        </figure>
+
+        <div class="card im-audit" data-reveal style="--reveal-delay:.12s">
+          <p class="side-title">Manual audit of {image.total} {image.generator} frames</p>
+          {Object.entries(image.errors).map(([k, n]) => (
+            <div class="audit-row">
+              <span class="audit-name">{k === 'Invariant' ? 'Topology broken' : k === 'Dynamics' ? 'Illegal dynamics' : 'Inconsistent frames'}</span>
+              <span class="audit-bar"><span style={`--v:${(100 * n) / image.total}%`}></span></span>
+              <span class="audit-n tabular">{n}<span>/{image.total}</span></span>
+            </div>
+          ))}
+          <p class="caption">Generated frames keep local cues, which is enough for {image.tasks.slice(0, 2).join(' and ')}, but not invariants that span a whole trajectory, as in {image.tasks[2]}.</p>
+        </div>
+      </div>
+    </div>
+
+    <figure class="card figure-card" data-reveal>
+      <div class="figure-head">
+        <div>
+          <p class="subhead">A solved last frame is not a solved task</p>
+          <p class="subhead-note">An automatic verifier parses 41 frames of each video. Bars: final frame shows a solved state. Right column: every frame and transition is legal.</p>
+        </div>
+      </div>
+      <div class="verifier">
+        {verifierTasks.map((task) => (
+          <div class="v-panel">
+            <p class="v-title">{task}</p>
+            <div class="v-head" aria-hidden="true"><span></span><span>Solved final frame</span><span>Valid</span></div>
+            {Object.entries(VIDEO_VERIFIER[task]).map(([gen, v]) => (
+              <div class="v-row" tabindex="0" aria-label={`${task}, ${gen}: solved final frame ${fmt(v.finalStateSuccess)}%, process-valid ${fmt(v.processValid)}%`}>
+                <span class="v-gen">{gen}</span>
+                <span class="v-bar"><span style={`--v:${(100 * v.finalStateSuccess) / 40}%`}></span><em class="tabular">{fmt(v.finalStateSuccess)}</em></span>
+                <span class="v-valid tabular">{fmt(v.processValid)}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <p class="caption">105 rollouts per generator and task. A human audit of 180 videos agreed with every verifier decision. Since nearly all fail, the verifier is a strict screen for invalid rollouts rather than a ranking of generators.</p>
+    </figure>
+  </div>
+</section>
+
+<script>
+  import { initImagination } from '../scripts/imagination';
+  initImagination();
+</script>
+
+<style>
+  .im-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .im-row {
+    margin-top: 24px;
+    align-items: start;
+  }
+
+  .im-row + .figure-card {
+    margin-top: 24px;
+  }
+
+  .im-stats,
+  .im-audit {
+    padding: 22px;
+  }
+
+  .im-side {
+    display: grid;
+    gap: 20px;
+  }
+
+  .im-figures {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .im-big {
+    font-size: clamp(2.4rem, 4.6vw, 3.4rem);
+    font-weight: 750;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #4a3aa7;
+  }
+
+  .im-big span {
+    font-size: 0.45em;
+    color: var(--ink-3);
+    margin-left: 2px;
+  }
+
+  .im-big.zero {
+    color: var(--ink);
+  }
+
+  .im-cap {
+    margin-top: 8px;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .audit {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line-2);
+  }
+
+  .side-title {
+    font-size: 0.86rem;
+    font-weight: 650;
+    margin-bottom: 10px;
+  }
+
+  .audit-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+  }
+
+  .audit-row + .audit-row {
+    margin-top: 8px;
+  }
+
+  .audit-bar {
+    height: 10px;
+    border-radius: 5px;
+    background: var(--line-2);
+    overflow: hidden;
+  }
+
+  .audit-bar span {
+    display: block;
+    height: 100%;
+    width: var(--v);
+    border-radius: 0 5px 5px 0;
+    background: var(--model);
+    transition: width 1s var(--ease);
+  }
+
+  .js .im-stats:not(.is-visible) .audit-bar span,
+  .js .im-audit:not(.is-visible) .audit-bar span {
+    width: 0;
+  }
+
+  .audit-n {
+    text-align: right;
+    font-weight: 700;
+  }
+
+  .audit-n span {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  /* probe dumbbell */
+  .controls.compact {
+    margin: -6px 0 14px;
+  }
+
+  .probe-row,
+  .pr-axis {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr) 54px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .probe-row {
+    min-height: 36px;
+    border-radius: 8px;
+  }
+
+  .probe-row:hover,
+  .probe-row:focus-visible {
+    background: var(--surface-2);
+  }
+
+  .pr-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 6px;
+    font-size: 0.86rem;
+    font-weight: 550;
+  }
+
+  .kind-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .kind-dot.reasoning {
+    background: var(--reason);
+  }
+
+  .kind-dot.planning {
+    background: var(--plan);
+  }
+
+  .pr-track {
+    position: relative;
+    height: 36px;
+    background: linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / calc(100% / 3) 100%;
+  }
+
+  .pr-link {
+    position: absolute;
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 2px;
+    background: rgba(98, 80, 214, 0.3);
+    left: calc(min(var(--a), var(--b)) / 75 * 100%);
+    width: calc(max(var(--a) - var(--b), var(--b) - var(--a)) / 75 * 100%);
+    transition: left 0.6s var(--ease), width 0.6s var(--ease);
+  }
+
+  .pr-dot {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    transition: left 0.6s var(--ease);
+  }
+
+  .pr-dot.before {
+    left: calc(var(--a) / 75 * 100%);
+    background: var(--surface);
+    border: 2.5px solid var(--ink-3);
+  }
+
+  .pr-dot.after {
+    left: calc(var(--b) / 75 * 100%);
+    background: var(--model);
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+
+  .js #probe-chart:not(.drawn) .pr-dot.after {
+    left: calc(var(--a) / 75 * 100%);
+  }
+
+  .js #probe-chart:not(.drawn) .pr-link {
+    width: 0;
+  }
+
+  .pr-delta {
+    text-align: right;
+    padding-right: 6px;
+    font-size: 0.86rem;
+    font-weight: 650;
+    color: var(--ink-2);
+  }
+
+  .pr-axis {
+    margin: 4px 0 14px;
+    font-size: 0.72rem;
+    color: var(--ink-3);
+  }
+
+  .pr-ticks {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* verifier small multiples */
+  .verifier {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .v-panel {
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--surface-2);
+  }
+
+  .v-title {
+    font-weight: 650;
+    margin-bottom: 8px;
+  }
+
+  .v-head,
+  .v-row {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr) 40px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .v-head {
+    font-size: 0.7rem;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+
+  .v-head span:last-child {
+    text-align: right;
+  }
+
+  .v-row {
+    min-height: 28px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+
+  .v-row:focus-visible,
+  .v-row:hover {
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .v-gen {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 4px;
+  }
+
+  .v-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .v-bar span {
+    height: 10px;
+    width: var(--v);
+    min-width: 2px;
+    border-radius: 0 4px 4px 0;
+    background: var(--model);
+    transition: width 0.8s var(--ease);
+  }
+
+  .js .verifier:not(.drawn) .v-bar span {
+    width: 0;
+  }
+
+  .v-bar em {
+    font-style: normal;
+    font-size: 0.76rem;
+    font-weight: 650;
+    color: var(--ink-2);
+  }
+
+  .v-valid {
+    text-align: right;
+    padding-right: 4px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  @media (max-width: 980px) {
+    .im-hero {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .verifier {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .im-figures {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .probe-row,
+    .pr-axis {
+      grid-template-columns: 84px minmax(0, 1fr) 44px;
+      gap: 8px;
+    }
+  }
+</style>

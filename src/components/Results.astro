@@ -1,0 +1,610 @@
+---
+// Results.astro - the action gap (dumbbell) and the full leaderboard (heatmap),
+// both scoped by one difficulty control. Rendered here for "All"; the client
+// script re-renders on change from the same data.
+import SectionHeader from './SectionHeader.astro';
+import { LEVELS, PROPERTIES, TASKS, rowsFor, fmt } from '../data/site';
+import { gapHeadline, heat } from '../data/results';
+
+const rows = rowsFor('all').sort((a, b) => {
+  const ref = (r: typeof a) => (r.model.group === 'reference' ? 1 : 0);
+  return ref(a) - ref(b) || b.reasoning - a.reasoning;
+});
+const headline = gapHeadline('all');
+const ticks = [0, 20, 40, 60, 80, 100];
+
+const groups = PROPERTIES.map((p) => ({ ...p, span: TASKS.filter((t) => t.property === p.id).length }));
+const evaluated = rows.filter((r) => r.model.group !== 'reference');
+const bestOf = (get: (r: (typeof rows)[number]) => number) => Math.max(...evaluated.map(get));
+const bestReason = bestOf((r) => r.reasoning);
+const bestPlan = bestOf((r) => r.planning);
+const bestTask = TASKS.map((_, i) => bestOf((r) => r.scores[i]));
+---
+<section id="results" class="section">
+  <div class="wrap">
+    <SectionHeader id="results" title="Models recognize topology, but fail to act on it">
+      Reasoning accuracy against planning success for every model. The gap is the cost of having to <em>use</em> a
+      topological relation instead of just naming it.
+    </SectionHeader>
+
+    <div class="controls" data-reveal>
+      <span class="control-label" id="level-label">Difficulty</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="level-label" id="level-control">
+        {LEVELS.map((l, i) => (
+          <button role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-value={l.id}>{l.label}</button>
+        ))}
+      </div>
+      <span class="level-hint" id="level-hint">{LEVELS[0].hint}</span>
+    </div>
+
+    <figure class="card figure-card" data-reveal>
+      <div class="figure-head">
+        <div>
+          <p class="subhead" id="gap-title" aria-live="polite">{headline.title}</p>
+          <p class="subhead-note" id="gap-note">{headline.note}</p>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span class="legend-item"><span class="swatch dot" style="background:var(--reason)"></span>Reasoning avg</span>
+          <span class="legend-item"><span class="swatch dot" style="background:var(--plan)"></span>Planning avg</span>
+          <span class="legend-item"><span class="swatch ring"></span>Reference</span>
+        </div>
+      </div>
+
+      <div class="dumbbell" id="dumbbell">
+        <div class="db-axis" aria-hidden="true">
+          <span></span>
+          <span class="db-ticks">
+            {ticks.map((t) => <span style={`left:${t}%`}>{t}%</span>)}
+          </span>
+          <span class="db-delta-head">Plan − Reason</span>
+        </div>
+        <div class="db-rows" id="db-rows" role="list">
+          {rows.map((r) => (
+            <div
+              class={`db-row ${r.model.group}`}
+              role="listitem"
+              tabindex="0"
+              data-id={r.model.id}
+              style={`--r:${r.reasoning};--p:${r.planning}`}
+              aria-label={`${r.model.name}: reasoning ${fmt(r.reasoning)}%, planning ${fmt(r.planning)}%`}
+            >
+              <span class="db-name">{r.model.short}{r.model.group === 'open-weight' && <span class="ow-tag">open</span>}</span>
+              <span class="db-track">
+                {ticks.map((t) => <i style={`left:${t}%`}></i>)}
+                <span class="db-link"></span>
+                <span class="db-dot plan"></span>
+                <span class="db-dot reason"></span>
+              </span>
+              <span class="db-delta tabular">{(r.planning - r.reasoning > 0 ? '+' : '−') + fmt(Math.abs(r.planning - r.reasoning))}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <details class="table-view">
+        <summary>Show data table</summary>
+        <div class="table-scroll"><table id="gap-table"></table></div>
+      </details>
+    </figure>
+
+    <figure class="card figure-card" data-reveal>
+      <div class="figure-head">
+        <div>
+          <p class="subhead">Full leaderboard</p>
+          <p class="subhead-note">Accuracy (%) for reasoning tasks, success rate (%) for planning tasks. Select a column to sort.</p>
+        </div>
+        <div class="heat-legend" aria-hidden="true">
+          <span>0</span><span class="heat-bar"></span><span>100</span>
+          <span class="legend-item"><span class="best-key">00.0</span>best model</span>
+        </div>
+      </div>
+
+      <div class="lb-frame" id="lb-frame">
+      <div class="lb-scroll" id="lb-scroll" tabindex="0" role="region" aria-label="Leaderboard, scrolls horizontally">
+        <table class="lb" id="leaderboard">
+          <thead>
+            <tr class="lb-groups">
+              <th class="lb-model-col" rowspan="2" scope="col">
+                <button class="lb-sort" data-sort="name">Model</button>
+              </th>
+              <th colspan="2" scope="colgroup">Average</th>
+              {groups.map((g) => <th colspan={g.span} scope="colgroup">{g.name}</th>)}
+            </tr>
+            <tr class="lb-cols">
+              <th scope="col" class="k-reasoning" aria-sort="descending"><button class="lb-sort" data-sort="reasoning">Reason</button></th>
+              <th scope="col" class="k-planning"><button class="lb-sort" data-sort="planning">Plan</button></th>
+              {TASKS.map((t, i) => (
+                <th scope="col" class={`k-${t.kind}`}><button class="lb-sort" data-sort={String(i)}>{t.name}</button></th>
+              ))}
+            </tr>
+          </thead>
+          <tbody id="lb-body">
+            {rows.map((r) => (
+              <tr class={r.model.group} data-id={r.model.id}>
+                <th scope="row" class="lb-model-col" title={r.model.name}>
+                  {r.model.short}{r.model.group === 'open-weight' && <span class="ow-tag">open</span>}
+                </th>
+                {[r.reasoning, r.planning, ...r.scores].map((v, i) => {
+                  const best = r.model.group !== 'reference' && v === (i === 0 ? bestReason : i === 1 ? bestPlan : bestTask[i - 2]);
+                  const h = heat(v);
+                  return <td class={`${i < 2 ? 'avg' : ''} ${best ? 'best' : ''}`} style={`background:${h.bg};color:${h.ink}`}>{fmt(v)}</td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      </div>
+      <p class="scroll-hint" aria-hidden="true">Scroll sideways for every task →</p>
+      <p class="caption">
+        Each task has 300 instances (150 Easy, 150 Hard). Human results exist for the Easy level only; random chance
+        is reported on the full set. Open-weight models are hosted.
+      </p>
+    </figure>
+  </div>
+</section>
+
+<script>
+  import { initResults } from '../scripts/results';
+  initResults();
+</script>
+
+<style>
+  .level-hint {
+    font-size: 0.82rem;
+    color: var(--ink-3);
+  }
+
+  /* ---- dumbbell ---- */
+  .dumbbell {
+    --name-w: 188px;
+    --delta-w: 92px;
+  }
+
+  .db-axis,
+  .db-row {
+    display: grid;
+    grid-template-columns: var(--name-w) minmax(0, 1fr) var(--delta-w);
+    align-items: center;
+    gap: 14px;
+  }
+
+  .db-axis {
+    height: 22px;
+    font-size: 0.72rem;
+    color: var(--ink-3);
+  }
+
+  .db-ticks {
+    position: relative;
+    height: 100%;
+  }
+
+  .db-ticks span {
+    position: absolute;
+    top: 2px;
+    transform: translateX(-50%);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .db-ticks span:first-child {
+    transform: none;
+  }
+
+  .db-ticks span:last-child {
+    transform: translateX(-100%);
+  }
+
+  .db-delta-head {
+    text-align: right;
+  }
+
+  .db-rows {
+    position: relative;
+  }
+
+  .db-row {
+    min-height: 34px;
+    border-radius: 8px;
+    outline-offset: 0;
+    transition: background-color 0.15s;
+  }
+
+  .db-row:hover,
+  .db-row:focus-visible {
+    background: var(--surface-2);
+  }
+
+  .db-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 8px;
+    font-size: 0.86rem;
+    font-weight: 550;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .db-row.reference .db-name {
+    font-style: italic;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+
+  .ow-tag {
+    font-size: 0.64rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0 4px;
+    line-height: 1.5;
+  }
+
+  .db-track {
+    position: relative;
+    height: 34px;
+  }
+
+  .db-track i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--grid);
+  }
+
+  .db-link {
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 4px;
+    left: calc(min(var(--r), var(--p)) * 1%);
+    width: calc(max(var(--r) - var(--p), var(--p) - var(--r)) * 1%);
+    background: linear-gradient(90deg, rgba(235, 104, 52, 0.35), rgba(10, 127, 176, 0.35));
+    transition: left 0.7s var(--ease), width 0.7s var(--ease);
+  }
+
+  .db-row.flip .db-link {
+    background: linear-gradient(90deg, rgba(10, 127, 176, 0.35), rgba(235, 104, 52, 0.35));
+  }
+
+  .db-dot {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--surface);
+    transition: left 0.7s var(--ease);
+  }
+
+  .db-dot.reason {
+    left: calc(var(--r) * 1%);
+    background: var(--reason);
+  }
+
+  .db-dot.plan {
+    left: calc(var(--p) * 1%);
+    background: var(--plan);
+  }
+
+  .db-row.reference .db-dot {
+    background: var(--surface);
+    border: 3px solid;
+  }
+
+  .db-row.reference .db-dot.reason {
+    border-color: var(--reason);
+  }
+
+  .db-row.reference .db-dot.plan {
+    border-color: var(--plan);
+  }
+
+  .js .dumbbell:not(.drawn) .db-dot {
+    left: 0;
+  }
+
+  .js .dumbbell:not(.drawn) .db-link {
+    left: 0;
+    width: 0;
+  }
+
+  .db-delta {
+    text-align: right;
+    padding-right: 8px;
+    font-size: 0.86rem;
+    font-weight: 650;
+    color: var(--ink-2);
+  }
+
+  /* Phones: the name and delta sit above a full-width track. */
+  @media (max-width: 640px) {
+    .db-axis,
+    .db-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: 'name delta' 'track track';
+      gap: 0 8px;
+    }
+
+    .db-row {
+      padding: 6px 0 2px;
+    }
+
+    .db-name {
+      grid-area: name;
+      font-size: 0.8rem;
+      padding-left: 2px;
+    }
+
+    .db-delta {
+      grid-area: delta;
+      font-size: 0.8rem;
+      padding-right: 2px;
+    }
+
+    .db-track {
+      grid-area: track;
+      height: 24px;
+      margin: 0 7px;
+    }
+
+    .db-axis {
+      grid-template-areas: 'track track';
+      height: 20px;
+    }
+
+    .db-axis > span:first-child,
+    .db-delta-head {
+      display: none;
+    }
+
+    .db-ticks {
+      grid-area: track;
+      margin: 0 7px;
+    }
+
+    .db-ticks span:nth-child(2),
+    .db-ticks span:nth-child(4) {
+      display: none;
+    }
+  }
+
+  /* ---- leaderboard ----
+   * Rows can be created by src/scripts/results.ts (Human appears on Easy only),
+   * so everything inside the table is styled through :global(). */
+  .heat-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.74rem;
+    color: var(--ink-3);
+  }
+
+  .heat-bar {
+    width: 120px;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #fff, #ebf3fd 10%, #cde2fb 25%, #9ec5f4 40%, #6da7ec 55%, #3987e5 70%, #256abf 85%, #184f95);
+    border: 1px solid var(--line);
+  }
+
+  .best-key {
+    margin-left: 10px;
+    padding: 0 3px 1px;
+    font-weight: 800;
+    color: var(--ink);
+    box-shadow: inset 0 -2.5px 0 var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lb-frame {
+    position: relative;
+  }
+
+  /* Edge shadows appear only when there is more table to scroll to. */
+  .lb-frame::before,
+  .lb-frame::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    width: 28px;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .lb-frame::before {
+    left: 151px;
+    background: linear-gradient(90deg, rgba(15, 29, 34, 0.1), transparent);
+  }
+
+  .lb-frame::after {
+    right: 1px;
+    border-radius: 0 12px 12px 0;
+    background: linear-gradient(270deg, rgba(15, 29, 34, 0.1), transparent);
+  }
+
+  .lb-frame.more-left::before,
+  .lb-frame.more-right::after {
+    opacity: 1;
+  }
+
+  .scroll-hint {
+    display: none;
+    margin-top: 8px;
+    font-size: 0.78rem;
+    color: var(--ink-3);
+  }
+
+  .lb-frame.more-right + .scroll-hint,
+  .lb-frame.more-left + .scroll-hint {
+    display: block;
+  }
+
+  .lb-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .lb {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lb :global(th),
+  .lb :global(td) {
+    white-space: nowrap;
+  }
+
+  .lb thead th {
+    background: var(--surface);
+    font-weight: 600;
+    color: var(--ink-2);
+    border-bottom: 1px solid var(--line);
+    vertical-align: bottom;
+  }
+
+  .lb-groups th {
+    padding: 10px 6px 4px;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom-color: var(--line-2) !important;
+    border-left: 1px solid var(--line-2);
+  }
+
+  .lb-cols th {
+    border-left: 1px solid var(--line-2);
+  }
+
+  .lb-cols th.k-reasoning {
+    box-shadow: inset 0 -3px 0 var(--reason);
+  }
+
+  .lb-cols th.k-planning {
+    box-shadow: inset 0 -3px 0 var(--plan);
+  }
+
+  .lb-sort {
+    width: 100%;
+    min-height: 40px;
+    padding: 6px 4px 9px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: inherit;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    white-space: normal;
+  }
+
+  .lb-sort::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .lb-sort:hover::after {
+    opacity: 0.35;
+  }
+
+  th[aria-sort] .lb-sort {
+    color: var(--ink);
+  }
+
+  th[aria-sort] .lb-sort::after {
+    opacity: 1;
+  }
+
+  th[aria-sort='ascending'] .lb-sort::after {
+    transform: rotate(180deg);
+  }
+
+  .lb :global(.lb-model-col) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    text-align: left;
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    width: 150px;
+    min-width: 150px;
+  }
+
+  thead .lb-model-col .lb-sort {
+    align-items: flex-start;
+    padding-left: 12px;
+  }
+
+  .lb :global(tbody .lb-model-col) {
+    padding: 0 10px 0 12px;
+    font-weight: 550;
+    color: var(--ink);
+  }
+
+  .lb :global(tbody .ow-tag) {
+    margin-left: 6px;
+  }
+
+  .lb :global(td) {
+    min-width: 52px;
+    height: 34px;
+    padding: 0 6px;
+    text-align: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    transition: background-color 0.4s, color 0.4s;
+  }
+
+  .lb :global(td.avg) {
+    font-weight: 650;
+  }
+
+  .lb :global(td.best) {
+    font-weight: 800;
+    box-shadow: inset 0 -3px 0 currentColor;
+  }
+
+  .lb :global(tr.reference th),
+  .lb :global(tr.reference td) {
+    font-style: italic;
+  }
+
+  .lb :global(tr.ref-first th),
+  .lb :global(tr.ref-first td) {
+    border-top: 2px solid var(--line);
+  }
+
+  .lb :global(tbody tr:hover th) {
+    background: var(--surface-2);
+  }
+
+  .lb :global(tbody tr:hover td) {
+    filter: brightness(0.95);
+  }
+</style>

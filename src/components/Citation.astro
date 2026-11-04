@@ -1,0 +1,80 @@
+---
+// Citation.astro - BibTeX with a one-click copy.
+import SectionHeader from './SectionHeader.astro';
+import Icon from './Icon.astro';
+
+const BIBTEX = `@misc{ge2026mindtopo,
+  title  = {MindTopo: Can Foundation Models Reason in Topological Space?},
+  author = {Yunfei Ge and Anbang Liu and Qineng Wang and Johnalbert Garnica and Jianwen Lyu and Zihan Wang and Reuben Tan and Jianfeng Gao and Ruohan Zhang and Yining Hong and Jiajun Wu and Manling Li},
+  year   = {2026},
+  url    = {https://mind-topo.github.io/},
+}`;
+---
+<section id="citation" class="section tinted">
+  <div class="wrap">
+    <SectionHeader id="citation" title="Cite MindTopo">
+      If MindTopo is useful in your research, please cite:
+    </SectionHeader>
+    <div class="bib card" data-reveal>
+      <button class="copy-btn" data-copy-target="bibtex" aria-label="Copy BibTeX to clipboard">
+        <Icon name="copy" size={16} class="i-copy" /><Icon name="check" size={16} class="i-check" /><span data-copy-label>Copy</span>
+      </button>
+      <pre><code id="bibtex">{BIBTEX}</code></pre>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bib {
+    position: relative;
+    max-width: 860px;
+    padding: 22px 24px;
+    background: #0f1d22;
+    border-color: #0f1d22;
+  }
+
+  pre {
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: #d8e4e8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding-right: 90px;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+
+  .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .copy-btn :global(.i-check),
+  .copy-btn:global(.copied) :global(.i-copy) {
+    display: none;
+  }
+
+  .copy-btn:global(.copied) :global(.i-check) {
+    display: block;
+  }
+
+  .copy-btn:global(.copied) {
+    background: #0ca30c;
+  }
+</style>

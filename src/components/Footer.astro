@@ -1,25 +1,74 @@
 ---
-// src/components/Footer.astro
-// You can make the year dynamic if you want
-// const currentYear = new Date().getFullYear();
+// Footer.astro - lab credit and related projects (links parked until the public release).
+const RELATED = [
+  { name: 'MindCube', href: 'https://mind-cube.github.io/' },
+  { name: 'ENACT', href: 'https://enact-embodied-cognition.github.io/' },
+  { name: 'RAGEN', href: 'https://ragen-ai.github.io/' },
+  { name: 'Embodied Agent Interface', href: 'https://embodied-agent-interface.github.io/' },
+  { name: 'VAGEN', href: 'https://vagen-ai.github.io/' },
+  { name: 'EmbodiedBench', href: 'https://embodiedbench.github.io/' },
+];
 ---
-<footer class="simple-footer">
-    <p>Copyright © 2026 - All right reserved by <a data-href="https://mll-lab-nu.github.io" class="link-disabled" aria-disabled="true" target="_blank">MLL Lab</a></p>
-    <p>Website maintained by <a data-href="https://mll-lab-nu.github.io" class="link-disabled" aria-disabled="true">MLL Lab</a></p>
-    </footer>
-  
-  <style>
-    .simple-footer {
-      background-color: #ffffff; /* Light grey background like the image */
-      padding: 1.5rem 1rem;      /* Add some vertical and horizontal padding */
-      margin-top: 3rem;         /* Space above the footer */
-      text-align: center;       /* Center the text */
-      color: #333;             /* Darker text color for readability */
-      font-size: 0.875rem;      /* Slightly smaller font size */
-      border-top: 1px solid #ccc; /* Optional subtle top border */
-    }
-  
-    .simple-footer p {
-      margin: 0.25rem 0; /* Add a small space between the lines */
-    }
-  </style>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <p class="footer-brand"><img src="/icon.png" alt="" width="22" height="22" />MindTopo</p>
+      <p class="footer-note">
+        © 2026 <a data-href="https://mll-lab-nu.github.io" class="link-disabled" aria-disabled="true">MLL Lab</a>, Northwestern University.
+      </p>
+    </div>
+    <div>
+      <p class="footer-label">More from the lab</p>
+      <ul class="related">
+        {RELATED.map((r) => (
+          <li><a data-href={r.href} class="link-disabled" aria-disabled="true">{r.name}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    padding: 40px 0 56px;
+    font-size: 0.875rem;
+    color: var(--ink-3);
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 24px 48px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .footer-label {
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+
+  .related {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    max-width: 460px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+</style>

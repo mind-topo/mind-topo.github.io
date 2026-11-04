@@ -1,0 +1,330 @@
+---
+// Training.astro - what SFT and RL change on Qwen3-VL-2B-Instruct, per task.
+import SectionHeader from './SectionHeader.astro';
+import { TRAINING, fmt } from '../data/site';
+
+const DEFAULT = 'SFT + RL';
+const METHOD_LABELS: Record<string, string> = {
+  SFT: 'SFT',
+  RL: 'RL (GRPO)',
+  'SFT + RL': 'SFT + RL',
+  'Leave-one-task-out RL': 'Held-out RL',
+};
+const base = TRAINING.rows.Base as number[];
+const trained = TRAINING.rows[DEFAULT];
+const groups = (['reasoning', 'planning'] as const).map((kind) => ({
+  kind,
+  rows: TRAINING.tasks.map((task, i) => ({ task, i })).filter((r) => TRAINING.kinds[r.i] === kind),
+}));
+const delta = (v: number | null, b: number) => (v === null ? '' : `${v - b >= 0 ? '+' : '−'}${fmt(Math.abs(v - b))}`);
+---
+<section id="training" class="section">
+  <div class="wrap">
+    <SectionHeader id="training" title="Training teaches visual patterns, not plans">
+      Qwen3-VL-2B-Instruct trained on the Easy level of each task. Answer supervision lifts reasoning sharply;
+      planning success barely moves, and gains on held-out tasks are uneven.
+    </SectionHeader>
+
+    <div class="controls" data-reveal>
+      <span class="control-label" id="method-label">Training method</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="method-label" id="method-control">
+        {TRAINING.methods.map((m) => (
+          <button role="radio" aria-checked={m === DEFAULT ? 'true' : 'false'} tabindex={m === DEFAULT ? 0 : -1} data-value={m}>{METHOD_LABELS[m]}</button>
+        ))}
+      </div>
+    </div>
+
+    <figure class="card figure-card training" id="training-chart" data-reveal>
+      <div class="train-tiles">
+        {groups.map((g) => {
+          const b = TRAINING.mean('Base', g.kind);
+          const t = TRAINING.mean(DEFAULT, g.kind);
+          return (
+            <div class={`train-tile ${g.kind}`}>
+              <p class="tile-label">{g.kind === 'reasoning' ? 'Reasoning avg' : 'Planning avg'} <span>({g.rows.length} tasks)</span></p>
+              <p class="tile-values">
+                <span class="tile-base">{fmt(b)}%</span>
+                <span class="tile-arrow" aria-hidden="true">→</span>
+                <span class="tile-now" data-tile={g.kind}>{fmt(t)}%</span>
+              </p>
+              <p class="tile-delta" data-tile-delta={g.kind}>{delta(t, b)} pts</p>
+            </div>
+          );
+        })}
+        <div class="legend train-legend" aria-hidden="true">
+          <span class="legend-item"><span class="swatch" style="background:var(--reason)"></span><span class="swatch" style="background:var(--plan);margin-left:-4px"></span>after training</span>
+          <span class="legend-item"><span class="base-key"></span>base model</span>
+        </div>
+      </div>
+
+      <div class="train-bars">
+        {groups.map((g) => (
+          <div class="train-group">
+            <p class="group-label"><span class={`kind-tag ${g.kind}`}>{g.kind === 'reasoning' ? 'Reasoning tasks' : 'Planning tasks'}</span></p>
+            {g.rows.map(({ task, i }) => (
+              <div class={`train-row ${g.kind}`} data-i={i} tabindex="0" style={`--b:${base[i]};--v:${trained[i] ?? 0}`}>
+                <span class="tr-name">{task}</span>
+                <span class="tr-track">
+                  <span class="tr-bar"></span>
+                  <span class="tr-base"></span>
+                  <span class="tr-na">not evaluated</span>
+                </span>
+                <span class="tr-value tabular">{trained[i] === null ? '—' : fmt(trained[i]!)}</span>
+                <span class="tr-delta tabular">{delta(trained[i], base[i])}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+        <div class="tr-axis" aria-hidden="true"><span></span><span class="tr-ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span></span><span></span></div>
+      </div>
+
+      <details class="table-view">
+        <summary>Show data table</summary>
+        <div class="table-scroll"><table id="training-table"></table></div>
+      </details>
+    </figure>
+  </div>
+</section>
+
+<script>
+  import { initTraining } from '../scripts/training';
+  initTraining();
+</script>
+
+<style>
+  .training {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr);
+    gap: clamp(20px, 3vw, 40px);
+  }
+
+  .training .table-view {
+    grid-column: 1 / -1;
+  }
+
+  .train-tiles {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .train-tile {
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--reason-tint);
+  }
+
+  .train-tile.planning {
+    background: var(--plan-tint);
+  }
+
+  .tile-label {
+    font-size: 0.8rem;
+    font-weight: 650;
+    color: var(--ink-2);
+  }
+
+  .tile-label span {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  .tile-values {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .tile-base {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink-3);
+  }
+
+  .tile-arrow {
+    color: var(--ink-3);
+  }
+
+  .tile-now {
+    font-size: 2.2rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+
+  .tile-delta {
+    font-size: 0.84rem;
+    font-weight: 650;
+    color: #075b80;
+  }
+
+  .planning .tile-delta {
+    color: #a63f14;
+  }
+
+  .train-legend {
+    margin-top: 6px;
+  }
+
+  .base-key {
+    width: 2px;
+    height: 14px;
+    background: var(--ink);
+    border-radius: 1px;
+  }
+
+  .train-group + .train-group {
+    margin-top: 18px;
+  }
+
+  .group-label {
+    margin-bottom: 6px;
+  }
+
+  .train-row,
+  .tr-axis {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 46px 54px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .train-row {
+    min-height: 34px;
+    border-radius: 8px;
+  }
+
+  .train-row:hover,
+  .train-row:focus-visible {
+    background: var(--surface-2);
+  }
+
+  .tr-name {
+    padding-left: 6px;
+    font-size: 0.86rem;
+    font-weight: 550;
+  }
+
+  .tr-track {
+    position: relative;
+    height: 22px;
+    background: linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 25% 100%;
+    border-right: 1px solid var(--grid);
+  }
+
+  .tr-bar {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    height: 12px;
+    width: calc(var(--v) * 1%);
+    border-radius: 0 4px 4px 0;
+    background: var(--reason);
+    transition: width 0.7s var(--ease);
+  }
+
+  .planning .tr-bar {
+    background: var(--plan);
+  }
+
+  .tr-base {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    left: calc(var(--b) * 1%);
+    width: 2px;
+    margin-left: -1px;
+    border-radius: 1px;
+    background: var(--ink);
+    box-shadow: 0 0 0 1.5px var(--surface);
+  }
+
+  .tr-na {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.76rem;
+    font-style: italic;
+    color: var(--ink-3);
+    display: none;
+  }
+
+  .train-row.na .tr-na {
+    display: block;
+  }
+
+  .train-row.na .tr-bar,
+  .train-row.na .tr-base {
+    opacity: 0;
+  }
+
+  .js .training:not(.drawn) .tr-bar {
+    width: 0;
+  }
+
+  .tr-value {
+    text-align: right;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .tr-delta {
+    text-align: right;
+    padding-right: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink-3);
+  }
+
+  .tr-axis {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: var(--ink-3);
+  }
+
+  .tr-ticks {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 860px) {
+    .training {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .train-tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .train-legend {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .train-row,
+    .tr-axis {
+      grid-template-columns: 74px minmax(0, 1fr) 40px 46px;
+      gap: 8px;
+    }
+
+    .tr-name {
+      font-size: 0.76rem;
+    }
+
+    .train-tile {
+      padding: 12px 14px;
+    }
+
+    .tile-now {
+      font-size: 1.45rem;
+    }
+
+    .tile-values {
+      flex-wrap: wrap;
+      gap: 2px 6px;
+    }
+  }
+</style>

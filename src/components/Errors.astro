@@ -1,0 +1,289 @@
+---
+// Errors.astro - where reasoning and planning fail, from 910 hand-labeled failures,
+// with one real example per category. Legend, bar segments and cards are linked.
+import SectionHeader from './SectionHeader.astro';
+import { ERROR_CATEGORIES, ERROR_EXAMPLES, ERROR_MODELS, ERRORS } from '../data/site';
+
+const MODEL_LABELS: Record<string, string> = {
+  Combined: 'Both models',
+  'Gemini-3.1-Pro': 'Gemini-3.1-Pro',
+  'InternVL3.5-241B': 'InternVL3.5-241B',
+};
+const splits = (['reasoning', 'planning'] as const).map((split) => {
+  const counts = ERROR_CATEGORIES.map((c) => ERRORS[split][c.key].Combined);
+  const total = counts.reduce((a, b) => a + b, 0);
+  return { split, total, shares: counts.map((n) => (100 * n) / total), counts };
+});
+---
+<section id="errors" class="section tinted">
+  <div class="wrap">
+    <SectionHeader id="errors" title="Reasoning fails at seeing. Planning fails at acting.">
+      910 failures of Gemini-3.1-Pro and InternVL3.5-241B, sampled uniformly and labeled with the earliest stage
+      that explains them, from following the instruction to planning the action.
+    </SectionHeader>
+
+    <div class="controls" data-reveal>
+      <span class="control-label" id="err-label">Model</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="err-label" id="err-control">
+        {ERROR_MODELS.map((m, i) => (
+          <button role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-value={m}>{MODEL_LABELS[m]}</button>
+        ))}
+      </div>
+    </div>
+
+    <figure class="card figure-card" id="err-chart" data-reveal>
+      <div class="err-legend" role="list" aria-label="Error categories, in pipeline order">
+        {ERROR_CATEGORIES.map((c, i) => (
+          <button class="err-key" role="listitem" data-cat={c.id}>
+            <span class="swatch" style={`background:${c.color}`}></span><span class="err-step">{i + 1}</span>{c.key}
+          </button>
+        ))}
+      </div>
+
+      <div class="err-bars">
+        {splits.map((s) => (
+          <div class="err-row" data-split={s.split}>
+            <p class="err-row-label">
+              <span class={`kind-tag ${s.split}`}>{s.split === 'reasoning' ? 'Reasoning' : 'Planning'}</span>
+              <span class="err-n">n = <span data-n>{s.total}</span></span>
+            </p>
+            <div class="err-stack">
+              {ERROR_CATEGORIES.map((c, i) => (
+                <span
+                  class="err-seg"
+                  data-cat={c.id}
+                  tabindex="0"
+                  style={`flex-basis:${s.shares[i]}%;background:${c.color};color:${c.ink}`}
+                  aria-label={`${c.key}: ${s.shares[i].toFixed(1)}%`}
+                ><span class="seg-label">{s.shares[i].toFixed(1)}%</span></span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <details class="table-view">
+        <summary>Show data table</summary>
+        <div class="table-scroll"><table id="err-table"></table></div>
+      </details>
+    </figure>
+
+    <div class="err-gallery" id="err-gallery">
+      {ERROR_CATEGORIES.map((c, i) => {
+        const ex = ERROR_EXAMPLES[c.id];
+        return (
+          <article class={`err-card ${ex.wide ? 'wide' : ''}`} data-cat={c.id} data-reveal style={`--reveal-delay:${(i % 4) * 0.05}s;--cat:${c.color}`}>
+            <img src={`/media/errors/${c.id}.webp`} alt={`${ex.task} instance where the model failed`} width={ex.wide ? 900 : 480} height={ex.wide ? 344 : 480} loading="lazy" decoding="async" />
+            <div class="err-body">
+              <p class="err-cat"><span class="swatch" style={`background:${c.color}`}></span>{c.key}<span class="err-task">{ex.task}</span></p>
+              <blockquote>{ex.quote}</blockquote>
+              <p class="err-verdict"><span aria-hidden="true">✗</span> {ex.verdict}</p>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initErrors } from '../scripts/errors';
+  initErrors();
+</script>
+
+<style>
+  .err-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    margin-bottom: 22px;
+  }
+
+  .err-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 30px;
+    padding: 0 10px 0 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 550;
+    color: var(--ink-2);
+    transition: background-color 0.15s, color 0.15s, opacity 0.2s;
+  }
+
+  .err-key:hover,
+  .err-key.on {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+
+  .err-step {
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+
+  .err-row + .err-row {
+    margin-top: 18px;
+  }
+
+  .err-row-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .err-n {
+    font-size: 0.78rem;
+    color: var(--ink-3);
+  }
+
+  .err-stack {
+    display: flex;
+    gap: 2px;
+    height: 44px;
+  }
+
+  .err-seg {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    flex-grow: 0;
+    flex-shrink: 1;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: flex-basis 0.7s var(--ease), opacity 0.2s, transform 0.2s;
+  }
+
+  .err-seg:first-child {
+    border-radius: 6px 0 0 6px;
+  }
+
+  .err-seg:last-child {
+    border-radius: 0 6px 6px 0;
+  }
+
+  .err-seg.empty {
+    margin-left: -2px;
+  }
+
+  .seg-label {
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .err-seg.tight .seg-label {
+    visibility: hidden;
+  }
+
+  .err-chart-dim .err-seg:not(.on) {
+    opacity: 0.25;
+  }
+
+  .err-chart-dim .err-key:not(.on) {
+    opacity: 0.5;
+  }
+
+  .js #err-chart:not(.drawn) .err-seg {
+    flex-basis: 0 !important;
+  }
+
+  /* gallery */
+  .err-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .err-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s, opacity 0.25s;
+  }
+
+  .err-card.wide {
+    grid-column: span 2;
+  }
+
+  .err-card img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--surface-2);
+  }
+
+  .err-card.wide img {
+    aspect-ratio: auto;
+    height: 100%;
+    max-height: 232px;
+    object-fit: contain;
+  }
+
+  .err-body {
+    padding: 12px 14px 14px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .err-cat {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.78rem;
+    font-weight: 650;
+  }
+
+  .err-task {
+    margin-left: auto;
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  blockquote {
+    font-size: 0.88rem;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  .err-verdict {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #9c2f2f;
+  }
+
+  .err-card.on {
+    border-color: var(--cat);
+    box-shadow: 0 0 0 2px var(--cat), var(--shadow-2);
+    transform: translateY(-2px);
+  }
+
+  .err-gallery.dim .err-card:not(.on) {
+    opacity: 0.45;
+  }
+
+  @media (max-width: 980px) {
+    .err-gallery {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 520px) {
+    .err-gallery {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .err-card.wide {
+      grid-column: auto;
+    }
+  }
+</style>

@@ -1,0 +1,1281 @@
+{
+  "source": {
+    "paper": "TMLR submission (tmlr/)",
+    "commit": "76cd919",
+    "tables": {
+      "main": "tables/01_new_dataset_table.tex",
+      "easy": "tables/04_easy_level_human.tex",
+      "difficulty": "tables/03_difficulty_results.tex",
+      "training": "tables/02_rl_sft_results.tex",
+      "errors_reasoning": "tables/04_error_analysis_reasoning.tex",
+      "errors_planning": "tables/04_error_analysis_planning.tex",
+      "probing": "tables/03interleaved_probing.tex",
+      "cv": "tables/03_cv_metric_results.tex"
+    }
+  },
+  "tasks": [
+    "2D Maze",
+    "3D Maze",
+    "Pipe",
+    "Assembly",
+    "One Stroke",
+    "Bead",
+    "Origami Point",
+    "Swap",
+    "Sheep",
+    "Hole",
+    "Chat Noir",
+    "Knots",
+    "Untangle"
+  ],
+  "models": [
+    {
+      "name": "GPT-6 Astra",
+      "group": "proprietary",
+      "all": [
+        70.67,
+        81.33,
+        54.67,
+        71.0,
+        70.67,
+        53.33,
+        69.33,
+        51.33,
+        35.33,
+        33.33,
+        51.67,
+        62.0,
+        20.67
+      ],
+      "easy": [
+        99.33,
+        86.67,
+        99.33,
+        74.67,
+        95.33,
+        52.0,
+        83.33,
+        100.0,
+        59.33,
+        66.67,
+        96.67,
+        88.67,
+        18.0
+      ],
+      "hard": [
+        42.0,
+        76.0,
+        10.0,
+        67.33,
+        46.0,
+        54.67,
+        55.33,
+        2.67,
+        11.33,
+        0.0,
+        6.67,
+        35.33,
+        23.33
+      ]
+    },
+    {
+      "name": "GPT-5.6-Sol",
+      "group": "proprietary",
+      "all": [
+        33.0,
+        14.0,
+        11.0,
+        36.0,
+        9.33,
+        18.67,
+        9.67,
+        40.33,
+        31.33,
+        26.33,
+        35.33,
+        25.33,
+        3.0
+      ],
+      "easy": [
+        60.0,
+        18.67,
+        22.0,
+        34.67,
+        18.67,
+        8.0,
+        18.67,
+        80.67,
+        55.33,
+        52.67,
+        70.67,
+        30.0,
+        4.0
+      ],
+      "hard": [
+        6.0,
+        9.33,
+        0.0,
+        37.33,
+        0.0,
+        29.33,
+        0.67,
+        0.0,
+        7.33,
+        0.0,
+        0.0,
+        20.67,
+        2.0
+      ]
+    },
+    {
+      "name": "GPT-5.5",
+      "group": "proprietary",
+      "all": [
+        8.67,
+        7.67,
+        0.0,
+        33.0,
+        0.0,
+        7.33,
+        10.33,
+        19.67,
+        23.67,
+        27.33,
+        12.67,
+        30.67,
+        7.67
+      ],
+      "easy": [
+        5.33,
+        13.33,
+        0.0,
+        34.67,
+        0.0,
+        0.0,
+        9.33,
+        39.33,
+        39.33,
+        54.67,
+        25.33,
+        36.67,
+        9.33
+      ],
+      "hard": [
+        12.0,
+        2.0,
+        0.0,
+        31.33,
+        0.0,
+        14.67,
+        11.33,
+        0.0,
+        8.0,
+        0.0,
+        0.0,
+        24.67,
+        6.0
+      ]
+    },
+    {
+      "name": "GPT-5.4-mini",
+      "group": "proprietary",
+      "all": [
+        7.67,
+        2.67,
+        0.0,
+        22.67,
+        0.0,
+        5.33,
+        2.33,
+        0.0,
+        5.0,
+        0.33,
+        0.0,
+        12.33,
+        3.33
+      ],
+      "easy": [
+        2.0,
+        4.0,
+        0.0,
+        20.67,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        0.67,
+        0.0,
+        7.33,
+        3.33
+      ],
+      "hard": [
+        13.33,
+        1.33,
+        0.0,
+        24.67,
+        0.0,
+        10.67,
+        4.67,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        17.33,
+        3.33
+      ]
+    },
+    {
+      "name": "Gemini-3.1-Flash-Lite",
+      "group": "proprietary",
+      "all": [
+        6.67,
+        1.33,
+        0.0,
+        24.33,
+        0.0,
+        6.33,
+        2.67,
+        0.0,
+        14.33,
+        1.67,
+        0.33,
+        18.0,
+        3.0
+      ],
+      "easy": [
+        0.67,
+        2.67,
+        0.0,
+        25.33,
+        0.0,
+        0.0,
+        1.33,
+        0.0,
+        26.67,
+        3.33,
+        0.67,
+        18.0,
+        0.67
+      ],
+      "hard": [
+        12.67,
+        0.0,
+        0.0,
+        23.33,
+        0.0,
+        12.67,
+        4.0,
+        0.0,
+        2.0,
+        0.0,
+        0.0,
+        18.0,
+        5.33
+      ]
+    },
+    {
+      "name": "Gemini-3.1-Pro",
+      "group": "proprietary",
+      "all": [
+        10.67,
+        14.0,
+        0.0,
+        27.0,
+        0.0,
+        6.0,
+        3.0,
+        1.0,
+        30.33,
+        20.67,
+        13.67,
+        41.67,
+        6.33
+      ],
+      "easy": [
+        6.67,
+        27.33,
+        0.0,
+        30.0,
+        0.0,
+        0.0,
+        1.33,
+        2.0,
+        56.67,
+        41.33,
+        27.33,
+        64.0,
+        6.0
+      ],
+      "hard": [
+        14.67,
+        0.67,
+        0.0,
+        24.0,
+        0.0,
+        12.0,
+        4.67,
+        0.0,
+        4.0,
+        0.0,
+        0.0,
+        19.33,
+        6.67
+      ]
+    },
+    {
+      "name": "Claude-Haiku-5.5",
+      "group": "proprietary",
+      "all": [
+        1.0,
+        13.33,
+        0.0,
+        30.0,
+        0.0,
+        11.0,
+        4.33,
+        0.0,
+        42.33,
+        25.33,
+        22.0,
+        31.67,
+        5.0
+      ],
+      "easy": [
+        0.67,
+        24.67,
+        0.0,
+        29.33,
+        0.0,
+        0.67,
+        3.33,
+        0.0,
+        56.0,
+        48.67,
+        44.0,
+        38.67,
+        2.67
+      ],
+      "hard": [
+        1.33,
+        2.0,
+        0.0,
+        30.67,
+        0.0,
+        21.33,
+        5.33,
+        0.0,
+        28.67,
+        2.0,
+        0.0,
+        24.67,
+        7.33
+      ]
+    },
+    {
+      "name": "Nemotron-Nano-12B-VL-v2",
+      "group": "open-weight",
+      "all": [
+        4.0,
+        1.33,
+        0.0,
+        21.67,
+        0.0,
+        2.67,
+        0.33,
+        0.0,
+        3.33,
+        0.33,
+        0.0,
+        11.0,
+        0.67
+      ],
+      "easy": [
+        4.0,
+        2.67,
+        0.0,
+        26.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        6.67,
+        0.67,
+        0.0,
+        3.33,
+        0.0
+      ],
+      "hard": [
+        4.0,
+        0.0,
+        0.0,
+        17.33,
+        0.0,
+        5.33,
+        0.67,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        18.67,
+        1.33
+      ]
+    },
+    {
+      "name": "Qwen3.5-397B-A17B",
+      "group": "open-weight",
+      "all": [
+        6.67,
+        4.67,
+        0.0,
+        22.33,
+        0.0,
+        4.67,
+        1.33,
+        0.0,
+        0.33,
+        1.67,
+        0.67,
+        11.0,
+        0.33
+      ],
+      "easy": [
+        2.0,
+        8.0,
+        0.0,
+        20.67,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        3.33,
+        1.33,
+        5.33,
+        0.67
+      ],
+      "hard": [
+        11.33,
+        1.33,
+        0.0,
+        24.0,
+        0.0,
+        9.33,
+        2.67,
+        0.0,
+        0.67,
+        0.0,
+        0.0,
+        16.67,
+        0.0
+      ]
+    },
+    {
+      "name": "Llama-4-Maverick-17B-128E",
+      "group": "open-weight",
+      "all": [
+        8.0,
+        3.67,
+        0.0,
+        24.0,
+        0.0,
+        4.67,
+        3.0,
+        0.0,
+        2.0,
+        0.0,
+        0.0,
+        10.0,
+        2.67
+      ],
+      "easy": [
+        4.67,
+        2.67,
+        0.0,
+        25.33,
+        0.0,
+        0.0,
+        2.0,
+        0.0,
+        4.0,
+        0.0,
+        0.0,
+        1.33,
+        2.0
+      ],
+      "hard": [
+        11.33,
+        4.67,
+        0.0,
+        22.67,
+        0.0,
+        9.33,
+        4.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        18.67,
+        3.33
+      ]
+    },
+    {
+      "name": "Ministral-3-14B-Instruct-2512",
+      "group": "open-weight",
+      "all": [
+        5.0,
+        2.0,
+        0.0,
+        24.0,
+        0.0,
+        7.0,
+        1.67,
+        0.0,
+        1.33,
+        0.0,
+        0.0,
+        8.67,
+        3.0
+      ],
+      "easy": [
+        5.33,
+        4.0,
+        0.0,
+        23.33,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.67,
+        0.0,
+        0.0,
+        3.33,
+        2.67
+      ],
+      "hard": [
+        4.67,
+        0.0,
+        0.0,
+        24.67,
+        0.0,
+        14.0,
+        3.33,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        14.0,
+        3.33
+      ]
+    },
+    {
+      "name": "InternVL3.5-241B",
+      "group": "open-weight",
+      "all": [
+        2.0,
+        3.33,
+        0.0,
+        20.33,
+        0.0,
+        3.0,
+        3.67,
+        0.0,
+        4.33,
+        0.33,
+        0.0,
+        14.67,
+        0.0
+      ],
+      "easy": [
+        2.67,
+        6.67,
+        0.0,
+        17.33,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        8.67,
+        0.67,
+        0.0,
+        7.33,
+        0.0
+      ],
+      "hard": [
+        1.33,
+        0.0,
+        0.0,
+        23.33,
+        0.0,
+        6.0,
+        7.33,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        22.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Gemma-4-31B-IT",
+      "group": "open-weight",
+      "all": [
+        2.33,
+        3.33,
+        0.0,
+        13.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        7.0,
+        0.0,
+        1.33,
+        8.67,
+        0.67
+      ],
+      "easy": [
+        4.0,
+        6.0,
+        0.0,
+        17.33,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.67,
+        0.0,
+        2.67,
+        2.0,
+        0.67
+      ],
+      "hard": [
+        0.67,
+        0.67,
+        0.0,
+        8.67,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        11.33,
+        0.0,
+        0.0,
+        15.33,
+        0.67
+      ]
+    }
+  ],
+  "random": [
+    4.3,
+    3.7,
+    0.0,
+    20.0,
+    0.0,
+    7.08,
+    2.18,
+    0.0,
+    5.52,
+    6.67,
+    0.0,
+    13.97,
+    2.67
+  ],
+  "humanEasy": [
+    98.33,
+    95.33,
+    100.0,
+    83.33,
+    100.0,
+    93.0,
+    96.0,
+    100.0,
+    96.33,
+    99.56,
+    99.33,
+    92.0,
+    100.0
+  ],
+  "training": {
+    "tasks": [
+      "2D Maze",
+      "Knots",
+      "Assembly",
+      "Bead",
+      "Sheep",
+      "One Stroke",
+      "Untangle",
+      "Pipe",
+      "Swap"
+    ],
+    "rows": {
+      "Base": [
+        9.2,
+        11.2,
+        32.08,
+        9.31,
+        9.4,
+        0.0,
+        0.8,
+        0.0,
+        0.0
+      ],
+      "SFT": [
+        14.1,
+        75.5,
+        57.35,
+        41.74,
+        51.0,
+        0.8,
+        11.81,
+        0.0,
+        7.21
+      ],
+      "RL": [
+        10.1,
+        42.7,
+        38.52,
+        34.73,
+        25.3,
+        0.0,
+        15.42,
+        0.0,
+        1.4
+      ],
+      "Leave-one-task-out RL": [
+        8.2,
+        15.5,
+        31.32,
+        26.53,
+        8.9,
+        null,
+        null,
+        null,
+        null
+      ],
+      "SFT + RL": [
+        13.5,
+        79.6,
+        53.41,
+        52.95,
+        58.2,
+        0.5,
+        17.42,
+        0.0,
+        7.41
+      ]
+    }
+  },
+  "errors": {
+    "reasoning": {
+      "Instruction following": {
+        "Gemini-3.1-Pro": 59,
+        "InternVL3.5-241B": 130,
+        "Combined": 189
+      },
+      "Task understanding": {
+        "Gemini-3.1-Pro": 22,
+        "InternVL3.5-241B": 11,
+        "Combined": 33
+      },
+      "Perception grounding": {
+        "Gemini-3.1-Pro": 165,
+        "InternVL3.5-241B": 101,
+        "Combined": 266
+      },
+      "Topological invariance": {
+        "Gemini-3.1-Pro": 5,
+        "InternVL3.5-241B": 3,
+        "Combined": 8
+      },
+      "Feature state prediction": {
+        "Gemini-3.1-Pro": 29,
+        "InternVL3.5-241B": 35,
+        "Combined": 64
+      },
+      "Dynamic violation": {
+        "Gemini-3.1-Pro": 0,
+        "InternVL3.5-241B": 0,
+        "Combined": 0
+      },
+      "Action planning": {
+        "Gemini-3.1-Pro": 0,
+        "InternVL3.5-241B": 0,
+        "Combined": 0
+      }
+    },
+    "planning": {
+      "Instruction following": {
+        "Gemini-3.1-Pro": 9,
+        "InternVL3.5-241B": 36,
+        "Combined": 45
+      },
+      "Task understanding": {
+        "Gemini-3.1-Pro": 14,
+        "InternVL3.5-241B": 36,
+        "Combined": 50
+      },
+      "Perception grounding": {
+        "Gemini-3.1-Pro": 42,
+        "InternVL3.5-241B": 35,
+        "Combined": 77
+      },
+      "Topological invariance": {
+        "Gemini-3.1-Pro": 0,
+        "InternVL3.5-241B": 0,
+        "Combined": 0
+      },
+      "Feature state prediction": {
+        "Gemini-3.1-Pro": 37,
+        "InternVL3.5-241B": 0,
+        "Combined": 37
+      },
+      "Dynamic violation": {
+        "Gemini-3.1-Pro": 1,
+        "InternVL3.5-241B": 51,
+        "Combined": 52
+      },
+      "Action planning": {
+        "Gemini-3.1-Pro": 72,
+        "InternVL3.5-241B": 17,
+        "Combined": 89
+      }
+    }
+  },
+  "probing": [
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.6-Luna",
+      "task": "Knots",
+      "success": 26.0
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.6-Luna",
+      "task": "Sheep",
+      "success": 30.33
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.6-Luna",
+      "task": "2D Maze",
+      "success": 22.17
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.6-Luna",
+      "task": "Untangle",
+      "success": 19.05
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.6-Luna",
+      "task": "One Stroke",
+      "success": 2.86
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.6-Luna",
+      "task": "Pipe",
+      "success": 29.52
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.4-mini",
+      "task": "Knots",
+      "success": 25.71
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.4-mini",
+      "task": "Sheep",
+      "success": 19.05
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.4-mini",
+      "task": "2D Maze",
+      "success": 15.24
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.4-mini",
+      "task": "Untangle",
+      "success": 23.81
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.4-mini",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "Planner only",
+      "planner": "GPT-5.4-mini",
+      "task": "Pipe",
+      "success": 0.0
+    },
+    {
+      "condition": "Planner only",
+      "planner": "InternVL3.5-241B",
+      "task": "Knots",
+      "success": 42.86
+    },
+    {
+      "condition": "Planner only",
+      "planner": "InternVL3.5-241B",
+      "task": "Sheep",
+      "success": 17.14
+    },
+    {
+      "condition": "Planner only",
+      "planner": "InternVL3.5-241B",
+      "task": "2D Maze",
+      "success": 15.24
+    },
+    {
+      "condition": "Planner only",
+      "planner": "InternVL3.5-241B",
+      "task": "Untangle",
+      "success": 3.81
+    },
+    {
+      "condition": "Planner only",
+      "planner": "InternVL3.5-241B",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "Planner only",
+      "planner": "InternVL3.5-241B",
+      "task": "Pipe",
+      "success": 0.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Knots",
+      "success": 57.14
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Sheep",
+      "success": 68.57
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.6-Luna",
+      "task": "2D Maze",
+      "success": 61.9
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Untangle",
+      "success": 24.76
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.6-Luna",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Pipe",
+      "success": 20.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.4-mini",
+      "task": "Knots",
+      "success": 60.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.4-mini",
+      "task": "Sheep",
+      "success": 57.14
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.4-mini",
+      "task": "2D Maze",
+      "success": 12.38
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.4-mini",
+      "task": "Untangle",
+      "success": 6.67
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.4-mini",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "GPT-5.4-mini",
+      "task": "Pipe",
+      "success": 0.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "InternVL3.5-241B",
+      "task": "Knots",
+      "success": 56.19
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "InternVL3.5-241B",
+      "task": "Sheep",
+      "success": 30.47
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "InternVL3.5-241B",
+      "task": "2D Maze",
+      "success": 13.33
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "InternVL3.5-241B",
+      "task": "Untangle",
+      "success": 0.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "InternVL3.5-241B",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ GPT-Image-2 (image)",
+      "planner": "InternVL3.5-241B",
+      "task": "Pipe",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Wan2.2-I2V-A14B (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Untangle",
+      "success": 24.76
+    },
+    {
+      "condition": "+ Wan2.2-I2V-A14B (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Wan2.2-I2V-A14B (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Pipe",
+      "success": 9.52
+    },
+    {
+      "condition": "+ Wan2.2-I2V-A14B (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "Untangle",
+      "success": 4.76
+    },
+    {
+      "condition": "+ Wan2.2-I2V-A14B (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Wan2.2-I2V-A14B (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "Pipe",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Seedance-2.0-Mini (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Untangle",
+      "success": 25.71
+    },
+    {
+      "condition": "+ Seedance-2.0-Mini (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Seedance-2.0-Mini (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Pipe",
+      "success": 6.67
+    },
+    {
+      "condition": "+ Seedance-2.0-Mini (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "Untangle",
+      "success": 27.62
+    },
+    {
+      "condition": "+ Seedance-2.0-Mini (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Seedance-2.0-Mini (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "Pipe",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Veo-3.1-Lite (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Untangle",
+      "success": 27.62
+    },
+    {
+      "condition": "+ Veo-3.1-Lite (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Veo-3.1-Lite (video)",
+      "planner": "GPT-5.6-Luna",
+      "task": "Pipe",
+      "success": 5.71
+    },
+    {
+      "condition": "+ Veo-3.1-Lite (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "Untangle",
+      "success": 5.71
+    },
+    {
+      "condition": "+ Veo-3.1-Lite (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "One Stroke",
+      "success": 0.0
+    },
+    {
+      "condition": "+ Veo-3.1-Lite (video)",
+      "planner": "InternVL3.5-241B",
+      "task": "Pipe",
+      "success": 0.0
+    }
+  ],
+  "videoVerifier": {
+    "One Stroke": {
+      "LTX-2.3": {
+        "finalStateSuccess": 0.0,
+        "processValid": 0.0
+      },
+      "LTX-2.5": {
+        "finalStateSuccess": 0.0,
+        "processValid": 0.0
+      },
+      "Veo-3.1-Lite": {
+        "finalStateSuccess": 0.0,
+        "processValid": 0.0
+      },
+      "Wan2.2-I2V-A14B": {
+        "finalStateSuccess": 0.0,
+        "processValid": 0.0
+      },
+      "MiniMax-H3": {
+        "finalStateSuccess": 0.0,
+        "processValid": 0.0
+      },
+      "Seedance-2.5": {
+        "finalStateSuccess": 0.0,
+        "processValid": 0.0
+      }
+    },
+    "Pipe": {
+      "LTX-2.3": {
+        "finalStateSuccess": 3.8,
+        "processValid": 0.0
+      },
+      "LTX-2.5": {
+        "finalStateSuccess": 35.2,
+        "processValid": 0.0
+      },
+      "Veo-3.1-Lite": {
+        "finalStateSuccess": 5.7,
+        "processValid": 0.0
+      },
+      "Wan2.2-I2V-A14B": {
+        "finalStateSuccess": 13.3,
+        "processValid": 0.0
+      },
+      "MiniMax-H3": {
+        "finalStateSuccess": 19.0,
+        "processValid": 0.0
+      },
+      "Seedance-2.5": {
+        "finalStateSuccess": 16.2,
+        "processValid": 0.0
+      }
+    },
+    "Untangle": {
+      "LTX-2.3": {
+        "finalStateSuccess": 32.4,
+        "processValid": 0.0
+      },
+      "LTX-2.5": {
+        "finalStateSuccess": 6.7,
+        "processValid": 0.0
+      },
+      "Veo-3.1-Lite": {
+        "finalStateSuccess": 1.0,
+        "processValid": 0.0
+      },
+      "Wan2.2-I2V-A14B": {
+        "finalStateSuccess": 2.9,
+        "processValid": 0.0
+      },
+      "MiniMax-H3": {
+        "finalStateSuccess": 5.7,
+        "processValid": 0.0
+      },
+      "Seedance-2.5": {
+        "finalStateSuccess": 3.8,
+        "processValid": 0.0
+      }
+    }
+  },
+  "generationAudit": {
+    "image": {
+      "generator": "GPT-Image-2",
+      "tasks": [
+        "Sheep",
+        "2D Maze",
+        "One Stroke"
+      ],
+      "total": 464,
+      "errors": {
+        "Dynamics": 95,
+        "Invariant": 92,
+        "Consistency": 68
+      }
+    },
+    "video": {
+      "generator": "Wan2.2-I2V-A14B",
+      "tasks": [
+        "One Stroke",
+        "Untangle"
+      ],
+      "total": 119,
+      "errors": {
+        "Dynamics": 116,
+        "Invariant": 93,
+        "Consistency": 90
+      }
+    }
+  }
+}
