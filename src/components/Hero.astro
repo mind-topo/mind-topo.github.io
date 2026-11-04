@@ -2,6 +2,7 @@
 // Hero.astro - title, one-line takeaway, authors, resources and the benchmark at a glance.
 import Icon from './Icon.astro';
 import { FACTS } from '../data/site';
+import { AUTHORS, AFFILIATIONS, LINKS, VENUE } from '../data/people';
 
 const STATS = [
   { value: FACTS.properties, label: 'topological properties' },
@@ -11,15 +12,14 @@ const STATS = [
   { value: FACTS.models, label: 'MLLMs evaluated' },
   { value: FACTS.videoModels, label: 'video generators probed' },
 ];
+const marks = (a: (typeof AUTHORS)[number]) => `${a.affil.join(',')}${a.equal ? '*' : ''}${a.lead ? '†' : ''}`;
 ---
 <section id="top" class="hero">
-  <svg class="hero-loops" id="hero-loops" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <path class="loop loop-a" />
-    <path class="loop loop-b" />
-    <path class="loop loop-c" />
-  </svg>
+  <div class="hero-pegs" aria-hidden="true"></div>
 
   <div class="wrap hero-inner">
+    <p class="venue"><span class="venue-dot" aria-hidden="true"></span>{VENUE}</p>
+
     <h1 class="hero-title">
       <span class="hero-brand"><img src="/icon.png" alt="" width="56" height="56" />MindTopo</span>
       <span class="hero-question">Can Foundation Models Reason in Topological Space?</span>
@@ -32,32 +32,21 @@ const STATS = [
 
     <div class="authors">
       <p class="author-line">
-        <span>Yunfei Ge<sup>1*</sup></span>
-        <span>Anbang Liu<sup>1*</sup></span>
-        <a data-href="https://qinengwang-aiden.github.io/" class="link-disabled" aria-disabled="true">Qineng Wang<sup>1*†</sup></a>
-        <span>Johnalbert Garnica<sup>1*</sup></span>
-        <span>Jianwen Lyu<sup>1</sup></span>
-        <a data-href="https://zihanwang314.github.io/" class="link-disabled" aria-disabled="true">Zihan Wang<sup>1</sup></a>
-        <span>Reuben Tan<sup>2</sup></span>
-        <span>Jianfeng Gao<sup>2</sup></span>
-        <span>Ruohan Zhang<sup>1,3</sup></span>
-        <span>Yining Hong<sup>3</sup></span>
-        <a data-href="https://jiajunwu.com/" class="link-disabled" aria-disabled="true">Jiajun Wu<sup>3</sup></a>
-        <a data-href="https://limanling.github.io/" class="link-disabled" aria-disabled="true">Manling Li<sup>1</sup></a>
+        {AUTHORS.map((a) => (
+          <a href={a.url} target="_blank" rel="noopener">{a.name}<sup>{marks(a)}</sup></a>
+        ))}
       </p>
       <p class="affiliations">
-        <span><sup>1</sup>Northwestern University</span>
-        <span><sup>2</sup>Microsoft Research</span>
-        <span><sup>3</sup>Stanford University</span>
+        {AFFILIATIONS.map((name, i) => <span><sup>{i + 1}</sup>{name}</span>)}
+        <span class="contrib">*Equal contribution · †Project lead</span>
       </p>
-      <p class="contrib">*Equal contribution · †Project lead</p>
     </div>
 
     <div class="hero-actions">
-      <a href="#teaser" class="btn btn-primary"><Icon name="play" size={16} />Watch the overview</a>
-      <span class="btn is-pending" aria-disabled="true"><Icon name="paper" />Paper <span class="soon">soon</span></span>
-      <a data-href="https://github.com/mll-lab-nu/MindTopo" class="btn is-pending link-disabled" aria-disabled="true"><Icon name="github" />Code <span class="soon">soon</span></a>
-      <a data-href="https://huggingface.co/datasets/MLL-Lab/MindTOPO" class="btn is-pending link-disabled" aria-disabled="true"><Icon name="dataset" />Dataset <span class="soon">soon</span></a>
+      <a href="#play" class="btn btn-primary"><Icon name="play" size={16} />Play the games</a>
+      <a href={LINKS.paper} class="btn" target="_blank" rel="noopener"><Icon name="paper" />Paper</a>
+      <a href={LINKS.code} class="btn" target="_blank" rel="noopener"><Icon name="github" />Code</a>
+      <a href={LINKS.dataset} class="btn" target="_blank" rel="noopener"><Icon name="dataset" />Dataset</a>
     </div>
 
     <dl class="hero-stats">
@@ -71,16 +60,6 @@ const STATS = [
   </div>
 </section>
 
-<script>
-  import { animateLoops } from '../scripts/loops';
-  const svg = document.getElementById('hero-loops') as SVGSVGElement | null;
-  if (svg) animateLoops(svg, [
-    { cx: 1070, cy: 170, r: 120, seed: 2 },
-    { cx: 1130, cy: 470, r: 64, seed: 3 },
-    { cx: 120, cy: 600, r: 70, seed: 1 },
-  ]);
-</script>
-
 <style>
   .hero {
     position: relative;
@@ -92,31 +71,38 @@ const STATS = [
       radial-gradient(700px 360px at 85% 30%, rgba(235, 104, 52, 0.05), transparent 70%);
   }
 
-  .hero-loops {
+  /* A faint peg board (the Untangle / Chat Noir grids) that fades out toward the edges. */
+  .hero-pegs {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
     pointer-events: none;
+    background-image: radial-gradient(circle, rgba(20, 80, 94, 0.2) 1.4px, transparent 1.8px);
+    background-size: 28px 28px;
+    background-position: center top;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 10%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 10%, transparent 75%);
   }
 
-  .loop {
-    fill: none;
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    opacity: 0.16;
+  .venue {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 22px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.85);
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--ink-2);
   }
 
-  .loop-a {
-    stroke: var(--reason);
-  }
-
-  .loop-b {
-    stroke: var(--plan);
-  }
-
-  .loop-c {
-    stroke: var(--amber);
+  .venue-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--plan);
+    box-shadow: 0 0 0 3px rgba(235, 104, 52, 0.18);
   }
 
   .hero-inner {
@@ -201,6 +187,14 @@ const STATS = [
   .author-line a {
     color: inherit;
     text-decoration: none;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+
+  .author-line a:hover {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: rgba(11, 106, 146, 0.35);
   }
 
   sup {
@@ -220,8 +214,6 @@ const STATS = [
   }
 
   .contrib {
-    margin-top: 4px;
-    font-size: 0.82rem;
     color: var(--ink-3);
   }
 

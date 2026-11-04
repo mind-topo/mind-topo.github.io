@@ -13,13 +13,15 @@ Key facts:
 
 ## Links
 - [Project page](https://mind-topo.github.io/)
+- [Paper on arXiv](https://arxiv.org/abs/2609.11900)
 - [Code on GitHub](https://github.com/mll-lab-nu/MindTopo)
-- [Dataset on Hugging Face](https://huggingface.co/datasets/MLL-Lab/MindTOPO)
+- [Dataset on Hugging Face](https://huggingface.co/datasets/MLL-Lab/MindTopo)
 
 ## Citation
-@misc{ge2026mindtopo,
+@article{ge2026mindtopo,
   title={MindTopo: Can Foundation Models Reason in Topological Space?},
   author={Yunfei Ge and Anbang Liu and Qineng Wang and Johnalbert Garnica and Jianwen Lyu and Zihan Wang and Reuben Tan and Jianfeng Gao and Ruohan Zhang and Yining Hong and Jiajun Wu and Manling Li},
+  journal={arXiv preprint arXiv:2609.11900},
   year={2026},
   url={https://mind-topo.github.io/},
 }

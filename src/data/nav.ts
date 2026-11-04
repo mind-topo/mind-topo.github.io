@@ -4,7 +4,7 @@ export const SECTIONS = [
   { id: 'top', label: 'Overview' },
   { id: 'teaser', label: 'Teaser video' },
   { id: 'findings', label: 'Key findings' },
-  { id: 'benchmark', label: 'Benchmark' },
+  { id: 'play', label: 'Play the benchmark' },
   { id: 'results', label: 'The action gap' },
   { id: 'humans', label: 'Against humans' },
   { id: 'training', label: 'Training' },

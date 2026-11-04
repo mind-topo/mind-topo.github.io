@@ -168,7 +168,7 @@ export interface TaskDetail {
   answer?: string;
   /** Multiple-choice reasoning tasks: options, with the correct one marked. */
   options?: { label: string; image?: string; correct?: boolean }[];
-  /** One image for reasoning tasks; ordered states for planning environments. */
+  /** The scene; Origami lists its fold states in order. */
   media: { src: string; label?: string; width: number; height: number }[];
 }
 
@@ -187,10 +187,6 @@ export const TASK_DETAILS: Record<string, TaskDetail> = {
     answer: '[C, F]',
     media: [img('maze3d', 300, 546)],
   },
-  Pipe: {
-    prompt: 'Rotate pieces until every pipe connects to the source.',
-    media: [img('pipe-1', 453, 447, 'Initial'), img('pipe-2', 463, 446, 'Mid'), img('pipe-3', 459, 446, 'Solved')],
-  },
   Assembly: {
     prompt: 'Which option shows a correct subassembly of this shelf?',
     media: [img('assembly', 336, 336)],
@@ -200,10 +196,6 @@ export const TASK_DETAILS: Record<string, TaskDetail> = {
       { label: 'C', image: '/media/tasks/assembly-c.webp', correct: true },
       { label: 'D', image: '/media/tasks/assembly-d.webp' },
     ],
-  },
-  'One Stroke': {
-    prompt: 'Draw one path that separates every colour.',
-    media: [img('onestroke-1', 463, 445, 'Initial'), img('onestroke-2', 463, 445, 'Mid'), img('onestroke-3', 463, 445, 'Solved')],
   },
   Bead: {
     prompt: 'List the bead colours in order along the string.',
@@ -215,10 +207,6 @@ export const TASK_DETAILS: Record<string, TaskDetail> = {
     answer: '[F]',
     media: [img('origami-1', 607, 488, 'State 1'), img('origami-14', 609, 490, 'State 14')],
   },
-  Swap: {
-    prompt: 'Swap blocks through the empty slot until the board matches the goal.',
-    media: [img('swap-1', 541, 262, 'Initial'), img('swap-3', 541, 259, 'Goal reached')],
-  },
   Sheep: {
     prompt: 'How many sheep cannot escape to the outside?',
     answer: '3',
@@ -228,10 +216,6 @@ export const TASK_DETAILS: Record<string, TaskDetail> = {
     prompt: 'How many holes are visible in the top board?',
     answer: '13',
     media: [img('hole', 544, 546)],
-  },
-  'Chat Noir': {
-    prompt: 'Place one block per turn to trap the cat before it reaches the edge.',
-    media: [img('chatnoir-1', 447, 446, 'Initial'), img('chatnoir-2', 447, 446, 'Mid'), img('chatnoir-3', 447, 446, 'Trapped')],
   },
   Knots: {
     prompt: 'Which type is this scene?',
@@ -243,10 +227,6 @@ export const TASK_DETAILS: Record<string, TaskDetail> = {
       { label: 'Link' },
       { label: 'Unlinked ropes' },
     ],
-  },
-  Untangle: {
-    prompt: 'Move rope ends until no two ropes cross.',
-    media: [img('untangle-1', 334, 334, 'Initial'), img('untangle-2', 334, 334, 'Mid'), img('untangle-3', 335, 334, 'Solved')],
   },
 };
 

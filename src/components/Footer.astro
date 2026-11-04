@@ -1,27 +1,20 @@
 ---
-// Footer.astro - lab credit and related projects (links parked until the public release).
-const RELATED = [
-  { name: 'MindCube', href: 'https://mind-cube.github.io/' },
-  { name: 'ENACT', href: 'https://enact-embodied-cognition.github.io/' },
-  { name: 'RAGEN', href: 'https://ragen-ai.github.io/' },
-  { name: 'Embodied Agent Interface', href: 'https://embodied-agent-interface.github.io/' },
-  { name: 'VAGEN', href: 'https://vagen-ai.github.io/' },
-  { name: 'EmbodiedBench', href: 'https://embodiedbench.github.io/' },
-];
+// Footer.astro - lab credit and related projects.
+import { LINKS, RELATED } from '../data/people';
 ---
 <footer class="site-footer">
   <div class="wrap footer-inner">
     <div>
       <p class="footer-brand"><img src="/icon.png" alt="" width="22" height="22" />MindTopo</p>
       <p class="footer-note">
-        © 2026 <a data-href="https://mll-lab-nu.github.io" class="link-disabled" aria-disabled="true">MLL Lab</a>, Northwestern University.
+        © 2026 <a href={LINKS.lab} target="_blank" rel="noopener">MLL Lab</a>, Northwestern University.
       </p>
     </div>
     <div>
       <p class="footer-label">More from the lab</p>
       <ul class="related">
         {RELATED.map((r) => (
-          <li><a data-href={r.href} class="link-disabled" aria-disabled="true">{r.name}</a></li>
+          <li><a href={r.href} target="_blank" rel="noopener">{r.name}</a></li>
         ))}
       </ul>
     </div>
@@ -70,5 +63,10 @@ const RELATED = [
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--link);
+    text-decoration: underline;
   }
 </style>

@@ -38,7 +38,6 @@ const best = Object.entries(VIDEO_VERIFIER)
             <source src="/media/rollouts-grid.mp4" type="video/mp4" />
           </video>
         </div>
-        <figcaption class="caption">Three video models imagine a planner's moves on Untangle, One Stroke and Pipe. Endpoints look plausible; the steps in between do not follow the rules.</figcaption>
       </figure>
 
       <div class="im-stats card" data-reveal style="--reveal-delay:.08s">
@@ -70,7 +69,6 @@ const best = Object.entries(VIDEO_VERIFIER)
         <div class="figure-head">
           <div>
             <p class="subhead">A generated next frame helps only where a local cue suffices</p>
-            <p class="subhead-note">Success rate with and without GPT-Image-2 rendering the predicted next state, 105 episodes per task.</p>
           </div>
         </div>
         <div class="controls compact">
@@ -114,7 +112,6 @@ const best = Object.entries(VIDEO_VERIFIER)
               <source src="/media/rollouts-board.mp4" type="video/mp4" />
             </video>
           </div>
-          <figcaption class="caption">Same board, same instruction, three video models. One moves the wrong rope, one lets a rope end slip a peg, one invents a fifth rope.</figcaption>
         </figure>
 
         <div class="card im-audit" data-reveal style="--reveal-delay:.12s">
@@ -126,7 +123,6 @@ const best = Object.entries(VIDEO_VERIFIER)
               <span class="audit-n tabular">{n}<span>/{image.total}</span></span>
             </div>
           ))}
-          <p class="caption">Generated frames keep local cues, which is enough for {image.tasks.slice(0, 2).join(' and ')}, but not invariants that span a whole trajectory, as in {image.tasks[2]}.</p>
         </div>
       </div>
     </div>
@@ -135,7 +131,6 @@ const best = Object.entries(VIDEO_VERIFIER)
       <div class="figure-head">
         <div>
           <p class="subhead">A solved last frame is not a solved task</p>
-          <p class="subhead-note">An automatic verifier parses 41 frames of each video. Bars: final frame shows a solved state. Right column: every frame and transition is legal.</p>
         </div>
       </div>
       <div class="verifier">
@@ -153,7 +148,6 @@ const best = Object.entries(VIDEO_VERIFIER)
           </div>
         ))}
       </div>
-      <p class="caption">105 rollouts per generator and task. A human audit of 180 videos agreed with every verifier decision. Since nearly all fail, the verifier is a strict screen for invalid rollouts rather than a ranking of generators.</p>
     </figure>
   </div>
 </section>

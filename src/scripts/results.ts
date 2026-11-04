@@ -2,7 +2,7 @@
 // leaderboard heatmap. Rows keep their DOM nodes, so values animate and rows
 // glide (FLIP) to their new rank instead of being redrawn.
 
-import { LEVELS, TASKS, rowsFor, fmt, type Level } from '../data/site';
+import { TASKS, rowsFor, fmt, type Level } from '../data/site';
 import { gapHeadline, heat } from '../data/results';
 import { bindRadioGroup, bindTooltip, flipReorder, onReveal, renderTable } from './viz';
 
@@ -176,12 +176,10 @@ export function initResults() {
 
   const updateGap = initDumbbell(getRows);
   const renderBoard = initLeaderboard(getRows);
-  const hint = document.getElementById('level-hint')!;
 
   updateGap(level);
   bindRadioGroup(document.getElementById('level-control')!, (v) => {
     level = v as Level;
-    hint.textContent = LEVELS.find((l) => l.id === level)!.hint;
     updateGap(level);
     renderBoard();
   });

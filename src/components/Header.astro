@@ -2,6 +2,7 @@
 // Header.astro - slim sticky bar: brand, resource links, and (below 1200px) the section menu.
 import Icon from './Icon.astro';
 import { SECTIONS } from '../data/nav';
+import { LINKS } from '../data/people';
 ---
 <header class="site-header" id="site-header">
   <div class="header-inner">
@@ -11,10 +12,9 @@ import { SECTIONS } from '../data/nav';
     </a>
 
     <nav class="header-links" aria-label="Resources">
-      {/* Paper, code and data are not public yet; swap data-href for href to enable. */}
-      <span class="header-link link-disabled" aria-disabled="true"><Icon name="paper" size={16} />Paper<span class="soon">soon</span></span>
-      <a data-href="https://github.com/mll-lab-nu/MindTopo" class="header-link link-disabled" aria-disabled="true"><Icon name="github" size={16} />Code<span class="soon">soon</span></a>
-      <a data-href="https://huggingface.co/datasets/MLL-Lab/MindTOPO" class="header-link link-disabled" aria-disabled="true"><Icon name="dataset" size={16} />Data<span class="soon">soon</span></a>
+      <a href={LINKS.paper} class="header-link" target="_blank" rel="noopener"><Icon name="paper" size={16} />Paper</a>
+      <a href={LINKS.code} class="header-link" target="_blank" rel="noopener"><Icon name="github" size={16} />Code</a>
+      <a href={LINKS.dataset} class="header-link" target="_blank" rel="noopener"><Icon name="dataset" size={16} />Data</a>
       <a href="#citation" class="header-link cite-link">Cite</a>
     </nav>
 
@@ -103,11 +103,7 @@ import { SECTIONS } from '../data/nav';
     transition: background-color 0.2s, color 0.2s;
   }
 
-  .header-link.link-disabled {
-    color: var(--ink-3);
-  }
-
-  .cite-link:hover {
+  .header-link:hover {
     background: var(--surface-2);
     color: var(--ink);
   }

@@ -43,35 +43,35 @@ const planGain = t.bestPlanning - t.basePlanning;
           ))}
         </span>
         <span class="mini-legend" aria-hidden="true"><i class="reason"></i>Reasoning avg <i class="plan"></i>Planning avg</span>
-        <span class="f-link">See the action gap <Icon name="arrow-right" size={14} /></span>
+        <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>
 
       <a href="#humans" class="finding card" data-reveal style="--reveal-delay:.06s">
         <span class="f-kicker">Far below humans</span>
         <span class="f-figure"><span data-countup={f.bestEasy.reasoning.toFixed(1)} data-digits="1">{fmt(f.bestEasy.reasoning)}</span><span class="f-unit">%</span></span>
         <span class="f-claim">best model on Easy reasoning, vs <strong>{fmt(f.humanEasy.reasoning)}%</strong> for humans.</span>
-        <span class="f-link">Compare per task <Icon name="arrow-right" size={14} /></span>
+        <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>
 
       <a href="#results" class="finding card" data-reveal style="--reveal-delay:.12s">
         <span class="f-kicker">Open-weight models barely plan</span>
         <span class="f-figure"><span class="f-unit">≤</span>{fmt(f.openWeightMaxPlan)}<span class="f-unit">%</span></span>
         <span class="f-claim">average planning success, next to <strong>{fmt(f.randomPlan, 2)}%</strong> for random legal moves.</span>
-        <span class="f-link">Open the leaderboard <Icon name="arrow-right" size={14} /></span>
+        <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>
 
       <a href="#training" class="finding card" data-reveal style="--reveal-delay:.06s">
         <span class="f-kicker">Training teaches patterns, not plans</span>
         <span class="f-figure f-pair"><span class="reason-ink">+{fmt(reasonGain)}</span><span class="f-vs">vs</span><span class="plan-ink">+{fmt(planGain)}</span></span>
         <span class="f-claim">points from SFT + RL on reasoning vs planning (Qwen3-VL-2B).</span>
-        <span class="f-link">See what training fixes <Icon name="arrow-right" size={14} /></span>
+        <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>
 
       <a href="#errors" class="finding card" data-reveal style="--reveal-delay:.12s">
         <span class="f-kicker">Seeing vs acting</span>
         <span class="f-figure"><span data-countup={perceptionShare.toFixed(1)} data-digits="1">{fmt(perceptionShare)}</span><span class="f-unit">%</span></span>
         <span class="f-claim">of reasoning failures are perception; <strong>{fmt(downstreamShare)}%</strong> of planning failures come later, in state, dynamics and action.</span>
-        <span class="f-link">Browse failure modes <Icon name="arrow-right" size={14} /></span>
+        <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>
 
       <a href="#imagination" class="finding card f-wide" data-reveal>
@@ -80,7 +80,7 @@ const planGain = t.bestPlanning - t.basePlanning;
           <span class="f-figure"><span>0</span><span class="f-of">/ {f.video.rollouts.toLocaleString('en-US')}</span></span>
           <span class="f-claim">generated video rollouts are process-valid. Six video models reach a solved final frame in up to <strong>{fmt(f.video.bestEndpoint)}%</strong> of rollouts, but none gets there through legal moves.</span>
         </span>
-        <span class="f-link">Watch them break <Icon name="arrow-right" size={14} /></span>
+        <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>
     </div>
   </div>
@@ -118,6 +118,7 @@ const planGain = t.bestPlanning - t.basePlanning;
   }
 
   .f-kicker {
+    padding-right: 40px;
     font-size: 0.78rem;
     font-weight: 650;
     letter-spacing: 0.04em;
@@ -173,15 +174,28 @@ const planGain = t.bestPlanning - t.basePlanning;
     color: var(--ink);
   }
 
+  /* The whole card is the link; a corner arrow is the only affordance needed. */
+  .finding {
+    position: relative;
+  }
+
   .f-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: auto;
-    padding-top: 14px;
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: var(--link);
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: var(--ink-3);
+    background: var(--surface-2);
+    transition: background-color 0.25s, color 0.25s;
+  }
+
+  .finding:hover .f-link {
+    background: var(--ink);
+    color: #fff;
   }
 
   .finding:hover .f-link :global(svg) {

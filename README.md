@@ -5,7 +5,8 @@ Source for [mind-topo.github.io](https://mind-topo.github.io/), the project page
 
 Built with [Astro](https://astro.build/) and deployed to GitHub Pages by
 [`.github/workflows`](.github/workflows) on every push to `main`. No chart library:
-every chart is plain HTML/SVG with a few small TypeScript modules.
+every chart is plain HTML/SVG with a few small TypeScript modules. The planning
+games run MindTopo's own engines (see [Playable games](#playable-games)).
 
 ## Commands
 
@@ -43,7 +44,7 @@ tracks the current section.
 | Overview | `Hero.astro` | count-up stats, deforming-loop motif |
 | Teaser video | `TeaserVideo.astro` | loads only on play |
 | Key findings | `Findings.astro` | six cards linking to their evidence |
-| Benchmark | `Benchmark.astro` | invariance demo, task explorer (quiz + animated gym states) |
+| Play the benchmark | `Play.astro` | the five planning gyms on real benchmark boards; reasoning-question quiz |
 | The action gap | `Results.astro` | difficulty switch, dumbbell chart, sortable heatmap leaderboard |
 | Against humans | `Humans.astro` | model picker, morphing radar, largest gaps |
 | Training | `Training.astro` | method switch |
@@ -58,13 +59,16 @@ chart has a "Show data table" twin. Motion respects `prefers-reduced-motion`.
 ```text
 public/
   media/               teaser video + poster, rollout clips, task / error / figure images (WebP)
+  games/               benchmark boards for the playable games
   og-card.jpg          social preview card
   llms.txt             short LLM-facing summary
   llms-full.txt        extended LLM-facing reference
 scripts/
   sync-paper-data.py   regenerates src/data/paper.json from the paper's tables
+  build-game-instances.py, build-untangle-solutions.ts   playable boards (see Playable games)
 src/
-  data/                paper.json (generated), site.ts (typed access + copy), nav.ts, results.ts, humans.ts
+  data/                paper.json (generated), site.ts, people.ts, nav.ts, results.ts, humans.ts
+  games/               game wrappers + vendor/ (MindTopo engines)
   components/          one component per section, plus Header, SideNav, Footer, Icon, SectionHeader
   scripts/             client behaviour: site.ts (nav, reveal, media), viz.ts, one module per chart
   styles/global.css    design tokens and shared UI pieces
@@ -75,12 +79,29 @@ the seven error-category slots) was checked for color-vision-deficiency
 separation and contrast; change it in `src/styles/global.css` and
 `src/data/site.ts` together.
 
-## Links not yet public
+## Playable games
 
-Paper, code and dataset links, author pages and lab links are parked: the
-destination is in `data-href` instead of `href` and the element carries
-`link-disabled`. To enable one, swap `data-href` for `href` and drop the class
-(and the "soon" badge next to it in `Header.astro` / `Hero.astro`).
+The Pipe, One Stroke, Swap, Chat Noir and Untangle engines and renderers are
+vendored from [mll-lab-nu/MindTopo](https://github.com/mll-lab-nu/MindTopo) in
+`src/games/vendor/` (patches listed in its README). `src/games/*.ts` wraps each
+one with input, the models' move budget, undo and solution playback; three.js
+and each game load only when the game is opened.
+
+Boards come from the code repo's `environments/<env>/output/question.jsonl`:
+
+```bash
+python3 scripts/build-game-instances.py ../MindTopo          # public/games/<game>.json
+# Untangle boards and engine-verified solutions (generation is too slow to do in the browser):
+npx esbuild scripts/build-untangle-solutions.ts --bundle --platform=node --format=esm \
+  --loader:.json=json --outfile=/tmp/untangle-solutions.mjs
+for s in $(seq 0 23); do node /tmp/untangle-solutions.mjs $s 24 & done; wait
+node /tmp/untangle-solutions.mjs merge 24
+```
+
+## Authors and links
+
+Author pages, paper, code, dataset and lab links live in `src/data/people.ts`
+(taken from the MindTopo entry on https://qinengwang-aiden.github.io/).
 
 ## Currently hidden
 

@@ -1,0 +1,222 @@
+/* Skins for the vendored MindTopo game renderers (src/games/vendor). These
+ * elements are created by the engines at runtime, so the rules are global and
+ * scoped by the wrapper classes in src/games/*.ts. */
+
+.g-stage {
+  position: absolute;
+  inset: 0;
+  outline: none;
+}
+
+.g-stage canvas {
+  display: block;
+}
+
+.g-stage.bump {
+  animation: g-bump 0.28s ease;
+}
+
+@keyframes g-bump {
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* ---- Pipe (rules adapted from environments/continuity_pipe/frontend/index.html) ---- */
+.g-pipe {
+  --grid: rgba(178, 194, 224, 0.14);
+  --cell-bg: #121929;
+  --cell-hover: #1a2640;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    #0f1628;
+  background-size: 42px 42px;
+}
+
+.g-pipe-board {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 28px;
+}
+
+.g-pipe .pipe-board {
+  --grid-size: 3;
+  width: min(480px, 100%);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), 1fr);
+  grid-template-rows: repeat(var(--grid-size), 1fr);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--grid);
+  background: rgba(7, 12, 24, 0.72);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.26);
+}
+
+/* Coordinates are for models that answer with (x, y); people just click. */
+.g-pipe .coord-corner,
+.g-pipe .coord-label {
+  display: none;
+}
+
+.g-pipe .pipe-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+  background: var(--cell-bg);
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.g-pipe .pipe-cell:hover {
+  background: var(--cell-hover);
+}
+
+.g-pipe .pipe-cell:active {
+  transform: scale(0.97);
+}
+
+.g-pipe .pipe-cell.empty,
+.g-pipe .pipe-cell.empty:hover {
+  background:
+    linear-gradient(135deg, transparent 46%, rgba(178, 194, 224, 0.12) 48%, rgba(178, 194, 224, 0.12) 52%, transparent 54%),
+    rgba(255, 255, 255, 0.025);
+  cursor: default;
+}
+
+.g-pipe .pipe-svg {
+  width: 82%;
+  height: 82%;
+  overflow: visible;
+}
+
+.g-pipe.is-locked .pipe-cell {
+  cursor: default;
+}
+
+/* ---- Swap ---- */
+.g-swap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 30%);
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.g-swap-current {
+  height: 100%;
+}
+
+.g-swap-goal {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #f4f7fa;
+}
+
+.g-swap-goal-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5f6e74;
+  text-align: center;
+}
+
+.g-swap-goal-board {
+  aspect-ratio: calc(var(--cols, 3) * 1.25) / var(--rows, 3);
+}
+
+.g-swap .g-swap-goal-board,
+.g-swap .g-swap-goal-board > div {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.g-swap .g-swap-goal-board > div {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  gap: 4px !important;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(var(--rows, 3), minmax(0, 1fr)) !important;
+}
+
+.g-swap .g-swap-goal-board [data-cell-index] {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.g-swap .g-swap-goal-board [data-cell-index] > div:nth-child(2) {
+  font-size: clamp(14px, 2vw, 22px) !important;
+}
+
+/* Index and coordinate badges are the models' action vocabulary; hide them for people. */
+.g-swap [data-cell-index] > div:first-child,
+.g-swap [data-cell-index] > div:last-child {
+  display: none;
+}
+
+.g-swap-current [data-cell-index] {
+  transition: transform 160ms ease, box-shadow 160ms ease !important;
+}
+
+.g-swap-current [data-cell-index]:hover {
+  transform: translateY(-2px) !important;
+}
+
+.g-swap.is-locked [data-cell-index] {
+  cursor: default !important;
+}
+
+/* ---- One Stroke pad (touch and mouse) ---- */
+.g-dpad {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-rows: repeat(2, 40px);
+  gap: 4px;
+}
+
+.g-dpad button {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #eef6ff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.15s;
+}
+
+.g-dpad button:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.g-dpad [data-dir='U'] { grid-column: 2; grid-row: 1; }
+.g-dpad [data-dir='L'] { grid-column: 1; grid-row: 2; }
+.g-dpad [data-dir='D'] { grid-column: 2; grid-row: 2; }
+.g-dpad [data-dir='R'] { grid-column: 3; grid-row: 2; }
+
+.g-onestroke .g-stage:focus-visible {
+  box-shadow: inset 0 0 0 3px rgba(10, 127, 176, 0.6);
+}
+
+.g-onestroke.is-locked .g-dpad {
+  opacity: 0.4;
+  pointer-events: none;
+}

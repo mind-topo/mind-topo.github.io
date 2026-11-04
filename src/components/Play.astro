@@ -1,0 +1,584 @@
+---
+// Play.astro - the benchmark, playable: the five planning gyms run the vendored
+// MindTopo engines on real benchmark boards; the reasoning questions follow.
+import SectionHeader from './SectionHeader.astro';
+import '../styles/games.css';
+import Icon from './Icon.astro';
+import { GAMES, scoresFor } from '../games/meta';
+import { PROPERTIES, TASKS, TASK_DETAILS, HUMAN, MODELS, taskIndex, fmt } from '../data/site';
+
+const DIFFICULTIES = [
+  { id: 'easy', label: 'Easy' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'hard', label: 'Hard' },
+];
+
+const reasoning = TASKS.filter((t) => t.kind === 'reasoning').map((t) => {
+  const i = taskIndex(t.name);
+  const best = MODELS.reduce((a, m) => (m.scores.easy![i] > a ? m.scores.easy![i] : a), 0);
+  return { ...t, propertyName: PROPERTIES.find((p) => p.id === t.property)!.name, detail: TASK_DETAILS[t.name], human: HUMAN.scores.easy![i], best };
+});
+---
+<section id="play" class="section tinted">
+  <div class="wrap">
+    <SectionHeader id="play" title="Play the benchmark yourself">
+      The five planning gyms run MindTopo's own engines on real benchmark boards, with the move budget the models had.
+    </SectionHeader>
+
+    <div class="play" data-reveal>
+      <div class="game-tabs" role="tablist" aria-label="Planning gyms">
+        {GAMES.map((g, i) => (
+          <button role="tab" class="game-tab" id={`gtab-${g.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-game={g.id} aria-controls="game-card">
+            <span class="gt-name">{g.task}</span>
+            <span class="gt-prop">{g.property}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="game-card card" id="game-card" role="tabpanel">
+        <div class="game-stage-wrap" id="game-stage-wrap" data-theme="dark">
+          <div class="game-root" id="game-root"></div>
+          <div class="game-loading" id="game-loading"><span class="spinner" aria-hidden="true"></span>Loading the gym…</div>
+          <div class="game-overlay" id="game-overlay" hidden>
+            <p class="go-title" id="go-title"></p>
+            <p class="go-sub" id="go-sub"></p>
+            <div class="go-actions">
+              <button class="btn btn-primary" id="go-next">Next board</button>
+              <button class="btn" id="go-retry">Try again</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="game-panel" aria-live="polite">
+          {GAMES.map((g, i) => {
+            const s = scoresFor(g.task);
+            return (
+              <div class="gp-info" data-game={g.id} hidden={i !== 0}>
+                <p class="gp-goal">{g.goal}</p>
+                <p class="gp-how">{g.how}</p>
+                <dl class="gp-scores" title={`Best model on Easy: ${s.easy.model}; on Hard: ${s.hard.model}`}>
+                  <div><dt>Humans</dt><dd>{fmt(s.human, 0)}%</dd></div>
+                  <div><dt>Best model</dt><dd>{fmt(s.easy.score, 0)}%</dd></div>
+                  <div><dt>Best · Hard</dt><dd>{fmt(s.hard.score, 0)}%</dd></div>
+                </dl>
+              </div>
+            );
+          })}
+
+          <div class="segmented gp-level" role="radiogroup" aria-label="Difficulty" id="game-level">
+            {DIFFICULTIES.map((d, i) => (
+              <button role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-value={d.id}>{d.label}</button>
+            ))}
+          </div>
+
+          <div class="gp-meter">
+            <div class="gp-meter-row"><span>Moves</span><strong class="tabular" id="game-moves">0 / 0</strong></div>
+            <div class="gp-bar"><span id="game-bar"></span></div>
+            <p class="gp-progress" id="game-progress">&nbsp;</p>
+          </div>
+
+          <div class="gp-actions">
+            <button class="btn" id="game-undo">Undo</button>
+            <button class="btn" id="game-restart">Restart</button>
+            <button class="btn" id="game-new">New board</button>
+          </div>
+          <button class="btn btn-primary gp-solve" id="game-solve"><Icon name="play" size={14} /><span>Show solution</span></button>
+        </aside>
+      </div>
+    </div>
+
+    <div class="reasoning" data-reveal>
+      <p class="subhead">Reasoning questions</p>
+      <div class="r-track">
+        {reasoning.map((t) => (
+          <article class="r-card">
+            <header class="r-head"><h3>{t.name}</h3><span class="r-prop">{t.propertyName}</span></header>
+            <div class="r-media">
+              <img src={t.detail.media[t.detail.media.length - 1].src} width={t.detail.media[0].width} height={t.detail.media[0].height} alt={`${t.name} example scene`} loading="lazy" decoding="async" />
+            </div>
+            <p class="r-prompt">{t.detail.prompt}</p>
+            {t.detail.options ? (
+              <div class={`mcq ${t.detail.options[0].image ? 'mcq-images' : ''}`} role="group" aria-label={`${t.name} answer options`}>
+                {t.detail.options.map((o) => (
+                  <button class="mcq-option" data-correct={o.correct ? 'true' : 'false'}>
+                    {o.image ? <img src={o.image} alt={`Option ${o.label}`} width="720" height="274" loading="lazy" /> : null}
+                    <span>{o.image ? `Option ${o.label}` : o.label}</span>
+                  </button>
+                ))}
+                <p class="mcq-feedback" aria-live="polite"></p>
+              </div>
+            ) : (
+              <div class="reveal">
+                <button class="reveal-btn" aria-expanded="false">Reveal answer</button>
+                <p class="reveal-answer" hidden><strong>{t.detail.answer}</strong></p>
+              </div>
+            )}
+            <p class="r-score"><span>Humans {fmt(t.human, 0)}%</span><span>Best model {fmt(t.best, 0)}%</span></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initPlay } from '../scripts/play';
+  initPlay();
+</script>
+
+<style>
+  /* ---- tabs ---- */
+  .game-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .game-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--page);
+    text-align: left;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  }
+
+  .game-tab:hover {
+    border-color: #c9d4d8;
+    background: var(--surface);
+  }
+
+  .game-tab[aria-selected='true'] {
+    background: var(--surface);
+    border-color: var(--ink);
+    box-shadow: inset 0 -3px 0 var(--plan);
+  }
+
+  .gt-name {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .gt-prop {
+    font-size: 0.78rem;
+    color: var(--ink-3);
+  }
+
+  /* ---- card ---- */
+  .game-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    overflow: hidden;
+  }
+
+  .game-stage-wrap {
+    position: relative;
+    min-height: 540px;
+    background: #faf8f2;
+    border-right: 1px solid var(--line);
+  }
+
+  .game-stage-wrap[data-theme='dark'] {
+    background: #0f1628;
+  }
+
+  .game-root {
+    position: absolute;
+    inset: 0;
+  }
+
+  .game-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--ink-3);
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .game-loading.gone {
+    opacity: 0;
+  }
+
+  [data-theme='dark'] .game-loading {
+    color: #9fb0c8;
+  }
+
+  .spinner {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 3px solid rgba(127, 145, 174, 0.25);
+    border-top-color: var(--plan);
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* End-of-episode bar: slim, along the top edge, so the final board stays visible. */
+  .game-overlay {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: max-content;
+    max-width: calc(100% - 28px);
+    padding: 8px 8px 8px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(15, 29, 34, 0.06);
+    animation: pop 0.35s var(--ease);
+  }
+
+  .game-overlay[hidden] {
+    display: none;
+  }
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -8px);
+    }
+  }
+
+  .go-title {
+    font-size: 0.98rem;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+
+  .go-title.win {
+    color: #0a7a2f;
+  }
+
+  .go-title.lose {
+    color: #b42318;
+  }
+
+  .go-sub {
+    font-size: 0.84rem;
+    color: var(--ink-2);
+  }
+
+  .go-actions {
+    display: flex;
+    gap: 6px;
+    flex: none;
+  }
+
+  .go-actions .btn {
+    min-height: 34px;
+    padding: 0 14px;
+    font-size: 0.84rem;
+  }
+
+  @media (max-width: 640px) {
+    .game-overlay {
+      flex-wrap: wrap;
+      justify-content: center;
+      border-radius: 16px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .go-sub {
+      display: none;
+    }
+  }
+
+  /* ---- panel ---- */
+  .game-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 22px 20px;
+  }
+
+  .gp-goal {
+    font-size: 1.05rem;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  .gp-how {
+    margin-top: 4px;
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+
+  .gp-scores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .gp-scores > div {
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--surface-2);
+  }
+
+  .gp-scores dt {
+    font-size: 0.72rem;
+    color: var(--ink-3);
+  }
+
+  .gp-scores dd {
+    font-size: 1.15rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .gp-level {
+    align-self: flex-start;
+  }
+
+  .gp-meter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.86rem;
+    color: var(--ink-2);
+  }
+
+  .gp-meter-row strong {
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .gp-bar {
+    height: 6px;
+    margin-top: 6px;
+    border-radius: 6px;
+    background: var(--line-2);
+    overflow: hidden;
+  }
+
+  .gp-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 6px;
+    background: var(--plan);
+    transition: width 0.3s var(--ease), background-color 0.3s;
+  }
+
+  .gp-bar span.low {
+    background: #d03b3b;
+  }
+
+  .gp-progress {
+    margin-top: 6px;
+    font-size: 0.86rem;
+    color: var(--ink-2);
+  }
+
+  .gp-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .gp-actions .btn {
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 8px;
+    font-size: 0.84rem;
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .gp-solve {
+    justify-content: center;
+    margin-top: auto;
+  }
+
+  /* ---- reasoning questions ---- */
+  .reasoning {
+    margin-top: clamp(36px, 5vw, 56px);
+  }
+
+  .reasoning .subhead {
+    margin-bottom: 12px;
+  }
+
+  .r-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, 1fr);
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    overscroll-behavior-x: contain;
+  }
+
+  .r-card {
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .r-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .r-head h3 {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .r-prop {
+    font-size: 0.76rem;
+    color: var(--ink-3);
+  }
+
+  .r-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+
+  .r-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .r-prompt {
+    font-size: 0.9rem;
+    font-weight: 550;
+    line-height: 1.4;
+  }
+
+  .reveal-btn {
+    min-height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px dashed #b9c6ca;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+
+  .reveal-btn:hover {
+    border-style: solid;
+    color: var(--ink);
+  }
+
+  .reveal-answer {
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+
+  .mcq {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .mcq-images {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mcq-option {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-height: 30px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    font-size: 0.78rem;
+    font-weight: 550;
+    color: var(--ink-2);
+  }
+
+  .mcq-images .mcq-option {
+    padding: 4px;
+  }
+
+  .mcq-option.right {
+    border-color: #0ca30c;
+    background: #ecf8ec;
+    color: #0a5c0a;
+  }
+
+  .mcq-option.wrong {
+    border-color: #d03b3b;
+    background: #fcefef;
+    color: #8f2323;
+  }
+
+  .mcq-feedback {
+    flex-basis: 100%;
+    grid-column: 1 / -1;
+    font-size: 0.82rem;
+    color: var(--ink-2);
+    min-height: 1.2em;
+  }
+
+  .r-score {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--line-2);
+    font-size: 0.8rem;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 960px) {
+    .game-card {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .game-stage-wrap {
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .game-tabs {
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+  }
+</style>

@@ -4,8 +4,9 @@ Paper: "MindTopo: Can Foundation Models Reason in Topological Space?"
 Authors: Yunfei Ge, Anbang Liu, Qineng Wang, Johnalbert Garnica, Jianwen Lyu, Zihan Wang, Reuben Tan, Jianfeng Gao, Ruohan Zhang, Yining Hong, Jiajun Wu, Manling Li.
 Affiliations: Northwestern University, Microsoft Research, Stanford University.
 Project page: https://mind-topo.github.io/
+Paper: https://arxiv.org/abs/2609.11900
 Code: https://github.com/mll-lab-nu/MindTopo
-Dataset: https://huggingface.co/datasets/MLL-Lab/MindTOPO
+Dataset: https://huggingface.co/datasets/MLL-Lab/MindTopo
 
 ## What is MindTopo?
 
@@ -76,9 +77,10 @@ With GPT-5.6-Luna as planner, rendering the predicted next state with GPT-Image-
 
 ## Citation
 
-@misc{ge2026mindtopo,
+@article{ge2026mindtopo,
   title={MindTopo: Can Foundation Models Reason in Topological Space?},
   author={Yunfei Ge and Anbang Liu and Qineng Wang and Johnalbert Garnica and Jianwen Lyu and Zihan Wang and Reuben Tan and Jianfeng Gao and Ruohan Zhang and Yining Hong and Jiajun Wu and Manling Li},
+  journal={arXiv preprint arXiv:2609.11900},
   year={2026},
   url={https://mind-topo.github.io/},
 }

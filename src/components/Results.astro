@@ -34,7 +34,6 @@ const bestTask = TASKS.map((_, i) => bestOf((r) => r.scores[i]));
           <button role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-value={l.id}>{l.label}</button>
         ))}
       </div>
-      <span class="level-hint" id="level-hint">{LEVELS[0].hint}</span>
     </div>
 
     <figure class="card figure-card" data-reveal>
@@ -91,7 +90,7 @@ const bestTask = TASKS.map((_, i) => bestOf((r) => r.scores[i]));
       <div class="figure-head">
         <div>
           <p class="subhead">Full leaderboard</p>
-          <p class="subhead-note">Accuracy (%) for reasoning tasks, success rate (%) for planning tasks. Select a column to sort.</p>
+          <p class="subhead-note">Select a column to sort.</p>
         </div>
         <div class="heat-legend" aria-hidden="true">
           <span>0</span><span class="heat-bar"></span><span>100</span>
@@ -136,10 +135,6 @@ const bestTask = TASKS.map((_, i) => bestOf((r) => r.scores[i]));
       </div>
       </div>
       <p class="scroll-hint" aria-hidden="true">Scroll sideways for every task →</p>
-      <p class="caption">
-        Each task has 300 instances (150 Easy, 150 Hard). Human results exist for the Easy level only; random chance
-        is reported on the full set. Open-weight models are hosted.
-      </p>
     </figure>
   </div>
 </section>
@@ -150,11 +145,6 @@ const bestTask = TASKS.map((_, i) => bestOf((r) => r.scores[i]));
 </script>
 
 <style>
-  .level-hint {
-    font-size: 0.82rem;
-    color: var(--ink-3);
-  }
-
   /* ---- dumbbell ---- */
   .dumbbell {
     --name-w: 188px;

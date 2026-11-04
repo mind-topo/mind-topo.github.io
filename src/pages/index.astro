@@ -3,13 +3,14 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import TeaserVideo from '../components/TeaserVideo.astro';
 import Findings from '../components/Findings.astro';
-import Benchmark from '../components/Benchmark.astro';
+import Play from '../components/Play.astro';
 import Results from '../components/Results.astro';
 import Humans from '../components/Humans.astro';
 import Training from '../components/Training.astro';
 import Errors from '../components/Errors.astro';
 import Imagination from '../components/Imagination.astro';
 import Citation from '../components/Citation.astro';
+import { AUTHORS, LINKS } from '../data/people';
 // Hidden components (DatasetViewer, FindingsSection, TrajectoryViewer) are kept in
 // src/components but predate the 2026-11 redesign; see the README before re-enabling.
 
@@ -30,20 +31,8 @@ const structuredData = {
         'Spatial reasoning depends not only on metric properties such as distance, angle, and shape, but also on topological relations that remain invariant under continuous deformation. MindTopo is a benchmark of topological intuition across five properties grounded in cognitive science and formal topology: continuity, separation, order, enclosure, and knots. Each property is evaluated at two cognitive levels: reasoning, where a model identifies a topological relation or infers how it changes, and planning, where a foundation model acts as a closed-loop agent in an interactive environment. MindTopo evaluates 3,900 instances across 13 procedurally generated task types with controllable difficulty, split into an Easy and a Hard level. Across 13 MLLMs, every model performs better on reasoning than on planning, and the best model remains far below human performance. Supervised fine-tuning and reinforcement learning improve reasoning more than planning, and seven video generative models reach plausible endpoints without preserving valid topological transitions.',
       keywords:
         'MindTopo, topological reasoning, topological intuition, topology benchmark, spatial reasoning, multimodal large language models, MLLM, foundation models, video generation, world model, planning, Piaget, continuity, separation, order, enclosure, knots',
-      author: [
-        { '@type': 'Person', name: 'Yunfei Ge' },
-        { '@type': 'Person', name: 'Anbang Liu' },
-        { '@type': 'Person', name: 'Qineng Wang', url: 'https://qinengwang-aiden.github.io/' },
-        { '@type': 'Person', name: 'Johnalbert Garnica' },
-        { '@type': 'Person', name: 'Jianwen Lyu' },
-        { '@type': 'Person', name: 'Zihan Wang' },
-        { '@type': 'Person', name: 'Reuben Tan' },
-        { '@type': 'Person', name: 'Jianfeng Gao' },
-        { '@type': 'Person', name: 'Ruohan Zhang' },
-        { '@type': 'Person', name: 'Yining Hong' },
-        { '@type': 'Person', name: 'Jiajun Wu' },
-        { '@type': 'Person', name: 'Manling Li', '@id': 'https://limanling.github.io/#person', url: 'https://limanling.github.io/' },
-      ],
+      author: AUTHORS.map((a) => ({ '@type': 'Person', name: a.name, url: a.url })),
+      sameAs: [LINKS.paper],
     },
     {
       '@type': 'Dataset',
@@ -51,14 +40,14 @@ const structuredData = {
       description:
         'A topological reasoning benchmark: 3,900 procedurally generated evaluation instances across 13 task types and five topological properties (continuity, separation, order, enclosure, knots), comprising 2,400 reasoning questions over rendered scenes and 1,500 interactive planning episodes, split evenly between an Easy and a Hard level. The generators produce a larger pool of 11,030 instances for the public release.',
       url: 'https://mind-topo.github.io/',
-      sameAs: ['https://huggingface.co/datasets/MLL-Lab/MindTOPO', 'https://github.com/mll-lab-nu/MindTopo'],
+      sameAs: [LINKS.dataset, LINKS.code],
       creator: { '@type': 'Organization', name: 'MLL Lab, Northwestern University' },
       keywords: 'MindTopo, topological reasoning, topology benchmark, spatial reasoning, MLLM, planning, connectivity, enclosure, knots',
     },
     {
       '@type': 'SoftwareSourceCode',
       name: 'MindTopo',
-      codeRepository: 'https://github.com/mll-lab-nu/MindTopo',
+      codeRepository: LINKS.code,
       programmingLanguage: 'Python',
     },
     { '@type': 'WebSite', name: 'MindTopo', url: 'https://mind-topo.github.io/' },
@@ -68,19 +57,17 @@ const structuredData = {
 <Layout title={pageTitle}>
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
-    {/*
-      Google Scholar (Highwire Press) citation tags. Restore once the paper is on
-      arXiv: Scholar needs citation_pdf_url / citation_arxiv_id to index the page.
-      <meta name="citation_title" content="MindTopo: Can Foundation Models Reason in Topological Space?" />
-      <meta name="citation_author" content="..." />
-      <meta name="citation_arxiv_id" content="..." />
-      <meta name="citation_pdf_url" content="..." />
-    */}
+    {/* Google Scholar (Highwire Press) tags. */}
+    <meta name="citation_title" content={pageTitle} />
+    {AUTHORS.map((a) => <meta name="citation_author" content={a.name} />)}
+    <meta name="citation_publication_date" content="2026" />
+    <meta name="citation_arxiv_id" content={LINKS.arxivId} />
+    <meta name="citation_pdf_url" content={LINKS.pdf} />
   </Fragment>
   <Hero />
   <TeaserVideo />
   <Findings />
-  <Benchmark />
+  <Play />
   <Results />
   <Humans />
   <Training />

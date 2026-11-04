@@ -2,19 +2,19 @@
 // Citation.astro - BibTeX with a one-click copy.
 import SectionHeader from './SectionHeader.astro';
 import Icon from './Icon.astro';
+import { AUTHORS, LINKS } from '../data/people';
 
-const BIBTEX = `@misc{ge2026mindtopo,
-  title  = {MindTopo: Can Foundation Models Reason in Topological Space?},
-  author = {Yunfei Ge and Anbang Liu and Qineng Wang and Johnalbert Garnica and Jianwen Lyu and Zihan Wang and Reuben Tan and Jianfeng Gao and Ruohan Zhang and Yining Hong and Jiajun Wu and Manling Li},
-  year   = {2026},
-  url    = {https://mind-topo.github.io/},
+const BIBTEX = `@article{ge2026mindtopo,
+  title   = {MindTopo: Can Foundation Models Reason in Topological Space?},
+  author  = {${AUTHORS.map((a) => a.name).join(' and ')}},
+  journal = {arXiv preprint arXiv:${LINKS.arxivId}},
+  year    = {2026},
+  url     = {https://mind-topo.github.io/},
 }`;
 ---
 <section id="citation" class="section tinted">
   <div class="wrap">
-    <SectionHeader id="citation" title="Cite MindTopo">
-      If MindTopo is useful in your research, please cite:
-    </SectionHeader>
+    <SectionHeader id="citation" title="Cite MindTopo" />
     <div class="bib card" data-reveal>
       <button class="copy-btn" data-copy-target="bibtex" aria-label="Copy BibTeX to clipboard">
         <Icon name="copy" size={16} class="i-copy" /><Icon name="check" size={16} class="i-check" /><span data-copy-label>Copy</span>
