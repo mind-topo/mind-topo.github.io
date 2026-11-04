@@ -39,6 +39,8 @@ export interface Game {
   playSolution(signal: AbortSignal): Promise<boolean>;
   /** Block player input (during playback and after the episode ends). */
   setLocked(locked: boolean): void;
+  /** The moves played so far, in the engine's action format (used by ?record). */
+  moves?(): unknown[];
   destroy(): void;
 }
 

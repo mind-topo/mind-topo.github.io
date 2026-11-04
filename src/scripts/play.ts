@@ -5,17 +5,57 @@ import { createGame, type Difficulty, type Game, type GameId, type Instance } fr
 import { GAMES } from '../games/meta';
 import { bindRadioGroup } from './viz';
 
+// Maintainer mode (?record): load /games/<game>-pool.json when present (e.g. every hard
+// Untangle seed), show board ids, and POST each board solved by hand to /__record, so a
+// local server can save the moves as candidate solutions. Off on the public site.
+const RECORD = new URLSearchParams(location.search).has('record');
+
 const pools = new Map<GameId, Promise<Instance[]>>();
 const loadPool = (id: GameId) => {
   if (!pools.has(id)) {
-    pools.set(id, fetch(`/games/${id}.json`).then((r) => r.json()).then((d) => d.instances as Instance[]));
+    const get = (url: string) => fetch(url).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+    const data = RECORD ? get(`/games/${id}-pool.json`).catch(() => get(`/games/${id}.json`)) : get(`/games/${id}.json`);
+    pools.set(id, data.then((d) => d.instances as Instance[]));
   }
   return pools.get(id)!;
 };
 
+// Every move is saved (solved or not), so a hand-played attempt is never lost.
+let lastRecordKey = '';
+let savedCount = 0;
+function record(game: GameId, instance: Instance, moves: unknown[], status: { solved: boolean; progress?: string }) {
+  if (!RECORD) return;
+  const key = `${instance.id}|${moves.length}|${status.solved}`;
+  if (key === lastRecordKey) return;
+  lastRecordKey = key;
+  fetch('/__record', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ game, id: instance.id, difficulty: instance.difficulty, moves, solved: status.solved, progress: status.progress, at: new Date().toISOString() }),
+  })
+    .then((r) => {
+      if (!r.ok) throw new Error(String(r.status));
+      savedCount += 1;
+      const badge = document.getElementById('record-badge');
+      if (badge) badge.textContent = `● Recording · ${savedCount} moves saved`;
+    })
+    .catch((e) => {
+      console.error('record failed', e);
+      const badge = document.getElementById('record-badge');
+      if (badge) badge.textContent = '● Recording FAILED (see console)';
+    });
+}
+
 function initPlayground() {
   const root = document.getElementById('game-root');
   if (!root) return;
+  if (RECORD) {
+    const badge = document.createElement('p');
+    badge.id = 'record-badge';
+    badge.textContent = '● Recording · 0 moves saved';
+    badge.style.cssText = 'font-size:.82rem;font-weight:650;color:#b42318';
+    document.querySelector('.game-panel')?.prepend(badge);
+  }
   const wrap = document.getElementById('game-stage-wrap')!;
   const loading = document.getElementById('game-loading')!;
   const overlay = document.getElementById('game-overlay')!;
@@ -66,21 +106,22 @@ function initPlayground() {
     movesEl.textContent = `${s.moves} / ${s.budget}`;
     bar.style.width = `${Math.min(100, (100 * s.moves) / Math.max(1, s.budget))}%`;
     bar.classList.toggle('low', s.budget - s.moves <= 2 && !s.solved);
-    progress.textContent = s.progress ?? ' ';
+    progress.textContent = (s.progress ?? ' ') + (RECORD ? ` · ${instance.id.replace(/^.*_(easy|medium|hard)_seed_/, '$1 seed ')}` : '');
     const busy = playback !== null;
     undoBtn.disabled = busy || !game.canUndo() || s.failed && !game.canUndo();
     restartBtn.disabled = busy;
     newBtn.disabled = busy;
-    // solution === null means the offline search found no engine-verified plan for this board.
-    solveBtn.disabled = !busy && instance.solution === null;
+    // No solution means the offline search found no engine-verified plan for this board.
+    solveBtn.disabled = !busy && !instance.solution;
     game.setLocked(busy || s.solved || s.failed);
 
     if (busy) return;
+    if (game.moves) record(gameId, instance, game.moves(), s);
     if (s.solved && shownSolution) {
       showOverlay('shown', `One solution: ${s.moves} moves`, '');
     } else if (s.solved) {
       const best = instance.optimal;
-      showOverlay('win', `Solved in ${s.moves} moves`, best ? (s.moves <= best ? 'That is the shortest possible.' : `The shortest solution takes ${best}.`) : `Within the ${s.budget}-move budget.`);
+      showOverlay('win', `Solved in ${s.moves} moves`, best ? (s.moves <= best ? 'That matches the shortest known solution.' : `The shortest known solution takes ${best}.`) : `Within the ${s.budget}-move budget.`);
     } else if (s.failed) {
       showOverlay('lose', s.reason ?? 'Out of moves.', `The models had the same ${s.budget}-move budget.`);
     } else {

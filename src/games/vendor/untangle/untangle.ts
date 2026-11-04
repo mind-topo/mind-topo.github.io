@@ -543,6 +543,9 @@ export class UntangleGame {
       templateName: chosen.templateName,
       signature: chosen.signature,
       scrambleSteps: chosen.history.length,
+      // mind-topo.github.io addition: keep the scramble itself, so reversing it gives the
+      // per-instance oracle (template -> scramble, undone move by move).
+      scrambleHistory: chosen.history.map((m) => ({ ...m })),
       targetSteps: chosen.targetSteps,
       acceptedCandidateCount: acceptedCandidates.length,
       metrics: chosen.metrics,

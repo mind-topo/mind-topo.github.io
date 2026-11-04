@@ -65,7 +65,7 @@ public/
   llms-full.txt        extended LLM-facing reference
 scripts/
   sync-paper-data.py   regenerates src/data/paper.json from the paper's tables
-  build-game-instances.py, build-untangle-solutions.ts   playable boards (see Playable games)
+  build-game-instances.py, build-untangle-solutions.ts, serve-record.py   playable boards (see Playable games)
 src/
   data/                paper.json (generated), site.ts, people.ts, nav.ts, results.ts, humans.ts
   games/               game wrappers + vendor/ (MindTopo engines)
@@ -91,12 +91,41 @@ Boards come from the code repo's `environments/<env>/output/question.jsonl`:
 
 ```bash
 python3 scripts/build-game-instances.py ../MindTopo          # public/games/<game>.json
-# Untangle boards and engine-verified solutions (generation is too slow to do in the browser):
+# Untangle boards and engine-verified solutions (generation is too slow to do in the browser).
+# Keep the process count low (here 4, at nice 19); each process takes one core.
 npx esbuild scripts/build-untangle-solutions.ts --bundle --platform=node --format=esm \
   --loader:.json=json --outfile=/tmp/untangle-solutions.mjs
-for s in $(seq 0 23); do node /tmp/untangle-solutions.mjs $s 24 & done; wait
-node /tmp/untangle-solutions.mjs merge 24
+run() { for s in 0 1 2 3; do nice -n 19 node /tmp/untangle-solutions.mjs "$@" $s 4 & done; wait; }
+run; node /tmp/untangle-solutions.mjs merge 4                  # Easy / Medium: search
+run retry; node /tmp/untangle-solutions.mjs merge-retry 4      # optional, slow
+run hard; node /tmp/untangle-solutions.mjs merge-hard 4 10     # Hard: reverse-scramble oracle (5 boards)
+node /tmp/untangle-solutions.mjs finalize
 ```
+
+A plan counts as a solution only under the benchmark's own test: `step()` each move from
+the stored board with no extra frames in between, and the engine's `crossings()` (the
+simulated ropes seen from above) ends at 0, and stays 0 for 600 more frames. The page
+plays by the same rules: the board only changes through `step(source hole, target hole)`,
+the benchmark's action space. While you drag, a throwaway copy of the board runs live
+physics so the rope follows the pointer; on release the real move plays as the frames
+`step()` simulates. A game is therefore just its list of moves, and replays exactly.
+
+Easy and Medium solutions come from a search over the first 40 seeds of each. Hard uses
+two sources. The generator's own oracle: it builds an uncrossed board, scrambles it with
+recorded moves, then twists a few ropes into a central tangle; undoing the scramble always
+uncrosses the peg-to-peg lines, but on most Hard boards the simulated ropes stay wrapped,
+and only 5 of the 200 Hard seeds are solved by it. The rest of the Hard level are boards
+solved by hand in record mode:
+
+```bash
+python3 scripts/serve-record.py dist 4400 solves.jsonl     # play at http://localhost:4400/
+node /tmp/untangle-solutions.mjs add-solves solves.jsonl [pool.json]
+node /tmp/untangle-solutions.mjs verify
+```
+
+`?record` posts every move to `/__record` and shows the board's seed; it plays the boards
+in `public/games/untangle.json`, or `public/games/untangle-pool.json` if present (a local
+file of unsolved boards with snapshots).
 
 ## Authors and links
 

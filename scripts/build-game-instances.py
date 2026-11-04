@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 
 PER_LEVEL = 40
+# Untangle exports every hard seed so build-untangle-solutions.ts can scan all of them for the oracle.
+PER_LEVEL_OVERRIDES = {("untangle", "hard"): None}
 
 GAMES = {
     "pipe": "continuity_pipe",
@@ -43,7 +45,8 @@ def main(repo: Path) -> int:
         picked = []
         for level in ("easy", "medium", "hard"):
             level_rows = sorted((r for r in rows if r["meta_info"].get("difficulty") == level), key=lambda r: r["meta_info"].get("seed", 0))
-            for r in level_rows[:PER_LEVEL]:
+            limit = PER_LEVEL_OVERRIDES.get((game, level), PER_LEVEL)
+            for r in level_rows[:limit]:
                 meta = r["meta_info"]
                 config = meta["initial_state"]["reset_config"]
                 if config is None:

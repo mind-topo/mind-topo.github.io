@@ -14,7 +14,8 @@ copied verbatim except for these patches:
 - `untangle/untangle.ts`: add `exportSnapshot()` / `restoreSnapshot()`. Generating a
   medium or hard board takes 1-2.5 s, so `scripts/build-untangle-solutions.ts` generates
   every board offline with this engine and the site restores the snapshot; the
-  constructor takes `{ skipInitialReset }` so it does not generate a throwaway board.
+  constructor takes `{ skipInitialReset }` so it does not generate a throwaway board, and
+  `generatorInfo.scrambleHistory` keeps the scramble moves (reversed, they are the board's oracle).
 
 The site-side wrappers (input, budget, solution playback) live in `src/games/*.ts`.
 To update, copy the files again and re-apply the patches above.
