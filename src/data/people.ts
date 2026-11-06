@@ -2,7 +2,7 @@
 // https://qinengwang-aiden.github.io/ (checked 2026-11-03).
 
 export const AUTHORS = [
-  { name: 'Yunfei Ge', url: 'https://www.linkedin.com/in/yunfei-faye-ge/', affil: [1], equal: true },
+  { name: 'Yunfei Ge', url: 'https://invalidcodes.github.io', affil: [1], equal: true },
   { name: 'Anbang Liu', url: 'https://www.anbangliu.com/', affil: [1], equal: true },
   { name: 'Qineng Wang', url: 'https://qinengwang-aiden.github.io/', affil: [1], equal: true, lead: true },
   { name: 'Johnalbert Garnica', url: 'https://jasgcode.github.io/johnalbertgarnica/', affil: [1], equal: true },
