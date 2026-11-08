@@ -248,12 +248,18 @@ export type ErrorModel = (typeof ERROR_MODELS)[number];
 type ErrorCounts = Record<string, Record<ErrorModel, number>>;
 export const ERRORS = paper.errors as { reasoning: ErrorCounts; planning: ErrorCounts };
 
-/** One labeled failure per category (figure 5 of the paper). */
+/** One labeled failure per category. The Knots card uses Core sample
+ * knots_static_v3_e74116eba68cf6ee so its three colored rings remain legible
+ * at website-card size. Other examples follow figure 5 of the paper. */
 export const ERROR_EXAMPLES: Record<string, { task: string; quote: string; verdict: string; wide?: boolean }> = {
   instruction: { task: 'Sheep', quote: '“my final answer is that four sheep are trapped”', verdict: 'Output cut off; answers “unclear” (GT 4).' },
   task: { task: 'Assembly', quote: '“…the top shelf floating. Invalid. The subassemblies must be connected.”', verdict: 'Adds an unstated connectivity rule; rejects split A, answers C.', wide: true },
   perception: { task: 'Hole', quote: '“a cylindrical object inside, … Total is 8.”', verdict: 'That bar makes two holes; answers 8 (GT 9).' },
-  invariance: { task: 'Knots', quote: '“… sequence indicates they are linked.”', verdict: 'Three free rings; answers C (GT A).' },
+  invariance: {
+    task: 'Knots',
+    quote: '“The alternating under/over pattern … is a key indicator of linkage.”',
+    verdict: 'After removing brown, red and white are both free; answers ["none"].',
+  },
   feature: { task: '2D Maze', quote: '“the green bar appears to be the critical one”', verdict: 'Orange and blue also work; answers [green].' },
   dynamic: { task: 'Chat Noir', quote: '{"answer": 20} ×3', verdict: 'Three turns on the same cell; illegal, the cat escapes.' },
   action: { task: 'Pipe', quote: '“I’ve been rotating (1,0) in a cycle.”', verdict: 'Spins (1,0) a full turn; budget spent.' },
