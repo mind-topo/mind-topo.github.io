@@ -25,10 +25,10 @@ const structuredData = {
       name: pageTitle,
       url: 'https://mind-topo.github.io/',
       datePublished: '2026-08-07',
-      dateModified: '2026-11-03',
+      dateModified: '2026-11-07',
       image: 'https://mind-topo.github.io/og-card.jpg',
       abstract:
-        'Spatial reasoning depends not only on metric properties such as distance, angle, and shape, but also on topological relations that remain invariant under continuous deformation. MindTopo is a benchmark of topological intuition across five properties grounded in cognitive science and formal topology: continuity, separation, order, enclosure, and knots. Each property is evaluated at two cognitive levels: reasoning, where a model identifies a topological relation or infers how it changes, and planning, where a foundation model acts as a closed-loop agent in an interactive environment. MindTopo evaluates 3,900 instances across 13 procedurally generated task types with controllable difficulty, split into an Easy and a Hard level. Across 13 MLLMs, every model performs better on reasoning than on planning, and the best model remains far below human performance. Supervised fine-tuning and reinforcement learning improve reasoning more than planning, and seven video generative models reach plausible endpoints without preserving valid topological transitions.',
+        'Spatial reasoning depends not only on metric properties such as distance, angle, and shape, but also on topological relations that remain invariant under continuous deformation. MindTopo is a benchmark of topological intuition across five properties grounded in cognitive science and formal topology: continuity, separation, order, enclosure, and knots. Each property is evaluated at two cognitive levels: reasoning, where a model identifies a topological relation or infers how it changes, and planning, where a foundation model acts as a closed-loop agent in an interactive environment. The primary 3,900-instance Core Set spans 13 procedurally generated task types with controllable difficulty, split into an Easy and a Hard level; the companion Extended Set adds 8,780 exact-input-disjoint instances. Across 13 MLLMs, every model performs better on reasoning than on planning. On the Easy level, where human scores are available, even the strongest model trails humans. Supervised fine-tuning and reinforcement learning improve reasoning more than planning, and seven video generative models reach plausible endpoints without preserving valid topological transitions.',
       keywords:
         'MindTopo, topological reasoning, topological intuition, topology benchmark, spatial reasoning, multimodal large language models, MLLM, foundation models, video generation, world model, planning, Piaget, continuity, separation, order, enclosure, knots',
       author: AUTHORS.map((a) => ({ '@type': 'Person', name: a.name, url: a.url })),
@@ -38,7 +38,7 @@ const structuredData = {
       '@type': 'Dataset',
       name: 'MindTopo',
       description:
-        'A topological reasoning benchmark: 3,900 procedurally generated evaluation instances across 13 task types and five topological properties (continuity, separation, order, enclosure, knots), comprising 2,400 reasoning questions over rendered scenes and 1,500 interactive planning episodes, split evenly between an Easy and a Hard level. The generators produce a larger pool of 11,030 instances for the public release.',
+        'A topological reasoning benchmark with a 3,900-instance Core Set across 13 task types and five topological properties (continuity, separation, order, enclosure, knots), comprising 2,400 reasoning questions over rendered scenes and 1,500 interactive planning episodes, split evenly between an Easy and a Hard level. An additional 8,780-instance Extended Set has no exact-input overlap with the Core Set.',
       url: 'https://mind-topo.github.io/',
       sameAs: [LINKS.dataset, LINKS.code],
       creator: { '@type': 'Organization', name: 'MLL Lab, Northwestern University' },

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Regenerate src/data/paper.json from the paper's LaTeX tables.
+"""Regenerate src/data/paper.json from the arXiv manuscript sources.
 
 Every number on the site comes from this file, so refreshing the page after a
 results update is one command:
 
-    python3 scripts/sync-paper-data.py ../-NeurIPS-2026-TopoBench/tmlr
+    python3 scripts/sync-paper-data.py ../topobench_arxiv/arxiv
 
-The argument is the paper's TMLR directory (the newest results). The script
-parses the tables listed in SOURCES, cross-checks them against each other, and
-exits non-zero if anything disagrees, so a stale or half-edited table never
-reaches the page silently.
+The argument is the paper's arXiv directory. The script parses the tables listed
+in SOURCES plus data/release_counts.json, cross-checks them, and exits non-zero
+if anything disagrees, so a stale or half-edited result never reaches the page
+silently.
 """
 
 import json
@@ -156,11 +156,21 @@ def parse_cv(tex):
 
 def main(root: Path) -> int:
     tex = {key: read_tex(root / rel) for key, rel in SOURCES.items()}
+    release_path = root / "data/release_counts.json"
+    release_counts = json.loads(release_path.read_text())
     main_rows = parse_main(tex["main"])
     easy_rows = parse_main(tex["easy"])
     difficulty = parse_difficulty(tex["difficulty"])
 
     problems = []
+    expected_core = len(TASKS) * 300
+    if release_counts.get("core") != expected_core:
+        problems.append(
+            f"release Core count {release_counts.get('core')} != {expected_core} "
+            f"({len(TASKS)} tasks x 300)"
+        )
+    if release_counts.get("extended", 0) <= 0:
+        problems.append("release Extended count is missing or non-positive")
     models = [m for m in main_rows if m != "Random Chance"]
     for model in models:
         all_scores = main_rows[model]["tasks"]
@@ -189,7 +199,17 @@ def main(root: Path) -> int:
         commit = "unknown"
 
     data = {
-        "source": {"paper": "TMLR submission (tmlr/)", "commit": commit, "tables": SOURCES},
+        "source": {
+            "paper": "arXiv manuscript (arxiv/)",
+            "commit": commit,
+            "tables": SOURCES,
+            "releaseCounts": "data/release_counts.json",
+        },
+        "release": {
+            "core": release_counts["core"],
+            "extended": release_counts["extended"],
+            "deduplicationScope": release_counts["deduplication_scope"],
+        },
         "tasks": TASKS,
         "models": [
             {
