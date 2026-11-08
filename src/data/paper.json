@@ -1,7 +1,7 @@
 {
   "source": {
     "paper": "arXiv manuscript (arxiv/)",
-    "commit": "83eb607",
+    "commit": "4c15846",
     "tables": {
       "main": "tables/01_new_dataset_table.tex",
       "easy": "tables/04_easy_level_human.tex",
