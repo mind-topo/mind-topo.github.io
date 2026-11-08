@@ -254,6 +254,16 @@ main {
   color: var(--ink-3);
 }
 
+.protocol-note {
+  margin: -12px 0 24px;
+  padding: 14px 18px;
+  border-left: 3px solid var(--brand-2);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
 /* --------------------------------------------------------------- surfaces */
 
 .card {

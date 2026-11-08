@@ -26,8 +26,8 @@ const marks = (a: (typeof AUTHORS)[number]) => `${a.affil.join(',')}${a.equal ? 
     </h1>
 
     <p class="hero-takeaway">
-      Models can <mark class="see">recognize</mark> a topological relation in a static scene, but cannot
-      <mark class="act">maintain or act on it</mark> across a sequence of actions.
+      Models can <mark class="see">recognize</mark> topological relations in static scenes, but struggle to
+      <mark class="act">maintain or act on them reliably</mark> across a sequence of actions.
     </p>
 
     <div class="authors">
@@ -44,9 +44,9 @@ const marks = (a: (typeof AUTHORS)[number]) => `${a.affil.join(',')}${a.equal ? 
 
     <div class="hero-actions">
       <a href="#play" class="btn btn-primary"><Icon name="play" size={16} />Play the games</a>
-      <a href={LINKS.paper} class="btn" target="_blank" rel="noopener"><Icon name="paper" />Paper</a>
+      <a href={LINKS.paper} class="btn" target="_blank" rel="noopener"><Icon name="paper" />Current paper</a>
       <a href={LINKS.code} class="btn" target="_blank" rel="noopener"><Icon name="github" />Code</a>
-      <a href={LINKS.dataset} class="btn" target="_blank" rel="noopener"><Icon name="dataset" />Dataset</a>
+      <a href={LINKS.release} class="btn"><Icon name="dataset" />Core &amp; Extended</a>
     </div>
 
     <dl class="hero-stats">
@@ -59,7 +59,7 @@ const marks = (a: (typeof AUTHORS)[number]) => `${a.affil.join(',')}${a.equal ? 
     </dl>
     <p class="split-note">
       The Extended Set adds <strong>{FACTS.extendedInstances.toLocaleString('en-US')}</strong> instances with no
-      exact-input overlap with the Core Set.
+      exact-input overlap with the Core Set. <a href={LINKS.release}>Explore both sets and download the manifests.</a>
     </p>
   </div>
 </section>

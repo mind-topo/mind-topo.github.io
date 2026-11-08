@@ -1,0 +1,70 @@
+{
+  "Assembly": {
+    "source": {
+      "id": "separation_objects_category_Bench_object_applaro_3_seed_1613739223",
+      "level": "Core Easy",
+      "manifest": "/release/core_manifest.jsonl.gz"
+    },
+    "media": [
+      {
+        "src": "/media/tasks/assembly-core.webp",
+        "width": 840,
+        "height": 320
+      }
+    ],
+    "prompt": "Which pair of subassemblies exactly reconstructs the complete object? Choose A, B, C, D, or E.",
+    "options": [
+      {
+        "label": "A",
+        "image": "/media/tasks/assembly-core-a.webp",
+        "width": 840,
+        "height": 320,
+        "correct": true
+      },
+      {
+        "label": "B",
+        "image": "/media/tasks/assembly-core-b.webp",
+        "width": 840,
+        "height": 320,
+        "correct": false
+      },
+      {
+        "label": "C",
+        "image": "/media/tasks/assembly-core-c.webp",
+        "width": 840,
+        "height": 320,
+        "correct": false
+      },
+      {
+        "label": "D",
+        "image": "/media/tasks/assembly-core-d.webp",
+        "width": 840,
+        "height": 320,
+        "correct": false
+      },
+      {
+        "label": "E",
+        "image": "/media/tasks/assembly-core-e.webp",
+        "width": 840,
+        "height": 320,
+        "correct": false
+      }
+    ]
+  },
+  "Bead": {
+    "source": {
+      "id": "order_bead_string_difficulty_3_T_BS01_describe_sequence_0406",
+      "level": "Core Easy",
+      "manifest": "/release/core_manifest.jsonl.gz"
+    },
+    "media": [
+      {
+        "src": "/media/tasks/bead-core.webp",
+        "width": 1024,
+        "height": 1024
+      }
+    ],
+    "prompt": "Start at the bead circled in white, follow the indicated direction along the string, and list all bead colours in order.",
+    "answer": "GREEN, PURPLE, RED, GREEN, PURPLE, RED, GREEN, PURPLE"
+  }
+}

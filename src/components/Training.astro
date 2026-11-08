@@ -24,6 +24,11 @@ const delta = (v: number | null, b: number) => (v === null ? '' : `${v - b >= 0 
       Qwen3-VL-2B-Instruct trained on the Easy level of each task. Answer supervision lifts reasoning sharply;
       planning success barely moves, and gains on held-out tasks are uneven.
     </SectionHeader>
+    <p class="protocol-note">
+      Single-task runs split Easy data into 80% training, 10% validation, and 10% test.
+      Planning predicts a complete action sequence from the initial observation and executes it without further model feedback.
+      Bead uses a simplified variant. These test scores use a different protocol from the Core leaderboard's closed-loop evaluation.
+    </p>
 
     <div class="controls" data-reveal>
       <span class="control-label" id="method-label">Training method</span>

@@ -19,11 +19,13 @@ export const AUTHORS = [
 export const AFFILIATIONS = ['Northwestern University', 'Microsoft Research', 'Stanford University'];
 
 export const LINKS = {
-  paper: 'https://arxiv.org/abs/2609.11900',
-  pdf: 'https://arxiv.org/pdf/2609.11900',
+  paper: '/paper/mindtopo-current.pdf',
+  pdf: 'https://mind-topo.github.io/paper/mindtopo-current.pdf',
+  arxiv: 'https://arxiv.org/abs/2609.11900v1',
   arxivId: '2609.11900',
   code: 'https://github.com/mll-lab-nu/MindTopo',
   dataset: 'https://huggingface.co/datasets/MLL-Lab/MindTopo',
+  release: '#release',
   lab: 'https://mll-lab-nu.github.io/',
 };
 

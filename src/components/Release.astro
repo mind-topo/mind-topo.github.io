@@ -1,0 +1,76 @@
+---
+import SectionHeader from './SectionHeader.astro';
+import paper from '../data/paper.json';
+import { LINKS } from '../data/people';
+import { TASKS, fmt } from '../data/site';
+
+const release = paper.release;
+const extended = [...paper.extendedModels].sort((a, b) => b.reasoning - a.reasoning);
+---
+<section id="release" class="section tinted">
+  <div class="wrap">
+    <SectionHeader id="release" title="Core and Extended are evaluated separately">
+      Core is the balanced primary evaluation set. Extended adds exact-input-disjoint instances from the same generators.
+      Scores from the two sets are reported separately and are never pooled.
+    </SectionHeader>
+
+    <div class="grid-2 release-cards">
+      <div class="card figure-card">
+        <h3>Core Set</h3>
+        <p class="release-count">{release.core.toLocaleString('en-US')}</p>
+        <p>13 tasks, each with 150 Easy and 150 Hard instances. In total, 2,400 reasoning questions and 1,500 planning episodes.</p>
+        <p><a href="#results">13-model Core leaderboard</a> · <a href="/release/core_manifest.jsonl.gz" download>Core manifest (.jsonl.gz)</a></p>
+      </div>
+      <div class="card figure-card">
+        <h3>Extended Set</h3>
+        <p class="release-count">{release.extended.toLocaleString('en-US')}</p>
+        <p>Additional instances after removing {release.removedCoreOverlap.toLocaleString('en-US')} Core overlaps and {release.removedWithinExtended} repeated Swap inputs from the original pool.</p>
+        <p><a href="#extended-results">{extended.length}-model Extended results</a> · <a href="/release/extended_manifest.jsonl.gz" download>Extended manifest (.jsonl.gz)</a></p>
+      </div>
+    </div>
+
+    <div class="release-resources card figure-card">
+      <h3>Paper and release files</h3>
+      <p><a href={LINKS.paper} target="_blank" rel="noopener">Current manuscript (PDF)</a> · <a href="/release/release_counts.json" download>Composition and deduplication record</a> · <a href="/release/extended_results.json" download>Extended result counts (JSON)</a></p>
+      <p>The manifests identify each input, its source location, and its content hash. Use them with the benchmark source files to select the evaluation instances; the manifests do not contain the full inputs or rendered images.</p>
+      <p><a href={LINKS.arxiv} target="_blank" rel="noopener">arXiv v1</a> and the <a href={LINKS.dataset} target="_blank" rel="noopener">Hugging Face snapshot</a> describe earlier dataset compositions. The current manuscript and manifests above define the Core / Extended split used on this page.</p>
+    </div>
+
+    <details class="table-view card figure-card composition">
+      <summary>Per-task composition of both sets</summary>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Per-task Core and Extended counts">
+        <table>
+          <caption>Evaluation instances per task</caption>
+          <thead><tr><th scope="col">Task</th><th scope="col">Core</th><th scope="col">Extended</th></tr></thead>
+          <tbody>{release.composition.map((t) => <tr><th scope="row">{t.label}</th><td>{t.core}</td><td>{t.extended.toLocaleString('en-US')}</td></tr>)}</tbody>
+          <tfoot><tr><th scope="row">Total</th><td>{release.core.toLocaleString('en-US')}</td><td>{release.extended.toLocaleString('en-US')}</td></tr></tfoot>
+        </table>
+      </div>
+    </details>
+
+    <details class="table-view card figure-card" id="extended-results" open>
+      <summary>Extended results for {extended.length} models</summary>
+      <p class="subhead-note">Percent correct or successful. Reason and Plan are unweighted means over the eight reasoning and five planning tasks. Coverage follows the manuscript's Extended table, which excludes GPT-6 Astra and Claude-Haiku-5.5.</p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Extended leaderboard, scrolls horizontally">
+        <table>
+          <caption>Extended Set performance (%)</caption>
+          <thead><tr><th scope="col">Model</th><th scope="col">Reason</th><th scope="col">Plan</th>{TASKS.map((t) => <th scope="col">{t.name}</th>)}</tr></thead>
+          <tbody>{extended.map((m) => <tr><th scope="row">{m.name}</th><td>{fmt(m.reasoning, 2)}</td><td>{fmt(m.planning, 2)}</td>{m.scores.map((s) => <td>{fmt(s, 2)}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+      <p class="subhead-note">Scroll sideways to see every task.</p>
+    </details>
+  </div>
+</section>
+
+<style>
+  .release-cards, .release-resources, .composition { margin-bottom: 20px; }
+  .release-cards > .figure-card { margin-top: 0; }
+  #extended-results { scroll-margin-top: calc(var(--header-h) + 20px); }
+  .release-count { margin: 8px 0; font-size: clamp(2rem, 4vw, 3rem); font-weight: 750; color: var(--brand); font-variant-numeric: tabular-nums; }
+  p + p { margin-top: 12px; }
+  p { color: var(--ink-2); line-height: 1.65; }
+  .table-view .subhead-note { margin-top: 12px; }
+  caption { text-align: left; padding: 8px 10px; color: var(--ink-3); font-size: 0.85rem; }
+  tfoot { font-weight: 700; }
+</style>

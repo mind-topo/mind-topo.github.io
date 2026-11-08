@@ -22,9 +22,10 @@ const bestTask = TASKS.map((_, i) => bestOf((r) => r.scores[i]));
 ---
 <section id="results" class="section">
   <div class="wrap">
-    <SectionHeader id="results" title="Models recognize topology, but fail to act on it">
-      Results on the 3,900-instance Core Set: reasoning accuracy against planning success for every model. The gap
-      is the cost of having to <em>use</em> a topological relation instead of just naming it.
+    <SectionHeader id="results" title="Planning lags behind topology recognition">
+      Results on the 3,900-instance Core Set: reasoning accuracy against planning success for every model.
+      Across the evaluated models, identifying topological relations is more successful than acting on them.
+      All Core combines 150 Easy and 150 Hard instances per task. <a href="#release">Extended results are reported separately.</a>
     </SectionHeader>
 
     <div class="controls" data-reveal>

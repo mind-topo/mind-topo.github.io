@@ -26,10 +26,16 @@ const best = Object.entries(VIDEO_VERIFIER)
 ---
 <section id="imagination" class="section">
   <div class="wrap">
-    <SectionHeader id="imagination" title="Imagined rollouts reach the goal, but never by legal moves">
+    <SectionHeader id="imagination" title="Solved endpoints do not certify valid rollouts">
       Can image or video generation act as the world model that planning lacks? We let generators render the
-      next state, or a whole plan, and then check every frame.
+      next state, or a whole plan, and then check sampled states and transitions.
     </SectionHeader>
+    <p class="protocol-note">
+      Probing uses 105 episodes per task, 35 from each of three generator difficulty settings, including instances outside
+      the Core levels. The video verifier uses a separate sample of 1,890 rollouts. It parses 41 evenly spaced frames,
+      checks static constraints on four frames and dynamics between adjacent sampled frames, and requires every check to pass.
+      Its human validation mainly confirms rejections; it is a strict screen for invalid rollouts.
+    </p>
 
     <div class="im-hero">
       <figure class="im-clip" data-reveal>
@@ -48,7 +54,7 @@ const best = Object.entries(VIDEO_VERIFIER)
           </div>
           <div>
             <p class="im-big zero">{fmt(FACTS.video.bestProcessValid)}<span>%</span></p>
-            <p class="im-cap">of {FACTS.video.rollouts.toLocaleString('en-US')} rollouts are <strong>process-valid</strong>: every frame legal, every transition legal</p>
+            <p class="im-cap">of {FACTS.video.rollouts.toLocaleString('en-US')} audited rollouts pass <strong>all process-validity checks</strong> on sampled frames and transitions</p>
           </div>
         </div>
         <div class="audit">

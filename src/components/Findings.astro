@@ -27,7 +27,7 @@ const planGain = t.bestPlanning - t.basePlanning;
 
     <div class="findings-grid">
       <a href="#results" class="finding card f-gap" data-reveal>
-        <span class="f-kicker">Recognition does not transfer to action</span>
+        <span class="f-kicker">Planning lags behind reasoning</span>
         <span class="f-figure"><span data-countup={f.planBelowReason}>{f.planBelowReason}</span><span class="f-of">/ {f.models}</span></span>
         <span class="f-claim">models score lower on planning than on reasoning.</span>
         <span class="mini-gap" aria-hidden="true">
@@ -78,7 +78,7 @@ const planGain = t.bestPlanning - t.basePlanning;
         <span class="f-kicker">Imagination without validity</span>
         <span class="f-wide-body">
           <span class="f-figure"><span>0</span><span class="f-of">/ {f.video.rollouts.toLocaleString('en-US')}</span></span>
-          <span class="f-claim">generated video rollouts are process-valid. Six video models reach a solved final frame in up to <strong>{fmt(f.video.bestEndpoint)}%</strong> of rollouts, but none gets there through legal moves.</span>
+          <span class="f-claim">audited video rollouts pass all process-validity checks. Six video models reach a solved final frame in up to <strong>{fmt(f.video.bestEndpoint)}%</strong> of rollouts, while every audited rollout fails at least one check.</span>
         </span>
         <span class="f-link" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
       </a>

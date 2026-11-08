@@ -6,6 +6,7 @@ export const SECTIONS = [
   { id: 'findings', label: 'Key findings' },
   { id: 'play', label: 'Play the benchmark' },
   { id: 'results', label: 'The action gap' },
+  { id: 'release', label: 'Core & Extended' },
   { id: 'humans', label: 'Against humans' },
   { id: 'training', label: 'Training' },
   { id: 'errors', label: 'Failure modes' },
