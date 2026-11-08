@@ -10,7 +10,7 @@ Dataset: https://huggingface.co/datasets/MLL-Lab/MindTopo
 
 ## What is MindTopo?
 
-MindTopo is a benchmark of topological intuition for foundation models. It covers five topological properties (continuity, separation, order, enclosure, and knots) at two cognitive levels: reasoning over rendered scenes and planning in interactive environments. It has 13 procedurally generated task types with controllable difficulty and 3,900 evaluation instances, split evenly between an Easy and a Hard level.
+MindTopo is a benchmark of topological intuition for foundation models. It covers five topological properties (continuity, separation, order, enclosure, and knots) at two cognitive levels: reasoning over rendered scenes and planning in interactive environments. It has 13 procedurally generated task types with controllable difficulty. The primary Core Set contains 3,900 instances split evenly between an Easy and a Hard level, and the exact-input-disjoint Extended Set contains 8,780 additional instances.
 
 ## What is topological space, and why does it matter?
 
@@ -37,7 +37,7 @@ A fully automated four-stage pipeline with fixed seeds: scene generation (task-s
 
 ## How large is the benchmark?
 
-3,900 evaluation instances: each of the 13 tasks contributes 300 (150 Easy, 150 Hard), giving 2,400 reasoning questions over 8 tasks and 1,500 planning episodes over 5 tasks. The generators produce a larger pool of 11,030 instances for the public release.
+The Core Set has 3,900 evaluation instances: each of the 13 tasks contributes 300 (150 Easy, 150 Hard), giving 2,400 reasoning questions over 8 tasks and 1,500 planning episodes over 5 tasks. The Extended Set adds 8,780 instances with no exact-input overlap with Core.
 
 ## How do current models perform?
 
@@ -63,7 +63,7 @@ With GPT-5.6-Luna as planner, rendering the predicted next state with GPT-Image-
 
 ## Key numbers at a glance
 
-- 5 topological properties; 2 cognitive levels; 13 task types; 3,900 instances (2,400 reasoning, 1,500 planning; 150 Easy + 150 Hard per task).
+- 5 topological properties; 2 cognitive levels; 13 task types; 3,900 Core instances (2,400 reasoning, 1,500 planning; 150 Easy + 150 Hard per task); 8,780 exact-input-disjoint Extended instances.
 - 13 MLLMs evaluated; 7 video generative models studied.
 - Best model (GPT-6 Astra): 59.54% reasoning, 49.80% planning. Easy level: 76.33% / 81.87% vs. human 94.23% / 99.87%.
 - Video rollouts: up to 35.2% solved final frames, 0 of 1,890 process-valid.

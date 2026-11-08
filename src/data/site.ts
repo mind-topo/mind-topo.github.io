@@ -129,12 +129,12 @@ const verifier = paper.videoVerifier as Record<string, Record<string, { finalSta
 const verifierCells = Object.values(verifier).flatMap((byGen) => Object.values(byGen));
 
 export const FACTS = {
-  instances: 3900,
+  instances: paper.release.core,
+  extendedInstances: paper.release.extended,
   reasoningQuestions: 2400,
   planningEpisodes: 1500,
   perTask: 300,
   perLevel: 150,
-  generatorPool: 11030,
   models: MODELS.length,
   videoModels: 7,
   tasks: TASKS.length,

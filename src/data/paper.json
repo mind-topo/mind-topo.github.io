@@ -1,7 +1,7 @@
 {
   "source": {
-    "paper": "TMLR submission (tmlr/)",
-    "commit": "76cd919",
+    "paper": "arXiv manuscript (arxiv/)",
+    "commit": "7c5219f",
     "tables": {
       "main": "tables/01_new_dataset_table.tex",
       "easy": "tables/04_easy_level_human.tex",
@@ -11,7 +11,13 @@
       "errors_planning": "tables/04_error_analysis_planning.tex",
       "probing": "tables/03interleaved_probing.tex",
       "cv": "tables/03_cv_metric_results.tex"
-    }
+    },
+    "releaseCounts": "data/release_counts.json"
+  },
+  "release": {
+    "core": 3900,
+    "extended": 8780,
+    "deduplicationScope": "Exact model-input equality. Reasoning uses the normalized full question and ordered image-file SHA256s. Planning uses the saved initial scene, reset state and action budget, ignoring seed and difficulty tags. Shared IDs alone do not establish duplication; content-distinct reused IDs receive a legacy: prefix."
   },
   "tasks": [
     "2D Maze",

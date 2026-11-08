@@ -19,19 +19,20 @@ games run MindTopo's own engines (see [Playable games](#playable-games)).
 
 ## Updating the numbers
 
-Every score on the page comes from `src/data/paper.json`, which is generated from
-the paper's LaTeX tables (the TMLR version, the newest results):
+Every score and release count on the page comes from `src/data/paper.json`, which
+is generated from the current arXiv manuscript tables and release manifest:
 
 ```bash
-python3 scripts/sync-paper-data.py ../-NeurIPS-2026-TopoBench/tmlr
+python3 scripts/sync-paper-data.py ../topobench_arxiv/arxiv
 ```
 
 The script parses the main, Easy-level, difficulty, training, error-analysis,
-probing and video-verifier tables, cross-checks them (Easy + Hard must average to
-the main table; the Reason/Plan means must match), and refuses to write if they
-disagree. Headlines such as "13 of 13 models plan worse than they reason" are
-computed from the data, so they update with it. Only the per-task copy (questions,
-answers, error-example quotes) lives by hand in `src/data/site.ts`.
+probing and video-verifier tables plus `data/release_counts.json`. It cross-checks
+them (Easy + Hard must average to the main table; the Reason/Plan means and Core
+size must match) and refuses to write if they disagree. Headlines such as "13 of
+13 models plan worse than they reason" are computed from the data, so they update
+with it. Only the per-task copy (questions, answers, error-example quotes) lives
+by hand in `src/data/site.ts`.
 
 ## Page structure
 
