@@ -1,7 +1,7 @@
 {
   "source": {
     "paper": "arXiv manuscript (arxiv/)",
-    "commit": "7c5219f",
+    "commit": "4c15846",
     "tables": {
       "main": "tables/01_new_dataset_table.tex",
       "easy": "tables/04_easy_level_human.tex",
@@ -10,15 +10,385 @@
       "errors_reasoning": "tables/04_error_analysis_reasoning.tex",
       "errors_planning": "tables/04_error_analysis_planning.tex",
       "probing": "tables/03interleaved_probing.tex",
-      "cv": "tables/03_cv_metric_results.tex"
+      "cv": "tables/03_cv_metric_results.tex",
+      "extended": "tables/08_extended_results.tex"
     },
-    "releaseCounts": "data/release_counts.json"
+    "releaseCounts": "data/release_counts.json",
+    "extendedResults": "data/extended_results.json"
   },
   "release": {
     "core": 3900,
     "extended": 8780,
-    "deduplicationScope": "Exact model-input equality. Reasoning uses the normalized full question and ordered image-file SHA256s. Planning uses the saved initial scene, reset state and action budget, ignoring seed and difficulty tags. Shared IDs alone do not establish duplication; content-distinct reused IDs receive a legacy: prefix."
+    "deduplicationScope": "Exact model-input equality. Reasoning uses the normalized full question and ordered image-file SHA256s. Planning uses the saved initial scene, reset state and action budget, ignoring seed and difficulty tags. Shared IDs alone do not establish duplication; content-distinct reused IDs receive a legacy: prefix.",
+    "composition": [
+      {
+        "task": "continuity_2d_maze",
+        "label": "2D Maze",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 1000,
+        "extended": 850,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "continuity_3d_maze",
+        "label": "3D Maze",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 996,
+        "extended": 846,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "continuity_pipe",
+        "label": "Pipe",
+        "mode": "Planning",
+        "core": 300,
+        "original": 600,
+        "extended": 450,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "separation_objects",
+        "label": "Assembly",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 1040,
+        "extended": 890,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "separation_one_stroke",
+        "label": "One Stroke",
+        "mode": "Planning",
+        "core": 300,
+        "original": 600,
+        "extended": 450,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "order_bead_string",
+        "label": "Bead",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 1000,
+        "extended": 850,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "order_origami",
+        "label": "Origami Point",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 1000,
+        "extended": 1000,
+        "removed": {}
+      },
+      {
+        "task": "order_swap_2d_puzzle",
+        "label": "Swap",
+        "mode": "Planning",
+        "core": 300,
+        "original": 600,
+        "extended": 445,
+        "removed": {
+          "within_extended_input": 5,
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "enclosure_sheep",
+        "label": "Sheep",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 1000,
+        "extended": 700,
+        "removed": {
+          "core_input_overlap": 300
+        }
+      },
+      {
+        "task": "enclosure_hole_detection",
+        "label": "Hole",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 999,
+        "extended": 699,
+        "removed": {
+          "core_input_overlap": 300
+        }
+      },
+      {
+        "task": "enclosure_chat_noir",
+        "label": "Chat Noir",
+        "mode": "Planning",
+        "core": 300,
+        "original": 600,
+        "extended": 450,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "knots_static",
+        "label": "Knots",
+        "mode": "Reasoning",
+        "core": 300,
+        "original": 1000,
+        "extended": 850,
+        "removed": {
+          "core_input_overlap": 150
+        }
+      },
+      {
+        "task": "knots_untangle",
+        "label": "Untangle",
+        "mode": "Planning",
+        "core": 300,
+        "original": 600,
+        "extended": 300,
+        "removed": {
+          "core_input_overlap": 300
+        }
+      }
+    ],
+    "removedCoreOverlap": 2250,
+    "removedWithinExtended": 5
   },
+  "extendedModels": [
+    {
+      "name": "GPT-5.6-Sol",
+      "scores": [
+        88.71,
+        70.92,
+        60.0,
+        60.67,
+        41.11,
+        64.71,
+        77.0,
+        86.74,
+        78.29,
+        80.11,
+        70.67,
+        66.71,
+        40.33
+      ],
+      "reasoning": 73.39,
+      "planning": 59.77
+    },
+    {
+      "name": "GPT-5.5",
+      "scores": [
+        67.29,
+        51.18,
+        2.89,
+        57.42,
+        13.11,
+        39.88,
+        60.0,
+        50.11,
+        67.29,
+        79.54,
+        39.56,
+        64.82,
+        44.33
+      ],
+      "reasoning": 60.93,
+      "planning": 30.0
+    },
+    {
+      "name": "GPT-5.4-mini",
+      "scores": [
+        17.53,
+        22.34,
+        0.22,
+        36.18,
+        0.0,
+        32.47,
+        27.2,
+        13.71,
+        25.71,
+        23.75,
+        8.44,
+        28.59,
+        44.33
+      ],
+      "reasoning": 26.72,
+      "planning": 13.34
+    },
+    {
+      "name": "Gemini-3.1-Flash-Lite",
+      "scores": [
+        33.76,
+        36.05,
+        0.0,
+        45.73,
+        0.0,
+        39.76,
+        42.2,
+        11.69,
+        63.14,
+        31.62,
+        8.44,
+        71.53,
+        36.67
+      ],
+      "reasoning": 45.48,
+      "planning": 11.36
+    },
+    {
+      "name": "Gemini-3.1-Pro",
+      "scores": [
+        36.12,
+        58.27,
+        7.33,
+        53.82,
+        4.44,
+        51.88,
+        41.1,
+        22.47,
+        78.43,
+        76.11,
+        45.11,
+        75.29,
+        52.0
+      ],
+      "reasoning": 58.88,
+      "planning": 26.27
+    },
+    {
+      "name": "Nemotron-Nano-12B-VL-v2",
+      "scores": [
+        14.12,
+        11.82,
+        0.0,
+        28.88,
+        0.0,
+        20.47,
+        26.7,
+        1.57,
+        20.43,
+        9.87,
+        0.22,
+        28.35,
+        6.0
+      ],
+      "reasoning": 20.08,
+      "planning": 1.56
+    },
+    {
+      "name": "Qwen3.5-397B-A17B",
+      "scores": [
+        14.0,
+        38.65,
+        0.0,
+        44.83,
+        0.0,
+        21.88,
+        42.6,
+        12.36,
+        9.43,
+        34.91,
+        11.78,
+        36.59,
+        15.0
+      ],
+      "reasoning": 30.36,
+      "planning": 7.83
+    },
+    {
+      "name": "Llama-4-Maverick-17B-128E",
+      "scores": [
+        25.65,
+        17.97,
+        0.0,
+        35.73,
+        0.0,
+        30.94,
+        17.1,
+        7.42,
+        15.57,
+        3.72,
+        2.44,
+        35.88,
+        12.67
+      ],
+      "reasoning": 22.82,
+      "planning": 4.51
+    },
+    {
+      "name": "Ministral-3-14B-Instruct-2512",
+      "scores": [
+        20.35,
+        12.41,
+        0.0,
+        28.76,
+        0.0,
+        16.47,
+        18.4,
+        5.17,
+        16.29,
+        7.3,
+        5.33,
+        47.88,
+        20.67
+      ],
+      "reasoning": 20.98,
+      "planning": 6.23
+    },
+    {
+      "name": "InternVL3.5-241B",
+      "scores": [
+        17.18,
+        11.82,
+        0.0,
+        12.7,
+        0.0,
+        27.29,
+        19.5,
+        5.62,
+        22.86,
+        22.03,
+        1.33,
+        49.88,
+        7.33
+      ],
+      "reasoning": 22.91,
+      "planning": 2.86
+    },
+    {
+      "name": "Gemma-4-31B-IT",
+      "scores": [
+        30.35,
+        18.68,
+        0.0,
+        19.1,
+        0.0,
+        9.41,
+        1.6,
+        1.35,
+        9.29,
+        0.0,
+        17.33,
+        6.24,
+        19.67
+      ],
+      "reasoning": 11.83,
+      "planning": 7.67
+    }
+  ],
   "tasks": [
     "2D Maze",
     "3D Maze",

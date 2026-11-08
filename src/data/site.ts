@@ -2,13 +2,14 @@
 // Every score comes from paper.json, which scripts/sync-paper-data.py regenerates
 // from the paper's LaTeX tables; nothing numeric is typed in by hand here.
 import paper from './paper.json';
+import examples from './examples.json';
 
 export type Level = 'all' | 'easy' | 'hard';
 export type Kind = 'reasoning' | 'planning';
 export type PropertyId = 'continuity' | 'separation' | 'order' | 'enclosure' | 'knots';
 
 export const LEVELS: { id: Level; label: string; hint: string }[] = [
-  { id: 'all', label: 'All', hint: '300 instances per task' },
+  { id: 'all', label: 'All Core', hint: 'Core Easy + Hard · 300 instances per task' },
   { id: 'easy', label: 'Easy', hint: '150 per task · human-evaluated' },
   { id: 'hard', label: 'Hard', hint: '150 per task' },
 ];
@@ -167,7 +168,8 @@ export interface TaskDetail {
   /** Reasoning tasks: the reference answer. */
   answer?: string;
   /** Multiple-choice reasoning tasks: options, with the correct one marked. */
-  options?: { label: string; image?: string; correct?: boolean }[];
+  options?: { label: string; image?: string; width?: number; height?: number; correct?: boolean }[];
+  source?: { id: string; level: string; manifest: string };
   /** The scene; Origami lists its fold states in order. */
   media: { src: string; label?: string; width: number; height: number }[];
 }
@@ -187,21 +189,8 @@ export const TASK_DETAILS: Record<string, TaskDetail> = {
     answer: '[C, F]',
     media: [img('maze3d', 300, 546)],
   },
-  Assembly: {
-    prompt: 'Which option shows a correct subassembly of this shelf?',
-    media: [img('assembly', 336, 336)],
-    options: [
-      { label: 'A', image: '/media/tasks/assembly-a.webp' },
-      { label: 'B', image: '/media/tasks/assembly-b.webp' },
-      { label: 'C', image: '/media/tasks/assembly-c.webp', correct: true },
-      { label: 'D', image: '/media/tasks/assembly-d.webp' },
-    ],
-  },
-  Bead: {
-    prompt: 'List the bead colours in order along the string.',
-    answer: '[Yellow, Red, …]',
-    media: [img('bead', 547, 547)],
-  },
+  Assembly: examples.Assembly,
+  Bead: examples.Bead,
   'Origami Point': {
     prompt: 'Track the marked point from state 1 to state 14 of the fold.',
     answer: '[F]',

@@ -27,12 +27,31 @@ python3 scripts/sync-paper-data.py ../topobench_arxiv/arxiv
 ```
 
 The script parses the main, Easy-level, difficulty, training, error-analysis,
-probing and video-verifier tables plus `data/release_counts.json`. It cross-checks
+probing, video-verifier and Extended tables plus `data/release_counts.json` and
+`data/extended_results.json`. It cross-checks
 them (Easy + Hard must average to the main table; the Reason/Plan means and Core
 size must match) and refuses to write if they disagree. Headlines such as "13 of
 13 models plan worse than they reason" are computed from the data, so they update
-with it. Only the per-task copy (questions, answers, error-example quotes) lives
-by hand in `src/data/site.ts`.
+with it. Extended denominators and percentages must match the result counts and
+release composition, and the two sets are displayed in separate tables.
+
+Update the downloadable manuscript, compressed manifests, and Core examples with:
+
+```bash
+python3 scripts/sync-release-assets.py ../topobench_arxiv/arxiv ../topobench
+```
+
+This requires Pillow and Poppler's `pdftotext`. It verifies the two example
+records and every source image against the Core manifest before exporting
+Assembly's five options and Bead's complete answer to `src/data/examples.json`.
+It copies `arxiv/arxiv.pdf` after checking that its abstract names both current
+sets. Keep that compiled PDF current with the manuscript before running this
+command. The manifest downloads contain input identifiers, source locations,
+and hashes, rather than full question records or images.
+
+Other per-task copy and error-example quotes live in `src/data/site.ts`.
+`public/llms.txt` and `public/llms-full.txt` are hand-maintained summaries and
+must be checked when changing the release or evaluation protocols.
 
 ## Page structure
 
@@ -45,8 +64,9 @@ tracks the current section.
 | Overview | `Hero.astro` | count-up stats, deforming-loop motif |
 | Teaser video | `TeaserVideo.astro` | loads only on play |
 | Key findings | `Findings.astro` | six cards linking to their evidence |
-| Play the benchmark | `Play.astro` | the five planning gyms on real benchmark boards; reasoning-question quiz |
+| Play the benchmark | `Play.astro` | five generator demos with separate Core reference scores; reasoning-question quiz |
 | The action gap | `Results.astro` | difficulty switch, dumbbell chart, sortable heatmap leaderboard |
+| Core & Extended | `Release.astro` | separate Extended results, per-task composition, manuscript and manifest downloads |
 | Against humans | `Humans.astro` | model picker, morphing radar, largest gaps |
 | Training | `Training.astro` | method switch |
 | Failure modes | `Errors.astro` | model switch, linked legend / bars / example gallery |
@@ -61,11 +81,14 @@ chart has a "Show data table" twin. Motion respects `prefers-reduced-motion`.
 public/
   media/               teaser video + poster, rollout clips, task / error / figure images (WebP)
   games/               benchmark boards for the playable games
+  paper/               current compiled manuscript (PDF)
+  release/             compressed input manifests, composition and Extended result counts
   og-card.jpg          social preview card
   llms.txt             short LLM-facing summary
   llms-full.txt        extended LLM-facing reference
 scripts/
   sync-paper-data.py   regenerates src/data/paper.json from the paper's tables
+  sync-release-assets.py   exports the manuscript, release files and two verified Core examples
   build-game-instances.py, build-untangle-solutions.ts, serve-record.py   playable boards (see Playable games)
 src/
   data/                paper.json (generated), site.ts, people.ts, nav.ts, results.ts, humans.ts
@@ -89,6 +112,12 @@ one with input, the models' move budget, undo and solution playback; three.js
 and each game load only when the game is opened.
 
 Boards come from the code repo's `environments/<env>/output/question.jsonl`:
+
+The demos retain the original generator's Easy / Medium / Hard tiers. Those
+labels are independent of Core Easy / Hard. The adjacent human and model scores
+always refer to Core and do not change when the selected demo tier changes.
+Do not relabel these boards as Core instances without matching the release
+manifest's input hashes and Core levels.
 
 ```bash
 python3 scripts/build-game-instances.py ../MindTopo          # public/games/<game>.json

@@ -7,15 +7,23 @@ Key facts:
 - Five properties: continuity (is there an unbroken path?), separation (one whole or distinct parts?), order (what comes before what?), enclosure (inside or outside?), and knots (truly knotted or just tangled?).
 - Two cognitive levels: reasoning (identify a topological relation in a rendered scene, or predict how it changes) and planning (act as a closed-loop agent in an interactive gym until a topological goal holds).
 - Scale: the Core Set has 3,900 instances (2,400 reasoning questions, 1,500 planning episodes), 300 per task with 150 Easy and 150 Hard. The Extended Set adds 8,780 instances with no exact-input overlap with Core.
-- Results: 13 MLLMs evaluated. Every model scores lower on planning than on reasoning. The best, GPT-6 Astra, averages 59.54% on reasoning and 49.80% on planning. On the Easy level, where humans were evaluated, it reaches 76.33% / 81.87% against 94.23% / 99.87% for humans. No open-weight model exceeds 1% average planning success (random legal actions: 0.53%).
+- Core results: 13 MLLMs evaluated. Every model scores lower on planning than on reasoning. The best, GPT-6 Astra, averages 59.54% on reasoning and 49.80% on planning. On Core Easy, where humans were evaluated, it reaches 76.33% / 81.87% against 94.23% / 99.87% for humans. No open-weight model exceeds 1% average planning success (random legal actions: 0.53%).
+- Extended results: 11 models are reported separately after removing Core overlaps and within-set duplicates. GPT-5.6-Sol leads with 73.39% reasoning and 59.77% planning. Core and Extended scores are not pooled.
 - Training: on Qwen3-VL-2B-Instruct, SFT followed by RL lifts average reasoning accuracy from 14.24% to 51.53% but planning success only from 0.20% to 6.33%; gains on held-out tasks are uneven.
-- Visual imagination: generated next-state images help where a local cue suffices (Sheep, 2D Maze) but not on trajectory-wide invariants (One Stroke). Six video generators reach a solved final frame in up to 35.2% of rollouts, yet 0 of 1,890 rollouts are process-valid. A manual audit of 119 Wan2.2-I2V-A14B rollouts found dynamics violations in 116.
+- Protocol scope: single-task training uses 80/10/10 splits of Easy data, with complete planning sequences predicted from the initial observation. Probing uses 105 episodes per task over three generator difficulty settings, including instances outside Core. These experiments use different protocols from the Core leaderboard. The video verifier parses 41 sampled frames, checks static constraints on four and dynamics between adjacent samples.
+- Visual imagination: generated next-state images help where a local cue suffices (Sheep, 2D Maze) but not on trajectory-wide invariants (One Stroke). Six video generators reach a solved final frame in up to 35.2% of rollouts, yet none of the 1,890 evaluated rollouts passes all process-validity checks. A manual audit of 119 Wan2.2-I2V-A14B rollouts found dynamics violations in 116.
 
 ## Links
 - [Project page](https://mind-topo.github.io/)
-- [Paper on arXiv](https://arxiv.org/abs/2609.11900)
+- [Current manuscript PDF](https://mind-topo.github.io/paper/mindtopo-current.pdf)
+- [Core and Extended results and release files](https://mind-topo.github.io/#release)
+- [Core input manifest](https://mind-topo.github.io/release/core_manifest.jsonl.gz)
+- [Extended input manifest](https://mind-topo.github.io/release/extended_manifest.jsonl.gz)
+- [Earlier arXiv v1](https://arxiv.org/abs/2609.11900v1)
 - [Code on GitHub](https://github.com/mll-lab-nu/MindTopo)
-- [Dataset on Hugging Face](https://huggingface.co/datasets/MLL-Lab/MindTopo)
+- [Earlier Hugging Face snapshot](https://huggingface.co/datasets/MLL-Lab/MindTopo)
+
+The current manuscript and manifests define the Core / Extended split. The arXiv v1 and Hugging Face snapshot describe earlier compositions. Manifests contain input identifiers, source locations and hashes; use them with the benchmark source files for full inputs and rendered images.
 
 ## Citation
 @article{ge2026mindtopo,

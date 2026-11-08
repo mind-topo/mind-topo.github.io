@@ -123,7 +123,7 @@ function initPlayground() {
       const best = instance.optimal;
       showOverlay('win', `Solved in ${s.moves} moves`, best ? (s.moves <= best ? 'That matches the shortest known solution.' : `The shortest known solution takes ${best}.`) : `Within the ${s.budget}-move budget.`);
     } else if (s.failed) {
-      showOverlay('lose', s.reason ?? 'Out of moves.', `The models had the same ${s.budget}-move budget.`);
+      showOverlay('lose', s.reason ?? 'Out of moves.', `This demo board has a ${s.budget}-move budget.`);
     } else {
       overlay.hidden = true;
     }

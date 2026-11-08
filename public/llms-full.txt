@@ -4,9 +4,11 @@ Paper: "MindTopo: Can Foundation Models Reason in Topological Space?"
 Authors: Yunfei Ge, Anbang Liu, Qineng Wang, Johnalbert Garnica, Jianwen Lyu, Zihan Wang, Reuben Tan, Jianfeng Gao, Ruohan Zhang, Yining Hong, Jiajun Wu, Manling Li.
 Affiliations: Northwestern University, Microsoft Research, Stanford University.
 Project page: https://mind-topo.github.io/
-Paper: https://arxiv.org/abs/2609.11900
+Current manuscript: https://mind-topo.github.io/paper/mindtopo-current.pdf
+Core and Extended results and release files: https://mind-topo.github.io/#release
+Earlier arXiv v1: https://arxiv.org/abs/2609.11900v1
 Code: https://github.com/mll-lab-nu/MindTopo
-Dataset: https://huggingface.co/datasets/MLL-Lab/MindTopo
+Earlier Hugging Face snapshot: https://huggingface.co/datasets/MLL-Lab/MindTopo
 
 ## What is MindTopo?
 
@@ -19,8 +21,8 @@ Spatial reasoning involves more than metric properties such as distance, angle, 
 ## What are the five topological properties and their tasks?
 
 - Continuity: whether a path or surface forms an unbroken whole. Reasoning tasks (2D Maze, 3D Maze): which marked points are reachable from a target point, with what-if questions about adding or removing a wall. Planning task (Pipe): rotate pipe segments by 90 degrees until every segment connects back to the source.
-- Separation: the complement of proximity, the basis of object individuation. Reasoning task (Assembly): given an assembled object and candidate sub-assemblies, select the topologically separable component. Planning task (One Stroke): draw a single path through a colored grid that keeps same-colored cells together and separates different colors.
-- Order: the sequential arrangement of elements along a path. Reasoning tasks (Bead, Origami Point): list bead colors along a twisted string from a starting bead, or track marked points through a sequence of folds. Planning task (Swap): reach a target color permutation by moving blocks into a single empty slot.
+- Separation: the complement of proximity, the basis of object individuation. Reasoning task (Assembly): select one of five candidate pairs of subassemblies that exactly reconstructs the complete object, with no missing, extra, or substituted parts. Planning task (One Stroke): draw a single path through a colored grid that keeps same-colored cells together and separates different colors.
+- Order: the sequential arrangement of elements along a path. Reasoning tasks (Bead, Origami Point): list bead colors along a twisted string from the marked starting bead in the indicated direction, or track marked points through a sequence of folds. Planning task (Swap): reach a target color permutation by moving blocks into a single empty slot.
 - Enclosure: the inside/outside relation induced by a closed boundary. Reasoning tasks (Sheep, Hole): which animals lie strictly inside a fence, and how many through-holes a solid has. Planning task (Chat Noir): place one block per turn on a hexagonal grid to trap a cat before it reaches the edge.
 - Knots: entanglement that persists under deformation, the "mother structure" coordinating other topological relations. Reasoning task (Knots): is a loop truly knotted or only tangled, are two loops linked, which rings become free after one is cut. Planning task (Untangle): move rope ends on a peg grid until no two ropes cross.
 
@@ -39,9 +41,22 @@ A fully automated four-stage pipeline with fixed seeds: scene generation (task-s
 
 The Core Set has 3,900 evaluation instances: each of the 13 tasks contributes 300 (150 Easy, 150 Hard), giving 2,400 reasoning questions over 8 tasks and 1,500 planning episodes over 5 tasks. The Extended Set adds 8,780 instances with no exact-input overlap with Core.
 
+Extended is formed by removing 2,250 Core overlaps and five repeated Swap inputs from an original pool of 11,035. Equality is defined on exact model inputs: the normalized question and ordered image-file hashes for reasoning, and the saved initial scene, reset state and action budget for planning. Seed or difficulty labels alone do not establish whether two inputs are the same. Core and Extended results are never pooled.
+
+Core manifest: https://mind-topo.github.io/release/core_manifest.jsonl.gz
+Extended manifest: https://mind-topo.github.io/release/extended_manifest.jsonl.gz
+Per-task composition and deduplication record: https://mind-topo.github.io/release/release_counts.json
+Extended result counts: https://mind-topo.github.io/release/extended_results.json
+
+Manifests contain identifiers, source locations and hashes, rather than full inputs or rendered images. Use them with the benchmark source files to select the evaluation instances. The arXiv v1 and Hugging Face snapshot linked above describe earlier compositions; the current manuscript and manifests define the split used on the website.
+
+## How do the playable demos relate to Core?
+
+The five planning demos use boards from the original generator pool and retain its Easy / Medium / Hard tiers and each board's action budget. These demo tiers are independent of Core Easy / Hard. The displayed reference scores are always Core results and do not change when a demo tier changes. Assembly and Bead use verified Core Easy examples, with all five Assembly options and the complete Bead answer.
+
 ## How do current models perform?
 
-13 hosted MLLMs were evaluated with deterministic decoding: GPT-6 Astra, GPT-5.6-Sol, GPT-5.5, GPT-5.4-mini, Gemini-3.1-Flash-Lite, Gemini-3.1-Pro, Claude-Haiku-5.5 (proprietary); Nemotron-Nano-12B-VL-v2, Qwen3.5-397B-A17B, Llama-4-Maverick-17B-128E, Ministral-3-14B-Instruct-2512, InternVL3.5-241B, Gemma-4-31B-IT (open-weight).
+On Core, 13 hosted MLLMs were evaluated with deterministic decoding: GPT-6 Astra, GPT-5.6-Sol, GPT-5.5, GPT-5.4-mini, Gemini-3.1-Flash-Lite, Gemini-3.1-Pro, Claude-Haiku-5.5 (proprietary); Nemotron-Nano-12B-VL-v2, Qwen3.5-397B-A17B, Llama-4-Maverick-17B-128E, Ministral-3-14B-Instruct-2512, InternVL3.5-241B, Gemma-4-31B-IT (open-weight).
 
 - Every model scores lower on planning than on reasoning. GPT-6 Astra leads both: 59.54% reasoning, 49.80% planning.
 - The gap widens below the frontier: Claude-Haiku-5.5 drops from 19.87% to 5.40%, Gemini-3.1-Pro from 19.17% to 4.20%.
@@ -49,9 +64,13 @@ The Core Set has 3,900 evaluation instances: each of the 13 tasks contributes 30
 - Untangle is the hardest planning environment (best 20.67%); Swap is the most accessible below the frontier.
 - Humans (five professional annotators, Easy level, inter-annotator agreement 0.89) reach 94.23% on reasoning and 99.87% on planning; GPT-6 Astra reaches 76.33% and 81.87%. It matches humans on 2D Maze, Pipe, and Swap but trails far behind on Untangle, Bead, Sheep, and Hole.
 
+Extended reports 11 models separately, excluding GPT-6 Astra and Claude-Haiku-5.5 from its table. GPT-5.6-Sol leads with 73.39% reasoning and 59.77% planning. Reason and Plan are unweighted task means, not pooled instance accuracy. The website's All Core control combines Core Easy and Core Hard only.
+
 ## Does training help?
 
 Qwen3-VL-2B-Instruct was trained on the Easy level with supervised fine-tuning (SFT), GRPO reinforcement learning (RL), and SFT followed by RL. SFT followed by RL lifts average reasoning accuracy from 14.24% to 51.53% (Knots 11.20% to 79.60%, Sheep 9.40% to 58.20%), but average planning success only from 0.20% to 6.33%; Pipe stays at 0%. 2D Maze, which needs connectivity across the whole scene, barely improves. Leave-one-task-out RL transfers to held-out tasks only in selected cases.
+
+Single-task training uses 80% / 10% / 10% training, validation and test splits with seed 20260705. Planning predicts a complete action sequence from the initial observation and executes it without further model feedback. Bead uses a simplified variant. Held-out reasoning runs train on four tasks, with one fifth of the fifth task for validation and four fifths for test. These test scores use a different protocol from the Core leaderboard's closed-loop evaluation.
 
 ## Where do models fail?
 
@@ -61,12 +80,14 @@ Qwen3-VL-2B-Instruct was trained on the Easy level with supervised fine-tuning (
 
 With GPT-5.6-Luna as planner, rendering the predicted next state with GPT-Image-2 raises success to 68.57% on Sheep and 61.90% on 2D Maze but gives 0% on One Stroke: generated frames keep local cues but not invariants that span a trajectory. An automatic verifier checked 1,890 video rollouts from six video generators (LTX-2.3, LTX-2.5, Veo-3.1-Lite, Wan2.2-I2V-A14B, MiniMax-H3, Seedance-2.5) on One Stroke, Pipe, and Untangle. Up to 35.2% of rollouts end in a solved final frame, yet the process-valid rate is 0.0% for every generator on every task. A manual audit of 119 Wan2.2-I2V-A14B rollouts found dynamics violations in 116, topological-invariance errors in 93, and consistency errors in 90.
 
+Probing conditions and the Luna planning baselines use 105 episodes per task, 35 from each of three generator difficulty settings, including instances outside Core's two levels. The manual audit and automatic verifier use separate samples. The verifier parses 41 evenly spaced frames, applies static checks to four frames and dynamics checks between adjacent sampled frames, and requires every check to pass. Its human validation mainly confirms rejections and does not establish calibrated acceptance of valid rollouts.
+
 ## Key numbers at a glance
 
 - 5 topological properties; 2 cognitive levels; 13 task types; 3,900 Core instances (2,400 reasoning, 1,500 planning; 150 Easy + 150 Hard per task); 8,780 exact-input-disjoint Extended instances.
 - 13 MLLMs evaluated; 7 video generative models studied.
 - Best model (GPT-6 Astra): 59.54% reasoning, 49.80% planning. Easy level: 76.33% / 81.87% vs. human 94.23% / 99.87%.
-- Video rollouts: up to 35.2% solved final frames, 0 of 1,890 process-valid.
+- Video rollouts: up to 35.2% solved final frames, 0 of 1,890 evaluated rollouts pass all process-validity checks.
 
 ## Contributions
 

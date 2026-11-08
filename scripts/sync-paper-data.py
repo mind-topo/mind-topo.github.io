@@ -27,6 +27,7 @@ SOURCES = {
     "errors_planning": "tables/04_error_analysis_planning.tex",
     "probing": "tables/03interleaved_probing.tex",
     "cv": "tables/03_cv_metric_results.tex",
+    "extended": "tables/08_extended_results.tex",
 }
 
 # Column order shared by the main, Easy and difficulty tables.
@@ -159,6 +160,8 @@ def main(root: Path) -> int:
     release_path = root / "data/release_counts.json"
     release_counts = json.loads(release_path.read_text())
     main_rows = parse_main(tex["main"])
+    extended_rows = parse_main(tex["extended"])
+    extended_results = json.loads((root / "data/extended_results.json").read_text())
     easy_rows = parse_main(tex["easy"])
     difficulty = parse_difficulty(tex["difficulty"])
 
@@ -171,6 +174,30 @@ def main(root: Path) -> int:
         )
     if release_counts.get("extended", 0) <= 0:
         problems.append("release Extended count is missing or non-positive")
+    composition = release_counts["tasks"]
+    if sum(t["core"] for t in composition) != release_counts["core"]:
+        problems.append("per-task Core counts do not sum to release total")
+    if sum(t["extended"] for t in composition) != release_counts["extended"]:
+        problems.append("per-task Extended counts do not sum to release total")
+    if set(extended_rows) != set(extended_results["models"]):
+        problems.append("Extended table and result file list different models")
+    task_envs = {t["label"]: t["task"] for t in composition}
+    for model, row in extended_rows.items():
+        for i, task in enumerate(TASKS):
+            env = task_envs[task]
+            counts = extended_results["models"].get(model, {}).get(env, {})
+            expected_total = next(t["extended"] for t in composition if t["task"] == env)
+            if counts.get("total") != expected_total:
+                problems.append(f"{model} / {task}: Extended denominator != release count")
+            rate = extended_results["display_rates"].get(model, {}).get(env)
+            if rate is None or abs(row["tasks"][i] - rate) > 0.005:
+                problems.append(f"{model} / {task}: Extended table != result file")
+            if counts.get("total", 0) > 0 and rate is not None:
+                if abs(100 * counts["correct"] / counts["total"] - rate) > 0.0051:
+                    problems.append(f"{model} / {task}: Extended percentage != correct/total")
+        for key, idx in (("reason", [0, 1, 3, 5, 6, 8, 9, 11]), ("plan", [2, 4, 7, 10, 12])):
+            if abs(sum(row["tasks"][i] for i in idx) / len(idx) - row[key]) > 0.02:
+                problems.append(f"{model}: Extended {key} mean != table")
     models = [m for m in main_rows if m != "Random Chance"]
     for model in models:
         all_scores = main_rows[model]["tasks"]
@@ -204,12 +231,20 @@ def main(root: Path) -> int:
             "commit": commit,
             "tables": SOURCES,
             "releaseCounts": "data/release_counts.json",
+            "extendedResults": "data/extended_results.json",
         },
         "release": {
             "core": release_counts["core"],
             "extended": release_counts["extended"],
             "deduplicationScope": release_counts["deduplication_scope"],
+            "composition": composition,
+            "removedCoreOverlap": release_counts["removed_core_overlap"],
+            "removedWithinExtended": release_counts["removed_within_extended"],
         },
+        "extendedModels": [
+            {"name": name, "scores": row["tasks"], "reasoning": row["reason"], "planning": row["plan"]}
+            for name, row in extended_rows.items()
+        ],
         "tasks": TASKS,
         "models": [
             {
