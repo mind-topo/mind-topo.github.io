@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from mll-lab-nu/MindTopo @ 3e977584 (Core expert frontend).
+// Vendored from MLL-Lab/MindTopo @ 3e977584 (Core expert frontend).
 import { ChatNoirRenderer } from "./render.ts";
 import { ExpertEngine, EXPERT_BLOCK_RANGE } from "./chat_noir_expert.ts";
 

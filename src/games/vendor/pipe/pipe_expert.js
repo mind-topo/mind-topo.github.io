@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from mll-lab-nu/MindTopo @ 3e977584.
+// Vendored from MLL-Lab/MindTopo @ 3e977584.
 // Expert-only overpasses. Keep generation, search order and limits in sync
 // with gym/pipe_expert.py. Every physical + is two independent channels.
 export const EXPERT_PIPE_RULE = "overpass_v1";

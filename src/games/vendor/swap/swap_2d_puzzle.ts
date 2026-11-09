@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from mll-lab-nu/MindTopo @ 3e977584 (Core expert frontend).
+// Vendored from MLL-Lab/MindTopo @ 3e977584 (Core expert frontend).
 import { Swap2DPuzzleRenderer } from "./render.ts";
 import { EXPERT_STEP_BUDGET, EXPERT_MOVE_RULE, expertLegalActions, sampleExpert, solveExpert } from "./swap_2d_puzzle_expert.ts";
 

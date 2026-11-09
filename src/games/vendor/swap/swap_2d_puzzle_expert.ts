@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from mll-lab-nu/MindTopo @ 3e977584.
+// Vendored from MLL-Lab/MindTopo @ 3e977584.
 // Expert only; mirrors gym/swap_2d_puzzle_expert.py.
 export const EXPERT_MOVE_RULE = "row_column_v1";
 export const EXPERT_STEP_RANGE = [40, 44];

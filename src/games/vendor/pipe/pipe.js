@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from mll-lab-nu/MindTopo @ 3e977584 (Core expert frontend).
+// Vendored from MLL-Lab/MindTopo @ 3e977584 (Core expert frontend).
 // See ../README.md for provenance and local integration notes.
 import { EXPERT_PIPE_RULE, MIXED_PIPE_RULE, isExpertPipeRule, CLASSIC_PIPE_RULE, sampleExpertPipe, expertConnectivity,
   validateExpertTarget, doubleBendState, drawOverpass, drawDoubleBend } from "./pipe_expert.js";

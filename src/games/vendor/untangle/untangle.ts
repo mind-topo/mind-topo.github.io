@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/knots_untangle/frontend/src/untangle.ts). See ../README.md for local patches.
+// Vendored from github.com/MLL-Lab/MindTopo @ 96ac4d1 (environments/knots_untangle/frontend/src/untangle.ts). See ../README.md for local patches.
 // @ts-nocheck
 import * as THREE from "three";
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from mll-lab-nu/MindTopo @ 3e977584.
+// Vendored from MLL-Lab/MindTopo @ 3e977584.
 // Mirrors gym/chat_noir_expert.py. BigInt preserves all 61 board bits.
 export const EXPERT_BLOCK_RANGE = [10, 13];
 const NODE_LIMIT = 200000;

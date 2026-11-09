@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/order_swap_2d_puzzle/frontend/src/render.ts). See ../README.md for local patches.
+// Vendored from github.com/MLL-Lab/MindTopo @ 96ac4d1 (environments/order_swap_2d_puzzle/frontend/src/render.ts). See ../README.md for local patches.
 function colorFor(blockId, paletteById) {
   return paletteById.get(blockId)?.color ?? "#5d6b7a";
 }
