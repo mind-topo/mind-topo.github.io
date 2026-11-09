@@ -8,9 +8,8 @@ import { GAMES, scoresFor } from '../games/meta';
 import { PROPERTIES, TASKS, TASK_DETAILS, HUMAN, MODELS, taskIndex, fmt } from '../data/site';
 
 const DIFFICULTIES = [
-  { id: 'easy', label: 'Easy' },
-  { id: 'medium', label: 'Medium' },
-  { id: 'hard', label: 'Hard' },
+  { id: 'easy', label: 'Core Easy' },
+  { id: 'hard', label: 'Core Hard' },
 ];
 
 const reasoning = TASKS.filter((t) => t.kind === 'reasoning').map((t) => {
@@ -22,9 +21,8 @@ const reasoning = TASKS.filter((t) => t.kind === 'reasoning').map((t) => {
 <section id="play" class="section tinted">
   <div class="wrap">
     <SectionHeader id="play" title="Try the planning environments">
-      These demos run MindTopo's own engines on boards from the original generator pool, with each board's action budget.
-      Demo Easy, Medium, and Hard refer to generator tiers; Core uses its own Easy and Hard levels.
-      The reference scores below are Core results, independent of the selected demo tier.
+      These demos run MindTopo's own engines on input-hash-verified boards selected directly from the Core manifest.
+      Core Easy and Core Hard use the same instances, rules, initial states, and action budgets as the primary evaluation.
     </SectionHeader>
 
     <div class="play" data-reveal>
@@ -67,8 +65,8 @@ const reasoning = TASKS.filter((t) => t.kind === 'reasoning').map((t) => {
             );
           })}
 
-          <p class="gp-tier-label">Generator demo tier</p>
-          <div class="segmented gp-level" role="radiogroup" aria-label="Generator demo tier, independent of Core levels" id="game-level">
+          <p class="gp-tier-label">Core level</p>
+          <div class="segmented gp-level" role="radiogroup" aria-label="Core benchmark level" id="game-level">
             {DIFFICULTIES.map((d, i) => (
               <button role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-value={d.id}>{d.label}</button>
             ))}

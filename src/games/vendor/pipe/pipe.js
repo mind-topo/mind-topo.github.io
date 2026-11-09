@@ -1,5 +1,9 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/continuity_pipe/frontend/src/pipe.js). See ../README.md for local patches.
+// Vendored from MLL-Lab/MindTopo @ 3e977584 (Core expert frontend).
+// See ../README.md for provenance and local integration notes.
+import { EXPERT_PIPE_RULE, MIXED_PIPE_RULE, isExpertPipeRule, CLASSIC_PIPE_RULE, sampleExpertPipe, expertConnectivity,
+  validateExpertTarget, doubleBendState, drawOverpass, drawDoubleBend } from "./pipe_expert.js";
+
 const DIRS = Object.freeze([
   { name: "N", dx: 0, dy: -1, bit: 1 },
   { name: "E", dx: 1, dy: 0, bit: 2 },
@@ -23,10 +27,10 @@ const DEFAULT_CONFIG = Object.freeze({
   solvedMasks: null,
   rotations: null,
   maxSteps: null,
-  illegalReward: -1.0,
+  illegalReward: -0.1,
   moveReward: -0.01,
-  successReward: 1.0,
-  timeoutPenalty: -1.0
+  successReward: 3.0,
+  timeoutPenalty: -0.3
 });
 
 const MIN_GRID_SIZE = 3;
@@ -52,6 +56,16 @@ const DIFFICULTY_SETUPS = Object.freeze({
     activePipeCount: [17, 23],
     junctionCount: [5, 7],
     solutionTicks: [23, 27]
+  }),
+  expert: Object.freeze({
+    gridSize: [5, 5],
+    activePipeCount: [25, 25],
+    junctionCount: [5, 7],
+    solutionTicks: [40, 48],
+    initialConnectedCount: [1, 3],
+    misorientedPipeCount: [20, 25],
+    unresolvedPipeCount: [14, 25],
+    probeUnresolvedPipeCount: [6, 25]
   })
 });
 
@@ -227,7 +241,7 @@ function normalizeDifficulty(value) {
     return null;
   }
   const normalized = value.trim().toLowerCase();
-  return ["easy", "medium", "hard"].includes(normalized) ? normalized : null;
+  return Object.hasOwn(DIFFICULTY_SETUPS, normalized) ? normalized : null;
 }
 
 function solutionTickBoundsForDifficulty(difficulty) {
@@ -284,7 +298,8 @@ function rotateMask(mask, ticks) {
   return normalized;
 }
 
-function targetTicksForMaskRotation(mask, rotation) {
+function targetTicksForMaskRotation(mask, rotation, doubleBendPairing = 0) {
+  if (doubleBendPairing) return rotation % 2;
   const solvedMask = (Number(mask) | 0) & 15;
   if (solvedMask === 0) {
     return 0;
@@ -370,6 +385,137 @@ function connectedIndicesFromMasks(gridSize, sourceIndex, masks) {
   return Array.from(connected).sort((a, b) => a - b);
 }
 
+function propagatePipeDomains(domains, neighbors) {
+  // Repeatedly remove orientations unsupported by a neighboring pipe.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let index = 0; index < domains.length; index += 1) {
+      const remaining = domains[index].filter((mask) =>
+        neighbors[index].every(({ other, bit, oppositeBit }) =>
+          domains[other].some((otherMask) => Boolean(mask & bit) === Boolean(otherMask & oppositeBit))
+        )
+      );
+      if (remaining.length === 0) {
+        return false;
+      }
+      if (remaining.length !== domains[index].length) {
+        domains[index] = remaining;
+        changed = true;
+      }
+    }
+  }
+  return true;
+}
+
+function meetsExpertTopology(gridSize, solvedMasks, unresolvedRange, probeUnresolvedRange = null) {
+  // Generated trees have 2 * (activePipes - 1) ports: every winning board uses
+  // every port. Keep these constraints, search order and limits in sync with Python.
+  const neighbors = solvedMasks.map((_mask, index) => {
+    const adjacent = [];
+    for (const dir of DIRS) {
+      const other = neighborIndex(index % gridSize, Math.floor(index / gridSize), gridSize, dir);
+      if (other !== null) {
+        adjacent.push({ other, bit: dir.bit, oppositeBit: OPPOSITE_BITS[dir.bit] });
+      }
+    }
+    return adjacent;
+  });
+  const domains = solvedMasks.map((mask, index) => {
+    const allowedBits = neighbors[index].reduce((bits, adjacent) => bits | adjacent.bit, 0);
+    // Compare port masks, not rotation indices: straight pipes have two orientations.
+    return Array.from(new Set([0, 1, 2, 3].map((ticks) => rotateMask(mask, ticks))))
+      .sort((a, b) => a - b)
+      .filter((candidate) => (candidate & allowedBits) === candidate);
+  });
+  if (!propagatePipeDomains(domains, neighbors)) {
+    return false;
+  }
+  const unresolved = domains.filter((options) => options.length > 1).length;
+  if (unresolved < unresolvedRange[0] || unresolved > unresolvedRange[1]) {
+    return false;
+  }
+  const active = activePipeIndicesFromMasks(solvedMasks);
+  if (active.length === 0) {
+    return false;
+  }
+  let visitedNodes = 0;
+
+  function canConnect(options) {
+    const possibleMasks = options.map((candidates) => candidates.reduce((mask, candidate) => mask | candidate, 0));
+    // Even the union of all remaining choices must be able to connect every pipe.
+    return connectedIndicesFromMasks(gridSize, active[0], possibleMasks).length === active.length;
+  }
+
+  function countSolutions(options) {
+    visitedNodes += 1;
+    if (visitedNodes > 10000) {
+      // An unfinished proof must reject the board, never certify uniqueness.
+      return null;
+    }
+    if (!propagatePipeDomains(options, neighbors) || !canConnect(options)) {
+      return 0;
+    }
+    const undecided = active.filter((index) => options[index].length > 1);
+    if (undecided.length === 0) {
+      return 1;
+    }
+    undecided.sort((a, b) => options[a].length - options[b].length || a - b);
+    const index = undecided[0];
+    let count = 0;
+    for (const candidate of options[index]) {
+      const branch = options.map((candidates) => candidates.slice());
+      branch[index] = [candidate];
+      const found = countSolutions(branch);
+      if (found === null) {
+        return null;
+      }
+      count += found;
+      if (count >= 2) {
+        return 2;
+      }
+    }
+    return count;
+  }
+
+  if (countSolutions(domains) !== 1) {
+    return false;
+  }
+  if (!probeUnresolvedRange) {
+    return true;
+  }
+
+  // Try one pipe orientation at a time, without making a second assumption.
+  // Repeat failed-choice elimination until local rules and connectivity can
+  // rule out no more choices. Keep the order identical to Python.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const index of active) {
+      if (domains[index].length <= 1) {
+        continue;
+      }
+      const remaining = domains[index].filter((candidate) => {
+        const trial = domains.map((options) => options.slice());
+        trial[index] = [candidate];
+        return propagatePipeDomains(trial, neighbors) && canConnect(trial);
+      });
+      if (remaining.length === 0) {
+        return false;
+      }
+      if (remaining.length !== domains[index].length) {
+        domains[index] = remaining;
+        changed = true;
+        if (!propagatePipeDomains(domains, neighbors)) {
+          return false;
+        }
+      }
+    }
+  }
+  const unresolvedAfterProbes = domains.filter((options) => options.length > 1).length;
+  return unresolvedAfterProbes >= probeUnresolvedRange[0] && unresolvedAfterProbes <= probeUnresolvedRange[1];
+}
+
 function defaultActivePipeCount(gridSize, rng) {
   const total = gridSize * gridSize;
   const minActive = Math.min(total - 1, Math.max(3, Math.ceil(total / 2)));
@@ -419,7 +565,22 @@ function sampleCountRange(rng, exact, minimum, maximum, fallbackMinimum, fallbac
   return rng.randIntInclusive(low, high);
 }
 
-function generateSolvedMasks(gridSize, sourceIndex, rng, activePipeCount = null) {
+function allowsAmbiguousPipe(gridSize, index, mask) {
+  // Avoid pieces whose orientation is immediately fixed by the boundary.
+  const x = index % gridSize;
+  const y = Math.floor(index / gridSize);
+  const boundarySides = Number(x === 0 || x === gridSize - 1) + Number(y === 0 || y === gridSize - 1);
+  const ports = DIRS.filter((dir) => (mask & dir.bit) !== 0).length;
+  if (boundarySides === 2) {
+    return ports <= 1;
+  }
+  if (boundarySides === 1) {
+    return ports <= 2 && mask !== 5 && mask !== 10;
+  }
+  return mask !== 15;
+}
+
+function generateSolvedMasks(gridSize, sourceIndex, rng, activePipeCount = null, ambiguousBoundary = false) {
   const total = gridSize * gridSize;
   const fallbackActiveCount =
     activePipeCount === null || activePipeCount === undefined ? defaultActivePipeCount(gridSize, rng) : activePipeCount;
@@ -439,7 +600,8 @@ function generateSolvedMasks(gridSize, sourceIndex, rng, activePipeCount = null)
       const y = Math.floor(currentIndex / gridSize);
       for (const dir of DIRS) {
         const nextIndex = neighborIndex(x, y, gridSize, dir);
-        if (nextIndex !== null && !active.has(nextIndex)) {
+        if (nextIndex !== null && !active.has(nextIndex) &&
+            (!ambiguousBoundary || allowsAmbiguousPipe(gridSize, currentIndex, masks[currentIndex] | dir.bit))) {
           candidates.push({
             currentIndex,
             nextIndex,
@@ -459,6 +621,10 @@ function generateSolvedMasks(gridSize, sourceIndex, rng, activePipeCount = null)
   }
 
   if (active.size !== targetActiveCount) {
+    if (ambiguousBoundary) {
+      // This constrained tree ran into a dead end; let the sampler retry.
+      return [];
+    }
     throw new Error("Failed to generate a connected sparse pipe board.");
   }
   return masks;
@@ -468,12 +634,12 @@ function currentMasksFromArrays(solvedMasks, rotations) {
   return solvedMasks.map((mask, index) => rotateMask(mask, rotations[index]));
 }
 
-function solutionTicks(solvedMasks, rotations) {
+function solutionTicks(solvedMasks, rotations, pairings = null) {
   return rotations.reduce((total, rotation, index) => {
     if (((Number(solvedMasks[index]) | 0) & 15) === 0) {
       return total;
     }
-    return total + targetTicksForMaskRotation(solvedMasks[index], rotation);
+    return total + targetTicksForMaskRotation(solvedMasks[index], rotation, pairings?.[index]);
   }, 0);
 }
 
@@ -520,7 +686,8 @@ function samplePipeConfig(
   minActivePipeCount = null,
   maxActivePipeCount = null,
   minJunctionCount = null,
-  maxJunctionCount = null
+  maxJunctionCount = null,
+  pipeRule = null
 ) {
   const rng = seededRng(seed);
   const total = gridSize * gridSize;
@@ -544,7 +711,22 @@ function samplePipeConfig(
   const junctionMin = minJunctionCount ?? difficultySetup?.junctionCount[0] ?? null;
   const junctionMax = maxJunctionCount ?? difficultySetup?.junctionCount[1] ?? null;
 
-  for (let attempt = 0; attempt < 20000; attempt += 1) {
+  if (normalizedDifficulty === "expert" && pipeRule !== CLASSIC_PIPE_RULE) {
+    if ((explicitActivePipeCount !== null && explicitActivePipeCount !== undefined && Number(explicitActivePipeCount) !== total) ||
+        total < Number(activeMin) || total > Number(activeMax)) {
+      throw new Error("Overpass Expert requires all 25 cells to contain pipes.");
+    }
+    return sampleExpertPipe(gridSize, rng, {
+      sourceIndex: Number.isInteger(explicitSourceIndex) ? clampInt(explicitSourceIndex, 0, total - 1, 0) : null,
+      minTicks, maxTicks, minJunctions: Number(junctionMin), maxJunctions: Number(junctionMax),
+      unresolvedRange: difficultySetup.unresolvedPipeCount, probeRange: difficultySetup.probeUnresolvedPipeCount,
+      connectedRange: difficultySetup.initialConnectedCount, misorientedRange: difficultySetup.misorientedPipeCount,
+      pipeRule: pipeRule ?? MIXED_PIPE_RULE
+    });
+  }
+
+  const maxAttempts = normalizedDifficulty === "expert" ? 100000 : 20000;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const sourceIndex = Number.isInteger(explicitSourceIndex)
       ? clampInt(explicitSourceIndex, 0, total - 1, 0)
       : rng.randBelow(total);
@@ -556,7 +738,10 @@ function samplePipeConfig(
       fallbackActiveMin,
       fallbackActiveMax
     );
-    const solvedMasks = generateSolvedMasks(gridSize, sourceIndex, rng, sampledActivePipeCount);
+    const solvedMasks = generateSolvedMasks(gridSize, sourceIndex, rng, sampledActivePipeCount, normalizedDifficulty === "expert");
+    if (solvedMasks.length === 0) {
+      continue;
+    }
     if (hasFourWayJunction(solvedMasks)) {
       continue;
     }
@@ -566,6 +751,11 @@ function samplePipeConfig(
       continue;
     }
     if (junctionMax !== null && junctionCount > Number(junctionMax)) {
+      continue;
+    }
+    if (difficultySetup?.unresolvedPipeCount && !meetsExpertTopology(
+      gridSize, solvedMasks, difficultySetup.unresolvedPipeCount, difficultySetup.probeUnresolvedPipeCount
+    )) {
       continue;
     }
 
@@ -580,6 +770,21 @@ function samplePipeConfig(
       }
       const masks = currentMasksFromArrays(solvedMasks, rotations);
       const connected = connectedIndicesFromMasks(gridSize, sourceIndex, masks);
+      if (difficultySetup?.initialConnectedCount) {
+        const [minimum, maximum] = difficultySetup.initialConnectedCount;
+        if (connected.length < minimum || connected.length > maximum) {
+          continue;
+        }
+      }
+      if (difficultySetup?.misorientedPipeCount) {
+        const [minimum, maximum] = difficultySetup.misorientedPipeCount;
+        const misorientedCount = solvedMasks.filter(
+          (mask, index) => targetTicksForMaskRotation(mask, rotations[index]) > 0
+        ).length;
+        if (misorientedCount < minimum || misorientedCount > maximum) {
+          continue;
+        }
+      }
       if (connected.length < totalPipes && ticks > 0) {
         return {
           sourceIndex,
@@ -657,7 +862,7 @@ function buildSnakeSolvedMasks(gridSize) {
   return masks;
 }
 
-function buildCells(gridSize, solvedMasks, rotations, sourceIndex) {
+function buildCells(gridSize, solvedMasks, rotations, sourceIndex, pipeRule = null, pairings = null) {
   const cells = [];
   for (let y = 0; y < gridSize; y += 1) {
     for (let x = 0; x < gridSize; x += 1) {
@@ -672,6 +877,8 @@ function buildCells(gridSize, solvedMasks, rotations, sourceIndex) {
         solvedMask,
         rotation: hasPipe ? rotations[index] : 0,
         currentMask: hasPipe ? rotateMask(solvedMask, rotations[index]) : 0,
+        isBridge: isExpertPipeRule(pipeRule) && solvedMask === 15,
+        doubleBendPairing: pairings?.[index] ?? 0,
         isSource: index === sourceIndex
       });
     }
@@ -689,6 +896,9 @@ function neighborIndex(x, y, gridSize, dir) {
 }
 
 function computeConnectedIndices(cells, gridSize, sourceIndex) {
+  if (cells.some(cell => cell.isBridge)) {
+    return expertConnectivity(gridSize, sourceIndex, currentChannelStates(cells)).connectedIndices;
+  }
   const connected = new Set([sourceIndex]);
   const queue = [sourceIndex];
   for (let head = 0; head < queue.length; head += 1) {
@@ -716,8 +926,12 @@ function currentMasks(cells) {
   return cells.map((cell) => cell.currentMask);
 }
 
+function currentChannelStates(cells) {
+  return cells.map(cell => cell.doubleBendPairing ? doubleBendState(cell.doubleBendPairing, cell.rotation) : cell.currentMask);
+}
+
 function targetRotationTicks(cells) {
-  return cells.map((cell) => (cell.hasPipe ? targetTicksForMaskRotation(cell.solvedMask, cell.rotation) : 0));
+  return cells.map((cell) => (cell.hasPipe ? targetTicksForMaskRotation(cell.solvedMask, cell.rotation, cell.doubleBendPairing) : 0));
 }
 
 function activePipeCells(cells) {
@@ -800,6 +1014,17 @@ class PipeRenderer {
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("viewBox", "0 0 100 100");
+        if (isExpertPipeRule(state.pipeRule) && cell.solvedMask === 15) {
+          svg.setAttribute("class", "pipe-svg");
+          if (cell.doubleBendPairing) {
+            drawDoubleBend(svg, cell.doubleBendPairing, cell.rotation, state.connectedChannelMasks[index]);
+          } else {
+            drawOverpass(svg, cell.rotation, state.connectedChannelMasks[index]);
+          }
+          cellElement.appendChild(svg);
+          this.root.appendChild(cellElement);
+          continue;
+        }
         svg.setAttribute("class", connectedToSource ? "pipe-svg connected" : "pipe-svg disconnected");
         const strokeColor = connectedToSource ? "#19d955" : "#0aa2ff";
         const glowColor = connectedToSource ? "rgba(25,217,85,0.5)" : "rgba(10,162,255,0.42)";
@@ -852,6 +1077,13 @@ export class ContinuityPipeGame {
     const targetDifficulty = normalizeDifficulty(config.targetDifficulty ?? config.difficulty ?? DEFAULT_CONFIG.difficulty);
     const hasSolvedMasks = Array.isArray(config.solvedMasks);
     const hasRotations = Array.isArray(config.rotations);
+    const pipeRule = config.pipeRule ?? (targetDifficulty === "expert" && !hasSolvedMasks ? MIXED_PIPE_RULE : CLASSIC_PIPE_RULE);
+    if (!isExpertPipeRule(pipeRule) && pipeRule !== CLASSIC_PIPE_RULE) {
+      throw new Error(`Unsupported Pipe rule: ${pipeRule}`);
+    }
+    if (isExpertPipeRule(pipeRule) && targetDifficulty !== "expert") {
+      throw new Error("Overpass rules are only available for Expert.");
+    }
     const difficultyGridSize = gridSizeForDifficulty(targetDifficulty);
     const requestedGridSize = targetDifficulty && !hasSolvedMasks ? difficultyGridSize : config.gridSize;
     const gridSize = clampInt(requestedGridSize, MIN_GRID_SIZE, MAX_GRID_SIZE, difficultyGridSize);
@@ -873,14 +1105,18 @@ export class ContinuityPipeGame {
           config.minActivePipeCount,
           config.maxActivePipeCount,
           config.minJunctionCount,
-          config.maxJunctionCount
+          config.maxJunctionCount,
+          pipeRule
         );
     const solvedMasks = hasSolvedMasks ? normalizeMaskArray(config.solvedMasks, gridSize) : sampled.solvedMasks;
     const rotations = hasRotations ? normalizeRotationArray(config.rotations, gridSize) : sampled.rotations;
     const sourceIndex = hasSolvedMasks
       ? clampInt(config.sourceIndex, 0, total - 1, DEFAULT_CONFIG.sourceIndex)
       : sampled.sourceIndex;
-    const ticks = solutionTicks(solvedMasks, rotations);
+    const pairings = hasSolvedMasks ? (config.doubleBendPairings ?? null) : (sampled.doubleBendPairings ?? null);
+    if (pairings !== null && pipeRule !== MIXED_PIPE_RULE) throw new Error("doubleBendPairings requires pipeRule=split_channels_v2.");
+    if (isExpertPipeRule(pipeRule)) validateExpertTarget(gridSize, sourceIndex, solvedMasks, pairings, pipeRule);
+    const ticks = solutionTicks(solvedMasks, rotations, pairings);
     return {
       gridSize,
       seed,
@@ -891,6 +1127,8 @@ export class ContinuityPipeGame {
       difficulty: hasSolvedMasks ? (targetDifficulty ?? difficultyLabelForSolutionTicks(ticks)) : sampled.difficulty,
       junctionCount: hasSolvedMasks ? junctionCountFromMasks(solvedMasks) : sampled.junctionCount,
       maxSteps: Math.max(1, clampInt(config.maxSteps, 1, 1000, maxStepsForSolutionTicks(ticks))),
+      ...(isExpertPipeRule(pipeRule) ? {pipeRule} : {}),
+      ...(pipeRule === MIXED_PIPE_RULE ? {doubleBendPairings: pairings.slice()} : {}),
       illegalReward: Number(config.illegalReward ?? DEFAULT_CONFIG.illegalReward),
       moveReward: Number(config.moveReward ?? DEFAULT_CONFIG.moveReward),
       successReward: Number(config.successReward ?? DEFAULT_CONFIG.successReward),
@@ -904,7 +1142,9 @@ export class ContinuityPipeGame {
       this.config.gridSize,
       this.config.solvedMasks,
       this.config.rotations,
-      this.config.sourceIndex
+      this.config.sourceIndex,
+      this.config.pipeRule,
+      this.config.doubleBendPairings
     );
     this.stepCount = 0;
     this.lastTurn = null;
@@ -948,7 +1188,10 @@ export class ContinuityPipeGame {
       solutionSteps: this.config.solutionTicks,
       difficulty: this.config.difficulty,
       junctionCount: this.config.junctionCount,
-      targetRotationTicks: targetRotationTicks(this.cells)
+      targetRotationTicks: targetRotationTicks(this.cells),
+      ...(isExpertPipeRule(this.config.pipeRule) ? {pipeRule: this.config.pipeRule,
+        ...expertConnectivity(this.config.gridSize, this.config.sourceIndex, currentChannelStates(this.cells))} : {}),
+      ...(this.config.doubleBendPairings ? {doubleBendPairings: this.config.doubleBendPairings.slice()} : {})
     };
   }
 
@@ -968,7 +1211,8 @@ export class ContinuityPipeGame {
         solvedMask: cell.solvedMask,
         rotation: cell.rotation,
         currentMask: cell.currentMask,
-        targetRotationTicks: cell.hasPipe ? targetTicksForMaskRotation(cell.solvedMask, cell.rotation) : 0,
+        targetRotationTicks: cell.hasPipe ? targetTicksForMaskRotation(cell.solvedMask, cell.rotation, cell.doubleBendPairing) : 0,
+        ...(cell.doubleBendPairing ? {doubleBendPairing: cell.doubleBendPairing} : {}),
         isSource: cell.isSource
       })),
       currentMasks: currentMasks(this.cells),
@@ -990,7 +1234,10 @@ export class ContinuityPipeGame {
       junctionCount: this.config.junctionCount,
       lastTurn: this.lastTurn ? { ...this.lastTurn } : null,
       terminal: this.terminal ? { ...this.terminal } : null,
-      targetRotationTicks: targetRotationTicks(this.cells)
+      targetRotationTicks: targetRotationTicks(this.cells),
+      ...(isExpertPipeRule(this.config.pipeRule) ? {pipeRule: this.config.pipeRule,
+        ...expertConnectivity(this.config.gridSize, this.config.sourceIndex, currentChannelStates(this.cells))} : {}),
+      ...(this.config.doubleBendPairings ? {doubleBendPairings: this.config.doubleBendPairings.slice()} : {})
     };
   }
 
@@ -1099,7 +1346,8 @@ export class ContinuityPipeGame {
       solutionSteps: this.config.solutionTicks,
       difficulty: this.config.difficulty,
       junctionCount: this.config.junctionCount,
-      maxSteps: this.config.maxSteps
+      maxSteps: this.config.maxSteps,
+      ...(isExpertPipeRule(this.config.pipeRule) ? {pipeRule: this.config.pipeRule} : {})
     };
   }
 

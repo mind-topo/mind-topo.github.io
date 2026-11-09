@@ -1,4 +1,4 @@
-// "Play the benchmark": tabs over the five planning gyms, difficulty, move meter,
+// "Play the benchmark": tabs over the five planning gyms, Core level, move meter,
 // end-of-episode card and solution playback; plus the reasoning-question answers.
 
 import { createGame, type Difficulty, type Game, type GameId, type Instance } from '../games/types';
@@ -106,7 +106,7 @@ function initPlayground() {
     movesEl.textContent = `${s.moves} / ${s.budget}`;
     bar.style.width = `${Math.min(100, (100 * s.moves) / Math.max(1, s.budget))}%`;
     bar.classList.toggle('low', s.budget - s.moves <= 2 && !s.solved);
-    progress.textContent = (s.progress ?? ' ') + (RECORD ? ` · ${instance.id.replace(/^.*_(easy|medium|hard)_seed_/, '$1 seed ')}` : '');
+    progress.textContent = (s.progress ?? ' ') + (RECORD ? ` · Core ${instance.difficulty} · ${instance.id}` : '');
     const busy = playback !== null;
     undoBtn.disabled = busy || !game.canUndo() || s.failed && !game.canUndo();
     restartBtn.disabled = busy;

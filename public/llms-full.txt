@@ -7,7 +7,7 @@ Project page: https://mind-topo.github.io/
 Current manuscript: https://mind-topo.github.io/paper/mindtopo-current.pdf
 Core and Extended results and release files: https://mind-topo.github.io/#release
 Earlier arXiv v1: https://arxiv.org/abs/2609.11900v1
-Code: https://github.com/mll-lab-nu/MindTopo
+Code: https://github.com/MLL-Lab/MindTopo
 Earlier Hugging Face snapshot: https://huggingface.co/datasets/MLL-Lab/MindTopo
 
 ## What is MindTopo?
@@ -52,7 +52,7 @@ Manifests contain identifiers, source locations and hashes, rather than full inp
 
 ## How do the playable demos relate to Core?
 
-The five planning demos use boards from the original generator pool and retain its Easy / Medium / Hard tiers and each board's action budget. These demo tiers are independent of Core Easy / Hard. The displayed reference scores are always Core results and do not change when a demo tier changes. Assembly and Bead use verified Core Easy examples, with all five Assembly options and the complete Bead answer.
+The five planning demos export 40 boards from each of Core Easy and Core Hard directly through the release manifest. Every source file, source row, record hash, and model-input hash is checked before export. The browser uses the same initial state, action budget, and task rules, including Core Hard's split-channel Pipe pieces, row/column Swap actions, and expert Chat Noir policy. Assembly and Bead use verified Core Easy examples, with all five Assembly options and the complete Bead answer.
 
 ## How do current models perform?
 

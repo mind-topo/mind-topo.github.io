@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/enclosure_chat_noir/frontend/src/render.ts). See ../README.md for local patches.
+// Vendored from github.com/MLL-Lab/MindTopo @ 96ac4d1 (environments/enclosure_chat_noir/frontend/src/render.ts). See ../README.md for local patches.
 import * as THREE from "three";
 
 function clamp(value, min, max) {

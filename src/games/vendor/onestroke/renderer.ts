@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/separation_one_stroke/frontend/src/renderer.ts). See ../README.md for local patches.
+// Vendored from github.com/MLL-Lab/MindTopo @ 96ac4d1 (environments/separation_one_stroke/frontend/src/renderer.ts). See ../README.md for local patches.
 /**
  * TopoBench Three.js Renderer
  * 
