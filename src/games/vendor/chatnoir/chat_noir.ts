@@ -1,6 +1,7 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/enclosure_chat_noir/frontend/src/chat_noir.ts). See ../README.md for local patches.
+// Vendored from mll-lab-nu/MindTopo @ 3e977584 (Core expert frontend).
 import { ChatNoirRenderer } from "./render.ts";
+import { ExpertEngine, EXPERT_BLOCK_RANGE } from "./chat_noir_expert.ts";
 
 const HEX_DIRECTIONS = Object.freeze([
   [1, 0],
@@ -28,15 +29,22 @@ const DEFAULT_MIN_ADJACENT_WINNING_FIRST_ACTIONS = 3;
 const MIN_WINNING_FIRST_ACTIONS_BY_POLICY = Object.freeze({
   easy: 5,
   medium: 5,
-  hard: 5
+  hard: 5,
+  expert: 1
 });
 const INITIAL_BLOCK_COUNT_RANGES = Object.freeze({
+  expert: Object.freeze({ 4: EXPERT_BLOCK_RANGE }),
   easy: Object.freeze({ 3: [9, 12], 4: [11, 14] }),
   medium: Object.freeze({ 3: [12, 14], 4: [14, 17] }),
   hard: Object.freeze({ 3: [14, 16], 4: [17, 21] })
 });
 
 const CAT_POLICIES = Object.freeze({
+  expert: {
+    name: "expert",
+    level: 4,
+    description: "Evaluates every legal move for forced capture within three complete player turns, then prefers shorter escape paths and more shortest escape routes."
+  },
   static: {
     name: "static",
     level: 0,
@@ -45,7 +53,7 @@ const CAT_POLICIES = Object.freeze({
   easy: {
     name: "easy",
     level: 1,
-    description: "Mixed walker. On each move it uses shortest-path greedy behavior with 30% probability and otherwise chooses uniformly from the currently legal adjacent open cells."
+    description: "Mixed walker. On each move it uses shortest-path greedy behavior with 50% probability and otherwise chooses uniformly from the currently legal adjacent open cells."
   },
   medium: {
     name: "medium",
@@ -67,7 +75,7 @@ const DEFAULT_CONFIG = Object.freeze({
   catPolicy: "easy",
   rngSeed: null,
   minWinningFirstActions: DEFAULT_MIN_WINNING_FIRST_ACTIONS_SPEC,
-  minAdjacentWinningFirstActions: DEFAULT_MIN_ADJACENT_WINNING_FIRST_ACTIONS,
+  minAdjacentWinningFirstActions: AUTO_SETUP_VALUE,
   animate: true,
   illegalReward: -1.0,
   moveReward: -0.02,
@@ -530,6 +538,12 @@ function chooseCatMove(board, catIndex, blockedSet, catPolicy, randomFn = Math.r
     };
   }
 
+  if (catPolicy.name === "expert") {
+    const engine = new ExpertEngine(board);
+    const entries = engine.evaluate(catIndex, engine.mask(blockedSet));
+    return { chosenMove: entries[0].moveIndex, legalMoves, evaluatedMoves: entries };
+  }
+
   if (catPolicy.name === "static") {
     return {
       chosenMove: catIndex,
@@ -550,7 +564,7 @@ function chooseCatMove(board, catIndex, blockedSet, catPolicy, randomFn = Math.r
     });
     greedyEntries.sort((left, right) => compareTuples(left.scoreTuple, right.scoreTuple));
     const greedyMove = greedyEntries[0]?.moveIndex ?? legalMoves[0] ?? null;
-    const mode = modeDraw < 0.3 ? "greedy" : "random";
+    const mode = modeDraw < 0.5 ? "greedy" : "random";
     const chosenMove = mode === "greedy"
       ? greedyMove
       : legalMoves[Math.floor(randomFn() * legalMoves.length)] ?? legalMoves[0] ?? null;
@@ -680,6 +694,17 @@ function resolveMinWinningFirstActionsSpec(value, catPolicyName) {
   return Math.max(1, Math.trunc(Number(value)));
 }
 
+function resolveMinAdjacentWinningFirstActionsSpec(value, catPolicyName) {
+  if (value === null || value === undefined || isAutoSetupValue(value)) {
+    return catPolicyName === "expert" ? 0 : DEFAULT_MIN_ADJACENT_WINNING_FIRST_ACTIONS;
+  }
+  const result = Math.max(0, Math.trunc(Number(value)));
+  if (catPolicyName === "expert" && !Number.isInteger(result)) {
+    throw new Error("Expert adjacent winning first action requirement must be a non-negative integer.");
+  }
+  return result;
+}
+
 function resolveBoardRadiusSpec(value, setupRng) {
   if (isAutoSetupValue(value)) {
     return ALLOWED_BOARD_RADII[setupRng.randrange(ALLOWED_BOARD_RADII.length)];
@@ -788,6 +813,12 @@ function solveChatNoirInstance(
   winningFirstActionLimit = null,
   adjacentWinningFirstActionLimit = null
 ) {
+  if (normalizeCatPolicy(catPolicyName).name === "expert") {
+    const engine = new ExpertEngine(board);
+    return engine.solve(catIndex, engine.mask(blockedIndices), Math.max(0, maxSteps), {
+      winningFirstActionLimit, adjacentWinningFirstActionLimit
+    });
+  }
   const searchDepth = Math.min(
     Math.max(0, Math.trunc(maxSteps)),
     SOLVER_MAX_DEPTH_BY_RADIUS[board.radius] ?? 7
@@ -920,12 +951,19 @@ function sampleBlockedIndices(
   setupRng,
   catPolicyName,
   minWinningFirstActions = DEFAULT_MIN_WINNING_FIRST_ACTIONS_SPEC,
-  minAdjacentWinningFirstActions = DEFAULT_MIN_ADJACENT_WINNING_FIRST_ACTIONS
+  minAdjacentWinningFirstActions = AUTO_SETUP_VALUE
 ) {
   const candidates = board.cells.map((cell) => cell.index).filter((index) => index !== catIndex);
   const cappedCount = Math.max(0, Math.min(candidates.length, Math.trunc(initialBlockedCount)));
   const requiredWinningFirstActions = resolveMinWinningFirstActionsSpec(minWinningFirstActions, catPolicyName);
-  const requiredAdjacentWinningFirstActions = Math.max(0, Math.trunc(Number(minAdjacentWinningFirstActions)));
+  const requiredAdjacentWinningFirstActions = resolveMinAdjacentWinningFirstActionsSpec(minAdjacentWinningFirstActions, catPolicyName);
+  if (catPolicyName === "expert" && requiredAdjacentWinningFirstActions !== 0) {
+    throw new Error("Expert generation requires zero adjacent winning first actions.");
+  }
+  if (catPolicyName === "expert" &&
+      (board.radius !== 4 || cappedCount < EXPERT_BLOCK_RANGE[0] || cappedCount > EXPERT_BLOCK_RANGE[1])) {
+    throw new Error("Expert requires radius 4 and 10-13 initial blockers.");
+  }
   for (let attempt = 0; attempt < SAMPLE_ATTEMPTS; attempt += 1) {
     const blockedIndices = toSortedNumberArray(setupRng.sample(candidates, cappedCount));
     const blockedSet = new Set(blockedIndices);
@@ -934,15 +972,13 @@ function sampleBlockedIndices(
     }
     const escapeDistance = shortestBoundaryDistance(board, catIndex, blockedSet);
     const maxSteps = Math.max(0, board.cells.length - blockedIndices.length - 1);
-    const solvability = solveChatNoirInstance(
-      board,
-      catIndex,
-      blockedIndices,
-      catPolicyName,
-      maxSteps,
-      requiredWinningFirstActions,
-      requiredAdjacentWinningFirstActions
-    );
+    const engine = catPolicyName === "expert" ? new ExpertEngine(board) : null;
+    const solvability = engine
+      ? engine.certifyOpening(catIndex, engine.mask(blockedIndices), maxSteps,
+        { minWinningFirstActions: requiredWinningFirstActions })
+      : solveChatNoirInstance(board, catIndex, blockedIndices, catPolicyName, maxSteps,
+        requiredWinningFirstActions, requiredAdjacentWinningFirstActions);
+    if (engine && !solvability.expertOpeningFilterPassed) continue;
     if (
       escapeDistance !== null &&
       solvability.solvable &&
@@ -978,11 +1014,9 @@ export class EnclosureChatNoirGame {
       config.minWinningFirstActions ?? DEFAULT_CONFIG.minWinningFirstActions,
       catPolicy.name
     );
-    const minAdjacentWinningFirstActions = Math.max(
-      0,
-      Math.trunc(Number(
-        config.minAdjacentWinningFirstActions ?? DEFAULT_CONFIG.minAdjacentWinningFirstActions
-      ))
+    const minAdjacentWinningFirstActions = resolveMinAdjacentWinningFirstActionsSpec(
+      config.minAdjacentWinningFirstActions ?? DEFAULT_CONFIG.minAdjacentWinningFirstActions,
+      catPolicy.name
     );
 
     const rawBlockedIndices = config.initialBlockedIndices ?? config.blockedIndices;
@@ -990,7 +1024,11 @@ export class EnclosureChatNoirGame {
     if (Array.isArray(rawBlockedIndices) && isAutoSetupValue(boardRadiusSpec)) {
       throw new Error("Explicit initialBlockedIndices require a concrete boardRadius.");
     }
-    const boardRadius = resolveBoardRadiusSpec(boardRadiusSpec, setupRng);
+    const boardRadius = catPolicy.name === "expert" && isAutoSetupValue(boardRadiusSpec)
+      ? 4 : resolveBoardRadiusSpec(boardRadiusSpec, setupRng);
+    if (catPolicy.name === "expert" && boardRadius !== 4) {
+      throw new Error("Expert requires radius 4.");
+    }
     const board = buildBoard(boardRadius);
     const catIndex = clampInt(
       config.catIndex,
@@ -1007,7 +1045,7 @@ export class EnclosureChatNoirGame {
       blockedIndices = normalizeBlockedIndices(board, rawBlockedIndices, catIndex);
     } else {
       const initialBlockedCount = resolveInitialBlockedCountSpec(
-        config.initialBlockedCount,
+        config.initialBlockedCount ?? (catPolicy.name === "expert" ? AUTO_SETUP_VALUE : undefined),
         boardRadius,
         catPolicy.name,
         setupRng,
@@ -1024,6 +1062,10 @@ export class EnclosureChatNoirGame {
       );
     }
 
+    if (catPolicy.name === "expert" &&
+        (blockedIndices.length < EXPERT_BLOCK_RANGE[0] || blockedIndices.length > EXPERT_BLOCK_RANGE[1])) {
+      throw new Error("Expert requires 10-13 initial blockers.");
+    }
     const blockedSet = new Set(blockedIndices);
     const initialEscapePath = shortestBoundaryPath(board, catIndex, blockedSet);
     if (!initialEscapePath) {
@@ -1359,10 +1401,7 @@ export class EnclosureChatNoirGame {
   }
 }
 
-
-// --- mind-topo.github.io addition: next-move hint for the "show solution" player.
-// Uses the engine's own solver (depth-limited search over the cat's responses),
-// falling back to its ranked heuristic when the search finds no forced trap.
+// Site integration: expose one engine-native move for solution playback.
 export function solverHint(game, remainingSteps = 12) {
   if (game.terminal) return null;
   const policy = game.config.catPolicy.name;

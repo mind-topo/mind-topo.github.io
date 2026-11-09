@@ -66,7 +66,9 @@ export const create: GameFactory = async (root, onChange) => {
     },
     async playSolution(signal) {
       await load(instance!);
-      const plan: number[] = shortestActionSequence(instance!.config.initialArrangement, instance!.config.goalArrangement);
+      const plan: number[] = instance!.config.moveRule === 'row_column_v1'
+        ? instance!.config.referenceActions ?? []
+        : shortestActionSequence(instance!.config.initialArrangement, instance!.config.goalArrangement);
       for (const index of plan) {
         await wait(420, signal);
         await game.step(index);

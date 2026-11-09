@@ -64,7 +64,7 @@ tracks the current section.
 | Overview | `Hero.astro` | count-up stats, deforming-loop motif |
 | Teaser video | `TeaserVideo.astro` | loads only on play |
 | Key findings | `Findings.astro` | six cards linking to their evidence |
-| Play the benchmark | `Play.astro` | five generator demos with separate Core reference scores; reasoning-question quiz |
+| Play the benchmark | `Play.astro` | five input-hash-verified Core planning demos; reasoning-question quiz |
 | The action gap | `Results.astro` | difficulty switch, dumbbell chart, sortable heatmap leaderboard |
 | Core & Extended | `Release.astro` | separate Extended results, per-task composition, manuscript and manifest downloads |
 | Against humans | `Humans.astro` | model picker, morphing radar, largest gaps |
@@ -111,25 +111,22 @@ vendored from [mll-lab-nu/MindTopo](https://github.com/mll-lab-nu/MindTopo) in
 one with input, the models' move budget, undo and solution playback; three.js
 and each game load only when the game is opened.
 
-Boards come from the code repo's `environments/<env>/output/question.jsonl`:
-
-The demos retain the original generator's Easy / Medium / Hard tiers. Those
-labels are independent of Core Easy / Hard. The adjacent human and model scores
-always refer to Core and do not change when the selected demo tier changes.
-Do not relabel these boards as Core instances without matching the release
-manifest's input hashes and Core levels.
+Boards are selected through the manuscript's exact Core manifest. The export
+refuses to write site data unless the source-file, source-row, record, and
+model-input hashes all match the release record. It exports 40 boards from each
+of Core Easy and Core Hard for every planning task.
 
 ```bash
-python3 scripts/build-game-instances.py ../MindTopo          # public/games/<game>.json
-# Untangle boards and engine-verified solutions (generation is too slow to do in the browser).
+python3 scripts/build-game-instances.py ../topobench ../topobench_arxiv/arxiv
+npx esbuild scripts/validate-core-games.ts --bundle --platform=node --format=esm --outfile=/tmp/validate-core-games.mjs
+node /tmp/validate-core-games.mjs
+# Untangle Core boards and engine-verified solutions (generation is too slow in the browser).
 # Keep the process count low (here 4, at nice 19); each process takes one core.
 npx esbuild scripts/build-untangle-solutions.ts --bundle --platform=node --format=esm \
   --loader:.json=json --outfile=/tmp/untangle-solutions.mjs
 run() { for s in 0 1 2 3; do nice -n 19 node /tmp/untangle-solutions.mjs "$@" $s 4 & done; wait; }
-run; node /tmp/untangle-solutions.mjs merge 4                  # Easy / Medium: search
-run retry; node /tmp/untangle-solutions.mjs merge-retry 4      # optional, slow
-run hard; node /tmp/untangle-solutions.mjs merge-hard 4 10     # Hard: reverse-scramble oracle (5 boards)
-node /tmp/untangle-solutions.mjs finalize
+run hydrate; node /tmp/untangle-solutions.mjs merge-hydrate 4   # verify exact Core states, save snapshots and any robust oracle plans
+node /tmp/untangle-solutions.mjs verify
 ```
 
 A plan counts as a solution only under the benchmark's own test: `step()` each move from
@@ -140,12 +137,13 @@ the benchmark's action space. While you drag, a throwaway copy of the board runs
 physics so the rope follows the pointer; on release the real move plays as the frames
 `step()` simulates. A game is therefore just its list of moves, and replays exactly.
 
-Easy and Medium solutions come from a search over the first 40 seeds of each. Hard uses
-two sources. The generator's own oracle: it builds an uncrossed board, scrambles it with
-recorded moves, then twists a few ropes into a central tangle; undoing the scramble always
-uncrosses the peg-to-peg lines, but on most Hard boards the simulated ropes stay wrapped,
-and only 5 of the 200 Hard seeds are solved by it. The rest of the Hard level are boards
-solved by hand in record mode:
+Core level and generator difficulty are separate fields. Hydration regenerates
+each selected board, checks its grid, rope endpoints, colors, signature, and
+crossing counts against the Core source row, then stores a browser snapshot.
+Every board remains playable; when its reverse-scramble oracle also passes the
+engine's stability test, the optional "Show solution" control is enabled.
+
+Additional solutions can be recorded by hand:
 
 ```bash
 python3 scripts/serve-record.py dist 4400 solves.jsonl     # play at http://localhost:4400/

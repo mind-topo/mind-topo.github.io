@@ -2,11 +2,12 @@
 //
 //   npx esbuild scripts/build-untangle-solutions.ts --bundle --platform=node --format=esm \
 //     --loader:.json=json --outfile=/tmp/untangle-solutions.mjs
-//   node /tmp/untangle-solutions.mjs [shard] [shards]   # from the repo root;     # writes public/games/untangle.<shard>.json
-//   node /tmp/untangle-solutions.mjs merge [shards]       # folds the shards into public/games/untangle.json
-//   node /tmp/untangle-solutions.mjs retry [shard] [shards]; ... merge-retry [shards]   # wider search on unsolved
-//   node /tmp/untangle-solutions.mjs hard [shard] [shards]; ... merge-hard [shards] [count]   # Hard: reverse-scramble oracle
-//   node /tmp/untangle-solutions.mjs finalize              # drop boards that still have no verified solution
+//   node /tmp/untangle-solutions.mjs [shard] [shards]       # search non-hard generator boards
+//   node /tmp/untangle-solutions.mjs merge [shards]
+//   node /tmp/untangle-solutions.mjs retry [shard] [shards]; ... merge-retry [shards]
+//   node /tmp/untangle-solutions.mjs hard [shard] [shards]  # hydrate hard-generator boards with their reverse-scramble oracle
+//   node /tmp/untangle-solutions.mjs merge-hard [shards]
+//   node /tmp/untangle-solutions.mjs hydrate [shard] [shards]; ... merge-hydrate [shards] # all selected Core boards
 //   node /tmp/untangle-solutions.mjs verify                # replay every stored solution as the site does
 //   node /tmp/untangle-solutions.mjs add-solves <solves.jsonl> [pool.json]   # store verified human solves
 //
@@ -82,6 +83,67 @@ const staysSolved = (engine: any) => {
   }
   return true;
 };
+
+function assertExpected(inst: any, engine: any) {
+  const expected = inst.expectedState;
+  if (!expected) return;
+  const ropes = engine.ropes.map((r: any) => ({ s: r.startHole.id, e: r.endHole.id, c: r.color }));
+  const sameRopes = JSON.stringify(ropes) === JSON.stringify(expected.ropes);
+  if (engine.gridSize !== expected.gridSize || !sameRopes || engine.generatorInfo?.signature !== expected.signature) {
+    throw new Error(`${inst.id}: regenerated Untangle board does not match the Core source state`);
+  }
+  if (expected.visualCrossings !== null && expected.visualCrossings !== undefined &&
+      engine.crossings() !== expected.visualCrossings) {
+    throw new Error(`${inst.id}: visual crossings ${engine.crossings()} != Core ${expected.visualCrossings}`);
+  }
+  if (expected.logicalCrossings !== null && expected.logicalCrossings !== undefined &&
+      engine.logicalCrossings() !== expected.logicalCrossings) {
+    throw new Error(`${inst.id}: logical crossings ${engine.logicalCrossings()} != Core ${expected.logicalCrossings}`);
+  }
+}
+
+function hydrateCore(shard: number, shards: number) {
+  const data = JSON.parse(readFileSync(FILE, 'utf8'));
+  const out: Record<string, any> = {};
+  data.instances.forEach((inst: any, idx: number) => {
+    if (idx % shards !== shard) return;
+    const cfg = { ...inst.config, animate: true };
+    const gen: any = new UntangleGame({ skipInitialReset: true });
+    gen.reset({ ...cfg, animate: false });
+    assertExpected(inst, gen);
+    const snapshot = gen.exportSnapshot();
+    const initialCrossings = gen.crossings();
+    const scramble = gen.generatorInfo?.scrambleHistory ?? [];
+    const plan: Move[] = scramble.slice().reverse().map((m: any) => [m.targetHole, m.sourceHole]);
+    const engine: any = new UntangleGame({ skipInitialReset: true });
+    engine.restoreSnapshot(cfg, snapshot);
+    for (const move of plan) stepTo(engine, move);
+    const solution = plan.length && staysSolved(engine) ? plan : null;
+    out[inst.id] = { snapshot, solution, initialCrossings };
+    console.log(`${inst.id}: Core state verified; ${solution ? `${solution.length}-move oracle verified` : 'no verified oracle'}`);
+  });
+  writeFileSync(shardFile(shard, 'hydrate'), JSON.stringify(out));
+}
+
+function mergeHydrate(shards: number) {
+  const data = JSON.parse(readFileSync(FILE, 'utf8'));
+  const parts: Record<string, any> = {};
+  for (let s = 0; s < shards; s++) {
+    const file = shardFile(s, 'hydrate');
+    if (!existsSync(file)) throw new Error(`missing hydrate shard ${s}`);
+    Object.assign(parts, JSON.parse(readFileSync(file, 'utf8')));
+  }
+  let solved = 0;
+  for (const inst of data.instances) {
+    const part = parts[inst.id];
+    if (!part) throw new Error(`no hydrated Core state for ${inst.id}`);
+    Object.assign(inst, part, { optimal: null });
+    if (part.solution) solved++;
+  }
+  writeFileSync(FILE, JSON.stringify(data));
+  for (let s = 0; s < shards; s++) unlinkSync(shardFile(s, 'hydrate'));
+  console.log(`hydrated ${data.instances.length} Core boards; ${solved} reverse-scramble solutions verified`);
+}
 // Optional: UNTANGLE_CACHE=<previous untangle.json> re-verifies its plans instead of searching;
 // UNTANGLE_SKIP=<file of ids> marks boards a wider search already failed on.
 const cache: Record<string, any> = process.env.UNTANGLE_CACHE
@@ -92,9 +154,10 @@ const skip = new Set(process.env.UNTANGLE_SKIP ? readFileSync(process.env.UNTANG
 function main(shard: number, shards: number, retry = false) {
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   const out: Record<string, any> = {};
-  // retry: only boards the first pass left unsolved, with a wider and deeper beam.
-  // Hard boards get their solutions from the reverse-scramble oracle (see hardScan).
-  const pool = data.instances.filter((x: any) => x.difficulty !== 'hard' && (!retry || x.solution === null));
+  // Core level and generator difficulty are distinct. Search boards whose
+  // generator configuration is not hard; hard-generator boards use their
+  // reverse-scramble oracle below.
+  const pool = data.instances.filter((x: any) => x.config.difficulty !== 'hard' && (!retry || x.solution === null));
   const [WIDTH, BRANCH, DEPTH] = retry ? [8, 70, 10] : [3, 40, 8];
   pool.forEach((inst: any, idx: number) => {
     if (idx % shards !== shard) return;
@@ -209,7 +272,7 @@ function merge(shards: number, retry = false) {
     Object.assign(parts, JSON.parse(readFileSync(f, 'utf8')));
   }
   let solved = 0;
-  const pool = data.instances.filter((x: any) => x.difficulty !== 'hard');
+  const pool = data.instances.filter((x: any) => x.config.difficulty !== 'hard');
   for (const inst of pool) {
     const p = parts[inst.id];
     if (!p) {
@@ -227,10 +290,10 @@ function merge(shards: number, retry = false) {
   }
   writeFileSync(FILE, JSON.stringify(data));
   for (let s = 0; s < shards; s++) unlinkSync(shardFile(s, retry ? 'retry' : ''));
-  console.log(`merged: ${solved}/${pool.length} Easy and Medium boards have an engine-verified solution`);
+  console.log(`merged: ${solved}/${pool.length} non-hard-generator Core boards have an engine-verified solution`);
 }
 
-// Hard: the reverse-scramble oracle. The generator builds an uncrossed board, scrambles it with
+// Hard-generator boards: the reverse-scramble oracle. The generator builds an uncrossed board, scrambles it with
 // recorded moves (generatorInfo.scrambleHistory) and then twists a few ropes into a central
 // tangle. Undoing the scramble always uncrosses the peg-to-peg lines, but the simulated ropes
 // often stay wrapped around each other, so a Hard board is kept only if that per-board plan
@@ -239,7 +302,7 @@ function hardScan(shard: number, shards: number) {
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   const out: Record<string, any> = {};
   data.instances
-    .filter((x: any) => x.difficulty === 'hard')
+    .filter((x: any) => x.config.difficulty === 'hard')
     .forEach((inst: any, idx: number) => {
       if (idx % shards !== shard) return;
       const cfg = { ...inst.config, animate: true };
@@ -252,44 +315,37 @@ function hardScan(shard: number, shards: number) {
       engine.restoreSnapshot(cfg, snapshot);
       for (const m of plan) stepTo(engine, m);
       const ok = staysSolved(engine);
-      out[inst.id] = ok ? { snapshot, solution: plan, initialCrossings } : null;
+      out[inst.id] = { snapshot, solution: ok ? plan : null, initialCrossings };
       console.log(`${inst.id.padEnd(32)} reverse scramble ${plan.length} moves: ${ok ? 'solves it' : `${engine.crossings()} rope crossings left`}`);
     });
   writeFileSync(shardFile(shard, 'hard'), JSON.stringify(out));
 }
 
-// The Hard level becomes the `count` boards whose oracle plan solves them, longest plan first
-// (ties: more initial crossings, then seed).
-function mergeHard(shards: number, count: number) {
+function mergeHard(shards: number) {
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   const parts: Record<string, any> = {};
   for (let s = 0; s < shards; s++) Object.assign(parts, JSON.parse(readFileSync(shardFile(s, 'hard'), 'utf8')));
-  const seed = (x: any) => x.config.seed;
-  const hard = data.instances
-    .filter((x: any) => x.difficulty === 'hard' && parts[x.id])
-    .map((x: any) => ({ ...x, ...parts[x.id], optimal: null }))
-    .sort((a: any, b: any) => b.solution.length - a.solution.length || b.initialCrossings - a.initialCrossings || seed(a) - seed(b))
-    .slice(0, count)
-    .sort((a: any, b: any) => seed(a) - seed(b));
-  data.instances = [...data.instances.filter((x: any) => x.difficulty !== 'hard'), ...hard];
+  let solved = 0;
+  const hard = data.instances.filter((x: any) => x.config.difficulty === 'hard');
+  for (const inst of hard) {
+    const part = parts[inst.id];
+    if (!part) throw new Error(`no hard-generator result for ${inst.id}`);
+    inst.snapshot = part.snapshot;
+    inst.solution = part.solution;
+    inst.initialCrossings = part.initialCrossings;
+    inst.optimal = null;
+    if (part.solution) solved++;
+  }
   writeFileSync(FILE, JSON.stringify(data));
   for (let s = 0; s < shards; s++) unlinkSync(shardFile(s, 'hard'));
-  console.log(`hard level: ${hard.length} boards (oracle plans of ${hard.map((x: any) => x.solution.length).join(', ')} moves)`);
-}
-
-// Easy and Medium boards still unsolved after `retry` are dropped, so every board on the site has an answer.
-function finalize() {
-  const data = JSON.parse(readFileSync(FILE, 'utf8'));
-  const before = data.instances.length;
-  data.instances = data.instances.filter((x: any) => x.solution);
-  writeFileSync(FILE, JSON.stringify(data));
-  console.log(`kept ${data.instances.length}/${before} boards with verified solutions`);
+  console.log(`hard-generator boards: ${solved}/${hard.length} reverse-scramble plans verified; all snapshots retained`);
 }
 
 function verify() {
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   let bad = 0;
   for (const inst of data.instances) {
+    if (!inst.solution) continue;
     const engine: any = new UntangleGame({ skipInitialReset: true });
     engine.restoreSnapshot({ ...inst.config, animate: true }, inst.snapshot);
     for (const m of inst.solution) stepTo(engine, m);
@@ -298,7 +354,8 @@ function verify() {
       console.log(`${inst.id}: stored solution leaves ${engine.crossings()} crossings`);
     }
   }
-  console.log(`${data.instances.length - bad}/${data.instances.length} stored solutions verified`);
+  const solved = data.instances.filter((x: any) => x.solution).length;
+  console.log(`${solved - bad}/${solved} stored solutions verified`);
   if (bad) process.exit(1);
 }
 
@@ -335,9 +392,10 @@ const [a, b, c] = process.argv.slice(2);
 if (a === 'merge') merge(Number(b ?? 1));
 else if (a === 'retry') main(Number(b ?? 0), Number(c ?? 1), true);
 else if (a === 'merge-retry') merge(Number(b ?? 1), true);
-else if (a === 'finalize') finalize();
 else if (a === 'verify') verify();
 else if (a === 'add-solves') addSolves(b, c);
+else if (a === 'hydrate') hydrateCore(Number(b ?? 0), Number(c ?? 1));
+else if (a === 'merge-hydrate') mergeHydrate(Number(b ?? 1));
 else if (a === 'hard') hardScan(Number(b ?? 0), Number(c ?? 1));
-else if (a === 'merge-hard') mergeHard(Number(b ?? 1), Number(c ?? 10));
+else if (a === 'merge-hard') mergeHard(Number(b ?? 1));
 else main(Number(a ?? 0), Number(b ?? 1));

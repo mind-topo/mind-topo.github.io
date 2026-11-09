@@ -1,10 +1,11 @@
 // @ts-nocheck
-// Vendored from github.com/mll-lab-nu/MindTopo @ 96ac4d1 (environments/order_swap_2d_puzzle/frontend/src/swap_2d_puzzle.ts). See ../README.md for local patches.
+// Vendored from mll-lab-nu/MindTopo @ 3e977584 (Core expert frontend).
 import { Swap2DPuzzleRenderer } from "./render.ts";
+import { EXPERT_STEP_BUDGET, EXPERT_MOVE_RULE, expertLegalActions, sampleExpert, solveExpert } from "./swap_2d_puzzle_expert.ts";
 
 const BLANK_TOKEN = "_";
-const MAX_GRID_ROWS = 4;
-const MAX_GRID_COLS = 4;
+const MAX_GRID_ROWS = 5;
+const MAX_GRID_COLS = 5;
 const DIFFICULTY_GRID_SHAPES = Object.freeze({
   easy: Object.freeze([
     [2, 2],
@@ -16,7 +17,8 @@ const DIFFICULTY_GRID_SHAPES = Object.freeze({
     [3, 4],
     [4, 3]
   ]),
-  hard: Object.freeze([[4, 4]])
+  hard: Object.freeze([[4, 4]]),
+  expert: Object.freeze([[5, 5]])
 });
 
 const BLOCK_LIBRARY = Object.freeze([
@@ -34,7 +36,16 @@ const BLOCK_LIBRARY = Object.freeze([
   { id: "S", label: "S", name: "Silver", color: "#9aa7b2" },
   { id: "V", label: "V", name: "Violet", color: "#9a4bd7" },
   { id: "I", label: "I", name: "Indigo", color: "#4b5bdc" },
-  { id: "A", label: "A", name: "Amber", color: "#d79a00" }
+  { id: "A", label: "A", name: "Amber", color: "#d79a00" },
+  { id: "D", label: "D", name: "Dark Red", color: "#9e1b32" },
+  { id: "E", label: "E", name: "Emerald", color: "#007a4d" },
+  { id: "F", label: "F", name: "Rose", color: "#ed5a9c" },
+  { id: "H", label: "H", name: "Chocolate", color: "#7b4b2a" },
+  { id: "J", label: "J", name: "Olive", color: "#73752e" },
+  { id: "K", label: "K", name: "Charcoal", color: "#343a40" },
+  { id: "Q", label: "Q", name: "Aquamarine", color: "#76c7c0" },
+  { id: "U", label: "U", name: "Orchid", color: "#c989d7" },
+  { id: "W", label: "W", name: "Sand", color: "#c2a45d" }
 ]);
 
 const BLOCK_BY_ID = new Map(BLOCK_LIBRARY.map((spec) => [spec.id, spec]));
@@ -92,10 +103,11 @@ function normalizeDifficulty(value) {
     ["med", "medium"],
     ["m", "medium"],
     ["hard", "hard"],
-    ["h", "hard"]
+    ["h", "hard"],
+    ["expert", "expert"]
   ]);
   if (!aliases.has(text)) {
-    throw new Error("Difficulty must be one of: easy, medium, hard.");
+    throw new Error("Difficulty must be one of: easy, medium, hard, expert.");
   }
   return aliases.get(text);
 }
@@ -142,7 +154,7 @@ function normalizeShape(gridRows, gridCols) {
 function gridShapeForDifficulty(difficulty, seed) {
   const normalized = normalizeDifficulty(difficulty);
   if (!normalized) {
-    throw new Error("Difficulty must be one of: easy, medium, hard.");
+    throw new Error("Difficulty must be one of: easy, medium, hard, expert.");
   }
   const shapes = DIFFICULTY_GRID_SHAPES[normalized];
   if (shapes.length === 1) {
@@ -316,11 +328,15 @@ export function shortestActionSequence(initialArrangement, goalArrangement) {
   return actions;
 }
 
-function samplePuzzle(selectedBlockIds, minTheoreticalSteps, seed) {
+function samplePuzzle(selectedBlockIds, minTheoreticalSteps, seed, difficulty = null) {
   const rng = seed === null || seed === undefined ? null : new StableRng(seed);
-  const goalArrangement = shuffleCopy(selectedBlockIds, rng);
+  const goalArrangement = difficulty === "expert" ? selectedBlockIds.slice().sort() : shuffleCopy(selectedBlockIds, rng);
   goalArrangement.push(BLANK_TOKEN);
   const cellTokens = goalArrangement.slice();
+
+  if (difficulty === "expert") {
+    return { goalArrangement, ...sampleExpert(goalArrangement, rng, minTheoreticalSteps) };
+  }
 
   for (let attempt = 0; attempt < 512; attempt += 1) {
     const initialArrangement = shuffleCopy(cellTokens, rng);
@@ -413,6 +429,10 @@ export class OrderSwap2DPuzzleGame {
       cellCount: this.currentArrangement.length,
       difficulty: this.config.difficulty,
       targetDifficulty: this.config.targetDifficulty,
+      ...(this.config.difficulty === "expert" ? {
+        moveRule: EXPERT_MOVE_RULE,
+        referenceActions: this.config.referenceActions?.slice() ?? null
+      } : {}),
       seed: this.config.seed,
       selectedBlockIds: this.config.selectedBlockIds.slice(),
       blockPalette: this.config.selectedBlockIds.map((blockId) => ({ ...BLOCK_BY_ID.get(blockId) })),
@@ -632,6 +652,9 @@ export class OrderSwap2DPuzzleGame {
   }
 
   _validateMove(cellIndex) {
+    if (this.config.difficulty === "expert" && this.stepCount >= this.config.stepBudget) {
+      return { legal: false, reason: "step_limit" };
+    }
     if (!Number.isInteger(cellIndex)) {
       return { legal: false, reason: "non_integer_action" };
     }
@@ -640,6 +663,11 @@ export class OrderSwap2DPuzzleGame {
     }
     if (this.currentArrangement[cellIndex] === BLANK_TOKEN) {
       return { legal: false, reason: "selected_blank" };
+    }
+    if (this.config.difficulty === "expert" && !expertLegalActions(
+      this.currentArrangement.indexOf(BLANK_TOKEN), this.config.gridRows, this.config.gridCols
+    ).includes(cellIndex)) {
+      return { legal: false, reason: "not_in_blank_row_or_column" };
     }
     return { legal: true, reason: null };
   }
@@ -660,6 +688,9 @@ export class OrderSwap2DPuzzleGame {
     } else if (Object.prototype.hasOwnProperty.call(explicitConfig, "difficulty") && !hasExplicitGrid) {
       requestedDifficulty = normalizeDifficulty(explicitConfig.difficulty);
     }
+    if (requestedDifficulty === "expert" && explicitConfig.expertGridSize === 4) {
+      throw new Error("The temporary 4x4 Expert has been removed. Regenerate 5x5 Expert questions.");
+    }
     const shape = requestedDifficulty
       ? gridShapeForDifficulty(requestedDifficulty, seed)
       : normalizeShape(
@@ -668,6 +699,10 @@ export class OrderSwap2DPuzzleGame {
       );
     const gridRows = shape.gridRows;
     const gridCols = shape.gridCols;
+    const difficulty = requestedDifficulty || difficultyLabelForGrid(gridRows, gridCols);
+    if (difficulty === "expert" && (gridRows !== 5 || gridCols !== 5)) {
+      throw new Error("Expert requires a 5x5 grid.");
+    }
     const numBlocks = gridRows * gridCols - 1;
     const selectedBlockIds = chooseBlockIds(numBlocks, merged.selectedBlockIds);
     const hasExplicitArrangements = (
@@ -682,22 +717,38 @@ export class OrderSwap2DPuzzleGame {
       ? normalizeArrangement(explicitConfig.goalArrangement, selectedBlockIds, gridRows, gridCols)
       : null;
     let theoreticalMinSteps = null;
+    let referenceActions = null;
+    if (difficulty === "expert" && hasExplicitArrangements) {
+      if (explicitConfig.moveRule !== EXPERT_MOVE_RULE) {
+        throw new Error("Old Expert data uses unrestricted swaps. Regenerate Expert questions for the row/column rule.");
+      }
+      referenceActions = explicitConfig.referenceActions ?? null;
+    }
 
     if (!initialArrangement || !goalArrangement) {
       const sampled = samplePuzzle(
         selectedBlockIds,
         Math.max(1, clampInt(merged.minTheoreticalSteps, 1, 100, DEFAULT_CONFIG.minTheoreticalSteps)),
-        seed
+        seed,
+        requestedDifficulty || difficultyLabelForGrid(gridRows, gridCols)
       );
       initialArrangement = sampled.initialArrangement;
       goalArrangement = sampled.goalArrangement;
       theoreticalMinSteps = sampled.theoreticalMinSteps;
+      referenceActions = sampled.referenceActions ?? null;
     }
 
-    theoreticalMinSteps = shortestSwapDistance(initialArrangement, goalArrangement);
+    theoreticalMinSteps = difficulty === "expert"
+      ? solveExpert(initialArrangement, goalArrangement, gridRows, gridCols, referenceActions).length
+      : shortestSwapDistance(initialArrangement, goalArrangement);
 
-    const budgetMultiplier = Math.max(1.0, Number(merged.budgetMultiplier) || DEFAULT_CONFIG.budgetMultiplier);
-    const stepBudget = clampInt(
+    const defaultMultiplier = DEFAULT_CONFIG.budgetMultiplier;
+    const resetMultiplier = !Object.prototype.hasOwnProperty.call(explicitConfig, "budgetMultiplier") &&
+      (difficulty === "expert" || this.config.difficulty === "expert");
+    const budgetMultiplier = difficulty === "expert"
+      ? EXPERT_STEP_BUDGET / Math.max(1, theoreticalMinSteps)
+      : Math.max(1.0, Number(resetMultiplier ? defaultMultiplier : merged.budgetMultiplier) || defaultMultiplier);
+    const stepBudget = difficulty === "expert" ? EXPERT_STEP_BUDGET : clampInt(
       Object.prototype.hasOwnProperty.call(explicitConfig, "stepBudget")
         ? explicitConfig.stepBudget
         : undefined,
@@ -721,14 +772,15 @@ export class OrderSwap2DPuzzleGame {
       winReward: Number(merged.winReward),
       budgetMultiplier,
       stepBudget,
-      theoreticalMinSteps
+      theoreticalMinSteps,
+      ...(difficulty === "expert" ? { moveRule: EXPERT_MOVE_RULE, referenceActions } : {})
     };
   }
 
   _legalActions() {
     const legal = [];
     for (let cellIndex = 0; cellIndex < this.currentArrangement.length; cellIndex += 1) {
-      if (this.currentArrangement[cellIndex] !== BLANK_TOKEN) {
+      if (this.currentArrangement[cellIndex] !== BLANK_TOKEN && this._validateMove(cellIndex).legal) {
         legal.push({
           cell_index: cellIndex,
           cellIndex,

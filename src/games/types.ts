@@ -1,11 +1,17 @@
 // Shared contract between the playground UI (src/scripts/play.ts) and the five
 // game wrappers. Each wrapper drives one vendored MindTopo engine.
 
-export type Difficulty = 'easy' | 'medium' | 'hard';
+/** Balanced release level from the Core manifest, independent of generator tags. */
+export type Difficulty = 'easy' | 'hard';
 
 export interface Instance {
   id: string;
   difficulty: Difficulty;
+  /** Generator's original tier (for provenance only; never drives the UI control). */
+  sourceDifficulty?: string;
+  inputSha256?: string;
+  source?: string;
+  sourceLine?: number;
   /** Step budget the models had (max_actions_per_traj). */
   budget: number;
   /** Shortest solution length, when the generator records it. */
