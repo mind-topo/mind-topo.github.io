@@ -1,7 +1,7 @@
 # Vendored MindTopo game engines
 
 These files are the planning environments' browser engines and renderers from
-[MLL-Lab/MindTopo](https://github.com/MLL-Lab/MindTopo). Pipe, Swap, and
+[MLL-Lab/MindTopo](https://github.com/mll-lab-nu/MindTopo). Pipe, Swap, and
 Chat Noir use the expert-capable frontend at commit `3e977584`; the remaining
 engines match that release apart from the site patches below. This keeps Core
 Hard rules such as split-channel pipes, row/column swaps, and the expert cat
