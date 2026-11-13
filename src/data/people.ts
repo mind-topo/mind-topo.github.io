@@ -29,7 +29,7 @@ export const LINKS = {
   lab: 'https://mll-lab-nu.github.io/',
 };
 
-export const VENUE = 'NeurIPS 2026 workshops: NEmo (oral), VLM4RWD, BabyVLM';
+export const VENUE = 'Oral at three NeurIPS 2026 workshops: NEmo, VLM4RWD, BabyVLM';
 
 export const RELATED = [
   { name: 'MindCube', href: 'https://mll-lab-nu.github.io/mind-cube/' },
