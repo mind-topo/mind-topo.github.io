@@ -7,7 +7,7 @@ Project page: https://mind-topo.github.io/
 Current manuscript: https://mind-topo.github.io/paper/mindtopo-current.pdf
 Core and Extended results and release files: https://mind-topo.github.io/#release
 Earlier arXiv v1: https://arxiv.org/abs/2609.11900v1
-Code: https://github.com/MLL-Lab/MindTopo
+Code: https://github.com/mll-lab-nu/MindTopo
 Earlier Hugging Face snapshot: https://huggingface.co/datasets/MLL-Lab/MindTopo
 
 ## What is MindTopo?

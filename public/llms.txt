@@ -20,7 +20,7 @@ Key facts:
 - [Core input manifest](https://mind-topo.github.io/release/core_manifest.jsonl.gz)
 - [Extended input manifest](https://mind-topo.github.io/release/extended_manifest.jsonl.gz)
 - [Earlier arXiv v1](https://arxiv.org/abs/2609.11900v1)
-- [Code on GitHub](https://github.com/MLL-Lab/MindTopo)
+- [Code on GitHub](https://github.com/mll-lab-nu/MindTopo)
 - [Earlier Hugging Face snapshot](https://huggingface.co/datasets/MLL-Lab/MindTopo)
 
 The current manuscript and manifests define the Core / Extended split. The arXiv v1 and Hugging Face snapshot describe earlier compositions. Manifests contain input identifiers, source locations and hashes; use them with the benchmark source files for full inputs and rendered images.

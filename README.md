@@ -106,7 +106,7 @@ separation and contrast; change it in `src/styles/global.css` and
 ## Playable games
 
 The Pipe, One Stroke, Swap, Chat Noir and Untangle engines and renderers are
-vendored from [MLL-Lab/MindTopo](https://github.com/MLL-Lab/MindTopo) in
+vendored from [MLL-Lab/MindTopo](https://github.com/mll-lab-nu/MindTopo) in
 `src/games/vendor/` (patches listed in its README). `src/games/*.ts` wraps each
 one with input, the models' move budget, undo and solution playback; three.js
 and each game load only when the game is opened.

@@ -23,13 +23,13 @@ export const LINKS = {
   pdf: 'https://mind-topo.github.io/paper/mindtopo-current.pdf',
   arxiv: 'https://arxiv.org/abs/2609.11900v1',
   arxivId: '2609.11900',
-  code: 'https://github.com/MLL-Lab/MindTopo',
+  code: 'https://github.com/mll-lab-nu/MindTopo',
   dataset: 'https://huggingface.co/datasets/MLL-Lab/MindTopo',
   release: '#release',
   lab: 'https://mll-lab-nu.github.io/',
 };
 
-export const VENUE = 'Oral at three NeurIPS 2026 workshops: NEmo, VLM4RWD, BabyVLM';
+export const VENUE = 'NeurIPS 2026 workshops: NEmo (oral), VLM4RWD, BabyVLM';
 
 export const RELATED = [
   { name: 'MindCube', href: 'https://mll-lab-nu.github.io/mind-cube/' },
