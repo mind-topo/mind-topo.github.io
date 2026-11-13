@@ -110,8 +110,6 @@ export function rowsFor(level: Level) {
 export const fmt = (n: number, digits = 1) => n.toFixed(digits);
 /** Whole numbers stay whole (100), anything else keeps one decimal (99.6), so no score is rounded up to a perfect one. */
 export const pct = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
-/** Origami Point was regenerated after the human study; its human score is the previous release's. */
-export const humanMark = (task: string) => (task === 'Origami Point' ? '†' : '');
 
 // ---------------------------------------------------------------- headline facts
 

@@ -5,7 +5,7 @@ import SectionHeader from './SectionHeader.astro';
 import '../styles/games.css';
 import Icon from './Icon.astro';
 import { GAMES, scoresFor } from '../games/meta';
-import { PROPERTIES, TASKS, TASK_DETAILS, HUMAN, MODELS, taskIndex, pct, humanMark } from '../data/site';
+import { PROPERTIES, TASKS, TASK_DETAILS, HUMAN, MODELS, taskIndex, pct } from '../data/site';
 
 const DIFFICULTIES = [
   { id: 'easy', label: 'Core Easy' },
@@ -120,7 +120,7 @@ const reasoning = TASKS.filter((t) => t.kind === 'reasoning').map((t) => {
               {t.detail.media.map((m) => <a href={m.src} target="_blank" rel="noopener">{m.label ?? 'Scene'}</a>)}
               {t.detail.options?.filter((o) => o.image).map((o) => <a href={o.image} target="_blank" rel="noopener">Option {o.label}</a>)}
             </details>
-            <p class="r-score"><span title={humanMark(t.name) ? 'Previous-release human score; the task was regenerated after the study' : undefined}>Humans {pct(t.human)}%{humanMark(t.name)}</span><span>Best model {pct(t.best)}%</span></p>
+            <p class="r-score"><span>Humans {pct(t.human)}%</span><span>Best model {pct(t.best)}%</span></p>
           </article>
         ))}
       </div>
